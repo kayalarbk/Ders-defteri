@@ -266,3 +266,107 @@ footer {
   .hero { padding: 48px 0 28px; }
   .section { padding: 32px 0; }
 }
+
+/* ============================================================
+   FORMÜL KARTLARI (flip)
+   ============================================================ */
+.cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.flip {
+  perspective: 1200px; background: none; border: 0; padding: 0;
+  cursor: pointer; font-family: inherit; color: inherit; text-align: inherit;
+}
+.flip-inner {
+  position: relative; width: 100%; height: 175px;
+  transition: transform .5s; transform-style: preserve-3d;
+}
+.flip.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute; inset: 0; backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 16px; border: 1px solid var(--border); border-radius: 14px;
+  text-align: center; overflow: auto;
+}
+.flip-front { background: var(--surface); }
+.flip-front strong { font-family: var(--font-display); font-size: 1.15rem; }
+.flip-tag {
+  font-family: var(--font-mono); font-size: .62rem; letter-spacing: .15em;
+  color: var(--accent); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 20px;
+}
+.flip-hint { font-family: var(--font-mono); font-size: .68rem; color: var(--muted); }
+.flip-back {
+  background: var(--surface-2); transform: rotateY(180deg);
+  border-color: var(--accent);
+}
+.flip-formula { font-size: 1.05rem; }
+.flip-desc { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+
+/* ============================================================
+   YÜKLEME (upload)
+   ============================================================ */
+.upload-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.btn-upload {
+  font-family: var(--font-body); font-weight: 600; font-size: .9rem;
+  background: var(--accent); color: #06201E; border: 0;
+  padding: 10px 18px; border-radius: 10px; cursor: pointer;
+  transition: transform .15s, filter .15s;
+}
+.btn-upload:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.upload-note { font-size: .8rem; color: var(--muted); }
+
+/* Önizleme grid + thumbnail */
+.preview-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.thumb { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.thumb img {
+  width: 100%; height: 130px; object-fit: cover; display: block;
+  background: var(--surface-2); cursor: zoom-in;
+}
+.thumb .del, .del-doc {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(0,0,0,.6); color: #fff; font-size: 1rem; line-height: 1;
+  display: grid; place-items: center; backdrop-filter: blur(4px);
+}
+.thumb .del:hover, .del-doc:hover { background: #e5484d; }
+.del-doc { position: static; flex: none; margin-left: auto; background: var(--surface-2); color: var(--muted); }
+.del-doc:hover { background: #e5484d; color: #fff; }
+
+.more-btn {
+  margin-top: 16px; font-family: var(--font-body); font-weight: 600; font-size: .88rem;
+  background: var(--surface); color: var(--text); border: 1px solid var(--accent);
+  padding: 10px 18px; border-radius: 10px; cursor: pointer; transition: background .15s;
+}
+.more-btn:hover { background: var(--accent-dim); }
+.gallery-count { margin-top: 12px; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+
+/* Yüklenen doküman kartı (silme butonlu) */
+#dokUploaded .doc { padding-right: 12px; }
+.doc-link { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.doc-link .doc-name { word-break: break-word; }
+
+/* ============================================================
+   OVERLAY: galeri modalı + lightbox
+   ============================================================ */
+.overlay {
+  position: fixed; inset: 0; z-index: 200; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(0,0,0,.78); backdrop-filter: blur(6px);
+}
+.overlay.open { display: flex; }
+.ov-close {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; flex: none;
+}
+.ov-close:hover { border-color: var(--accent); }
+
+.lightbox { position: relative; max-width: 92vw; max-height: 90vh; text-align: center; }
+.lightbox img { max-width: 92vw; max-height: 80vh; border-radius: 12px; border: 1px solid var(--border); }
+.lightbox .ov-close { position: absolute; top: -10px; right: -10px; }
+.ov-cap { margin-top: 10px; color: var(--muted); font-size: .85rem; word-break: break-word; }
+
+.gallery-modal {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 16px;
+  width: min(900px, 96vw); max-height: 88vh; overflow: auto; padding: 20px;
+}
+.gm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.gm-head h3 { font-family: var(--font-display); font-size: 1.2rem; }
+.gallery-modal .thumb img { height: 150px; }

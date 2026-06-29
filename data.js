@@ -75,6 +75,13 @@ const DERSLER = {
           <p>Aksi halde <b>örtüşme (aliasing)</b> oluşur.</p>`
       }
     ],
+    formuller: [
+      { ad: "Konvolüsyon", formul: `\\( y(t)=\\int_{-\\infty}^{\\infty}x(\\tau)h(t-\\tau)\\,d\\tau \\)`, aciklama: "LTI sistemde çıkış = giriş ∗ dürtü yanıtı." },
+      { ad: "Fourier Dönüşümü", formul: `\\( X(j\\omega)=\\int_{-\\infty}^{\\infty}x(t)e^{-j\\omega t}dt \\)`, aciklama: "Zaman sinyalini frekans bileşenlerine ayırır." },
+      { ad: "Laplace Dönüşümü", formul: `\\( X(s)=\\int_{-\\infty}^{\\infty}x(t)e^{-st}dt \\)`, aciklama: "s-düzleminde sistem analizi." },
+      { ad: "Nyquist Örnekleme", formul: `\\( f_s>2f_m \\)`, aciklama: "Örtüşmeyi (aliasing) önleme koşulu." },
+      { ad: "z-Dönüşümü", formul: `\\( X(z)=\\sum_{n=-\\infty}^{\\infty}x[n]z^{-n} \\)`, aciklama: "Ayrık sistemlerin dönüşümü." }
+    ],
     galeri: [
       /* Örnek: { src: "https://.../tahta.jpg", baslik: "Konvolüsyon çözümü" } */
     ],
@@ -145,6 +152,12 @@ const DERSLER = {
           bozulmasını azaltır), <b>C</b> (yüksek verim, RF).</p>`
       }
     ],
+    formuller: [
+      { ad: "Geçiş Frekansı", formul: `\\( f_T=\\dfrac{g_m}{2\\pi(C_\\pi+C_\\mu)} \\)`, aciklama: "Kazancın birim olduğu frekans." },
+      { ad: "Kapalı Çevrim Kazancı", formul: `\\( A_f=\\dfrac{A}{1+A\\beta} \\)`, aciklama: "Negatif geri beslemeli kazanç." },
+      { ad: "Barkhausen Kriteri", formul: `\\( |A\\beta|=1,\\;\\angle A\\beta=0 \\)`, aciklama: "Osilasyon koşulu." },
+      { ad: "B Sınıfı Verim", formul: `\\( \\eta_{max}=\\dfrac{\\pi}{4}\\approx 78.5\\% \\)`, aciklama: "İdeal B sınıfı maksimum verim." }
+    ],
     galeri: [], dokumanlar: [],
     videolar: [],
     sorular: [
@@ -197,6 +210,13 @@ const DERSLER = {
           \\( n_s = \\dfrac{120 f}{p} \\) ile döner; asenkron makinede kayma \\( s \\) tanımlanır.</p>`
       }
     ],
+    formuller: [
+      { ad: "Manyetik Akı", formul: `\\( \\phi=\\dfrac{NI}{l/(\\mu A)} \\)`, aciklama: "Manyetik devrede akı = mmk / relüktans." },
+      { ad: "Transformatör Oranı", formul: `\\( \\dfrac{V_1}{V_2}=\\dfrac{N_1}{N_2}=a \\)`, aciklama: "İdeal transformatör gerilim oranı." },
+      { ad: "DC Zıt EMK", formul: `\\( E_a=K\\phi\\omega \\)`, aciklama: "Dönen DC makinede üretilen emk." },
+      { ad: "Senkron Hız", formul: `\\( n_s=\\dfrac{120f}{p} \\)`, aciklama: "AC makinede döner alan hızı (d/dk)." },
+      { ad: "DC Terminal Denklemi", formul: `\\( V_t=E_a+I_aR_a \\)`, aciklama: "Motor terminal gerilimi." }
+    ],
     galeri: [], dokumanlar: [],
     videolar: [],
     sorular: [
@@ -248,6 +268,12 @@ const DERSLER = {
              \\nabla\\times\\mathbf{H}=\\mathbf{J}+\\frac{\\partial\\mathbf{D}}{\\partial t} \\]`
       }
     ],
+    formuller: [
+      { ad: "Gauss Yasası", formul: `\\( \\oint_S \\mathbf{E}\\cdot d\\mathbf{S}=\\dfrac{Q_{enc}}{\\varepsilon_0} \\)`, aciklama: "Kapalı yüzeyden geçen elektrik akısı." },
+      { ad: "Noktasal Yük Alanı", formul: `\\( E=\\dfrac{Q}{4\\pi\\varepsilon_0 r^2} \\)`, aciklama: "Noktasal yükün elektrik alanı." },
+      { ad: "Ampere Yasası", formul: `\\( \\oint_C \\mathbf{H}\\cdot d\\mathbf{l}=I_{enc} \\)`, aciklama: "Kapalı yol etrafındaki manyetik alan." },
+      { ad: "Faraday Yasası", formul: `\\( \\varepsilon=-\\dfrac{d\\Phi_B}{dt} \\)`, aciklama: "Değişen akı → indüklenen emk." }
+    ],
     galeri: [], dokumanlar: [],
     videolar: [],
     sorular: [
@@ -298,6 +324,12 @@ const DERSLER = {
           Zamanla değişen rastgele olgular <b>rastgele süreç</b> olarak modellenir
           (ör. gürültü, sinyal kestirimi).</p>`
       }
+    ],
+    formuller: [
+      { ad: "Bayes Teoremi", formul: `\\( P(A\\mid B)=\\dfrac{P(B\\mid A)P(A)}{P(B)} \\)`, aciklama: "Koşullu olasılığı ters çevirme." },
+      { ad: "Koşullu Olasılık", formul: `\\( P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)} \\)`, aciklama: "B verildiğinde A olasılığı." },
+      { ad: "Beklenen Değer", formul: `\\( E[X]=\\int_{-\\infty}^{\\infty}x f_X(x)dx \\)`, aciklama: "Rastgele değişkenin ortalaması." },
+      { ad: "Varyans", formul: `\\( \\operatorname{Var}(X)=E[X^2]-(E[X])^2 \\)`, aciklama: "Dağılımın yayılım ölçüsü." }
     ],
     galeri: [], dokumanlar: [],
     videolar: [],
