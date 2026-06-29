@@ -194,8 +194,9 @@ function formullerBlock(d) {
 function medyaBlock(kod, d) {
   return `<section class="section"><h2><span class="idx">03</span> Medya ve Görseller</h2>
     <div class="upload-row">
-      <button class="btn-upload" type="button" onclick="document.getElementById('fotoInput').click()">📷 Fotoğraf Ekle</button>
-      <input id="fotoInput" type="file" accept="image/*" multiple hidden onchange="handleUpload(event,'foto')">
+      <label class="btn-upload">📷 Fotoğraf Ekle
+        <input type="file" accept="image/*" multiple class="file-hidden" onchange="handleUpload(event,'foto')">
+      </label>
       <span class="upload-note">Dersten çektiğin fotoğrafları ekle · ilk 5'i burada görünür</span>
     </div>
     <div class="preview-grid" id="fotoPreview"><p class="empty">Yükleniyor…</p></div>
@@ -213,8 +214,9 @@ function dokumanBlock(kod, d) {
     </a>`).join("");
   return `<section class="section"><h2><span class="idx">04</span> Dökümanlar</h2>
     <div class="upload-row">
-      <button class="btn-upload" type="button" onclick="document.getElementById('dokInput').click()">📄 Doküman Ekle</button>
-      <input id="dokInput" type="file" accept=".pdf,image/*" multiple hidden onchange="handleUpload(event,'dok')">
+      <label class="btn-upload">📄 Doküman Ekle
+        <input type="file" accept=".pdf,image/*" multiple class="file-hidden" onchange="handleUpload(event,'dok')">
+      </label>
       <span class="upload-note">Ders notu PDF'lerini ekle</span>
     </div>
     <div class="docs" id="dokList">${sabit}</div>
@@ -268,17 +270,29 @@ async function handleUpload(e, tip) {
   const files = [...e.target.files];
   e.target.value = "";           // aynı dosyayı tekrar seçebilmek için
   if (!files.length || !AKTIF_DERS) return;
-  for (const file of files) {
-    const blob = tip === "foto" ? await shrinkImage(file) : file;
-    await idbAdd({ ders: AKTIF_DERS, tip, ad: file.name, mime: blob.type || file.type, blob });
+  try {
+    for (const file of files) {
+      const blob = tip === "foto" ? await shrinkImage(file) : file;
+      await idbAdd({ ders: AKTIF_DERS, tip, ad: file.name, mime: blob.type || file.type, blob });
+    }
+    loadUploads(AKTIF_DERS);
+  } catch (err) {
+    console.error(err);
+    alert("Dosya kaydedilemedi. Tarayıcının gizli/özel sekmesindeysen normal sekmede dene. (Detay: " + err + ")");
   }
-  loadUploads(AKTIF_DERS);
 }
 
 async function loadUploads(kod) {
-  const all = await idbByDers(kod);
-  renderFotoPreview(kod, all.filter(x => x.tip === "foto"));
-  renderDokUploaded(all.filter(x => x.tip === "dok"));
+  try {
+    const all = await idbByDers(kod);
+    renderFotoPreview(kod, all.filter(x => x.tip === "foto"));
+    renderDokUploaded(all.filter(x => x.tip === "dok"));
+  } catch (err) {
+    console.error(err);
+    const grid = $("#fotoPreview"), box = $("#dokUploaded");
+    if (grid) grid.innerHTML = `<p class="empty">Depolama açılamadı (gizli sekme olabilir). Normal sekmede dene.</p>`;
+    if (box) box.innerHTML = "";
+  }
 }
 
 /* ilk 5 önizleme + "galeriyi aç" */
