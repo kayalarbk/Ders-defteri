@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ders Defteri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="dot"></span> Ders Defteri</a>
+      <div class="nav-actions">
+        <button id="themeBtn" class="theme-toggle" onclick="toggleTheme()" aria-label="Tema değiştir">☀️</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <span class="eyebrow">Elektrik-Elektronik Mühendisliği</span>
+      <h1>3. Sınıf · 1. Dönem<br>Ders Arşivim</h1>
+      <p>Konu anlatımları, ders notları, video kaynakları ve çözümlü soru havuzu.
+         Bir derse tıklayarak içeriğine geç.</p>
+    </section>
+
+    <section class="grid" id="courseGrid"><!-- app.js doldurur --></section>
+  </main>
+
+  <footer class="wrap">DERS DEFTERİ · kişisel çalışma arşivi</footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
