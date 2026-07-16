@@ -97,6 +97,34 @@ function shrinkImage(file, maxDim = 1600, quality = 0.85) {
 }
 
 /* ============================================================
+   İLERLEME TAKİBİ (localStorage)
+   ============================================================ */
+function getProgress(kod) {
+  try { return JSON.parse(localStorage.getItem("dd-prog-" + kod)) || []; }
+  catch { return []; }
+}
+function setProgress(kod, arr) {
+  localStorage.setItem("dd-prog-" + kod, JSON.stringify(arr));
+}
+function toggleTopicDone(kod, idx, btn) {
+  let done = getProgress(kod);
+  if (done.includes(idx)) done = done.filter(i => i !== idx);
+  else done.push(idx);
+  setProgress(kod, done);
+  btn.closest(".topic-item").classList.toggle("done", done.includes(idx));
+  updateCourseProgress(kod);
+}
+function updateCourseProgress(kod) {
+  const d = DERSLER[kod]; if (!d) return;
+  const total = (d.konular || []).length;
+  const done = getProgress(kod).filter(i => i < total).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const bar = $("#progFill"), label = $("#progLabel");
+  if (bar) bar.style.width = pct + "%";
+  if (label) label.textContent = `${done}/${total} konu tamamlandı · %${pct}`;
+}
+
+/* ============================================================
    ANA SAYFA
    ============================================================ */
 function renderHome() {
@@ -104,15 +132,38 @@ function renderHome() {
   if (!grid) return;
   grid.innerHTML = DERS_SIRASI.map(kod => {
     const d = DERSLER[kod]; if (!d) return "";
+    const total = (d.konular || []).length;
+    const done = getProgress(kod).filter(i => i < total).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
     return `
       <a class="card" style="--card-color:${d.renk}" href="course.html?ders=${kod}">
         <span class="code">${kod}</span>
         <h3>${esc(d.ad)}</h3>
         <div class="meta">${esc(d.donem)}</div>
         <p class="desc">${esc(d.ozet)}</p>
-        <span class="go">Derse git →</span>
+        <div class="card-prog" title="Konu ilerlemesi">
+          <div class="card-prog-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="card-prog-row">
+          <span class="card-prog-label">${done}/${total} konu</span>
+          <span class="go">Derse git →</span>
+        </div>
       </a>`;
   }).join("");
+  renderQuickLinks();
+}
+
+function renderQuickLinks() {
+  const box = $("#quickLinks");
+  if (!box || typeof HIZLI_LINKLER === "undefined") return;
+  box.innerHTML = HIZLI_LINKLER.map(l => `
+    <a class="ql" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.aciklama)}">
+      <span class="ql-ico">${l.ikon}</span>
+      <span class="ql-body">
+        <span class="ql-name">${esc(l.ad)}</span>
+        <span class="ql-desc">${esc(l.aciklama)}</span>
+      </span>
+    </a>`).join("");
 }
 
 /* ============================================================
@@ -137,17 +188,20 @@ function renderCourse() {
 
   root.innerHTML = `
     ${headBlock(kod, d)}
-    ${konularBlock(d)}
+    ${sectionNav(d)}
+    ${konularBlock(kod, d)}
     ${formullerBlock(d)}
     ${medyaBlock(kod, d)}
     ${dokumanBlock(kod, d)}
     ${videoBlock(d)}
+    ${linklerBlock(d)}
     ${sorularBlock(d)}
   `;
 
   bindAccordion();
   bindQuestionFilter();
   bindFlashcards();
+  updateCourseProgress(kod);
   renderMath();
   loadUploads(kod);   // IndexedDB'den foto + doküman çek
 }
@@ -158,14 +212,44 @@ function headBlock(kod, d) {
     <span class="code">${kod} · ${esc(d.donem)}</span>
     <h1>${esc(d.ad)}</h1>
     <p class="ozet">${esc(d.ozet)}</p>
+    <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+    <p class="prog-label" id="progLabel"></p>
   </header>`;
 }
 
-/* ----- 01 Konu Anlatımı ----- */
-function konularBlock(d) {
-  const items = (d.konular || []).map(k =>
-    `<div class="topic"><h3>${esc(k.baslik)}</h3>${k.icerik}</div>`).join("");
-  return `<section class="section"><h2><span class="idx">01</span> Konu Anlatımı</h2>
+/* ----- Bölüm içi hızlı gezinme ----- */
+function sectionNav(d) {
+  const items = [
+    ["sec-konular",  "Konular"],
+    ["sec-formuller","Formüller"],
+    ["sec-medya",    "Medya"],
+    ["sec-dokuman",  "Dökümanlar"],
+    ["sec-video",    "Videolar"],
+    ["sec-linkler",  "Kaynaklar"],
+    ["sec-sorular",  "Sorular"]
+  ];
+  return `<nav class="sec-nav" aria-label="Bölümler">
+    ${items.map(([id, ad]) => `<a href="#${id}">${ad}</a>`).join("")}
+  </nav>`;
+}
+
+/* ----- 01 Konu Anlatımı (akordeon + tamamlandı işareti) ----- */
+function konularBlock(kod, d) {
+  const done = getProgress(kod);
+  const items = (d.konular || []).map((k, i) => `
+    <div class="topic-item ${done.includes(i) ? "done" : ""}">
+      <div class="topic-head">
+        <button class="topic-check" type="button" title="Tamamlandı olarak işaretle"
+          onclick="toggleTopicDone('${kod}',${i},this)" aria-label="Konuyu tamamlandı işaretle">✓</button>
+        <button class="topic-toggle acc-head" type="button">
+          <span class="topic-title">${esc(k.baslik)}</span>
+          <span class="chev">▾</span>
+        </button>
+      </div>
+      <div class="acc-body"><div class="inner topic-content">${k.icerik}</div></div>
+    </div>`).join("");
+  return `<section class="section" id="sec-konular"><h2><span class="idx">01</span> Konu Anlatımı</h2>
+    <p class="section-hint">Konuya tıklayınca içerik açılır · soldaki ✓ ile çalıştığın konuyu işaretle</p>
     ${items || emptyMsg("Henüz konu eklenmemiş.")}</section>`;
 }
 
@@ -186,13 +270,13 @@ function formullerBlock(d) {
         </div>
       </div>
     </button>`).join("");
-  return `<section class="section"><h2><span class="idx">02</span> Formül Kartları</h2>
+  return `<section class="section" id="sec-formuller"><h2><span class="idx">02</span> Formül Kartları</h2>
     ${f.length ? `<div class="cards">${cards}</div>` : emptyMsg("Henüz formül eklenmemiş.")}</section>`;
 }
 
 /* ----- 03 Medya ve Görseller (yüklemeli) ----- */
 function medyaBlock(kod, d) {
-  return `<section class="section"><h2><span class="idx">03</span> Medya ve Görseller</h2>
+  return `<section class="section" id="sec-medya"><h2><span class="idx">03</span> Medya ve Görseller</h2>
     <div class="upload-row">
       <label class="btn-upload">📷 Fotoğraf Ekle
         <input type="file" accept="image/*" multiple class="file-hidden" onchange="handleUpload(event,'foto')">
@@ -212,7 +296,7 @@ function dokumanBlock(kod, d) {
       <span><span class="doc-name">${esc(x.ad)}</span><br>
       <span class="doc-tag">${esc(x.tur)} · görüntüle</span></span>
     </a>`).join("");
-  return `<section class="section"><h2><span class="idx">04</span> Dökümanlar</h2>
+  return `<section class="section" id="sec-dokuman"><h2><span class="idx">04</span> Dökümanlar</h2>
     <div class="upload-row">
       <label class="btn-upload">📄 Doküman Ekle
         <input type="file" accept=".pdf,image/*" multiple class="file-hidden" onchange="handleUpload(event,'dok')">
@@ -224,21 +308,41 @@ function dokumanBlock(kod, d) {
   </section>`;
 }
 
-/* ----- 05 Video ----- */
+/* ----- 05 Video (tek video veya playlist) ----- */
 function videoBlock(d) {
   const v = d.videolar || [];
-  const items = v.map(x => `
+  const items = v.map(x => {
+    const src = x.playlist
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${esc(x.playlist)}`
+      : `https://www.youtube-nocookie.com/embed/${esc(x.youtube)}`;
+    return `
     <figure class="video"><div class="frame">
-      <iframe src="https://www.youtube-nocookie.com/embed/${esc(x.youtube)}"
+      <iframe src="${src}"
         title="${esc(x.baslik)}" loading="lazy"
         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen></iframe>
-    </div><figcaption>${esc(x.baslik)}</figcaption></figure>`).join("");
-  return `<section class="section"><h2><span class="idx">05</span> Video Kaynakları</h2>
+    </div><figcaption>${x.playlist ? `<span class="pl-tag">PLAYLIST</span> ` : ""}${esc(x.baslik)}</figcaption></figure>`;
+  }).join("");
+  return `<section class="section" id="sec-video"><h2><span class="idx">05</span> Video Kaynakları</h2>
     ${v.length ? `<div class="videos">${items}</div>` : emptyMsg("Henüz video eklenmemiş.")}</section>`;
 }
 
-/* ----- 06 Soru Havuzu ----- */
+/* ----- 06 Faydalı Kaynaklar (web kısayolları) ----- */
+function linklerBlock(d) {
+  const l = d.linkler || [];
+  const items = l.map(x => `
+    <a class="ql" href="${esc(x.url)}" target="_blank" rel="noopener">
+      <span class="ql-ico">🔗</span>
+      <span class="ql-body">
+        <span class="ql-name">${esc(x.ad)}</span>
+        <span class="ql-desc">${esc(x.aciklama || "")}</span>
+      </span>
+    </a>`).join("");
+  return `<section class="section" id="sec-linkler"><h2><span class="idx">06</span> Faydalı Kaynaklar</h2>
+    ${l.length ? `<div class="ql-grid">${items}</div>` : emptyMsg("Henüz kaynak eklenmemiş.")}</section>`;
+}
+
+/* ----- 07 Soru Havuzu ----- */
 function sorularBlock(d) {
   const q = d.sorular || [];
   const items = q.map((x, i) => `
@@ -251,7 +355,7 @@ function sorularBlock(d) {
         ${x.soru}<div class="cozum-label">Çözüm</div>${x.cozum}
       </div></div>
     </div>`).join("");
-  return `<section class="section"><h2><span class="idx">06</span> Soru Havuzu</h2>
+  return `<section class="section" id="sec-sorular"><h2><span class="idx">07</span> Soru Havuzu</h2>
     ${q.length ? `
       <div class="q-filter">
         <button data-f="all" class="active">Tümü</button>
@@ -398,9 +502,16 @@ function bindFlashcards() {
 function bindAccordion() {
   document.querySelectorAll(".acc-head").forEach(btn =>
     btn.addEventListener("click", () => {
-      const item = btn.closest(".acc-item"), body = item.querySelector(".acc-body");
+      const item = btn.closest(".acc-item, .topic-item"), body = item.querySelector(".acc-body");
       const open = item.classList.toggle("open");
       body.style.maxHeight = open ? body.scrollHeight + "px" : null;
+      if (open) {
+        renderMath(body);   // içerik açılınca LaTeX'i işle
+        // MathJax yüksekliği değiştirebilir → yeniden ölç
+        setTimeout(() => {
+          if (item.classList.contains("open")) body.style.maxHeight = body.scrollHeight + "px";
+        }, 500);
+      }
     }));
 }
 function bindQuestionFilter() {
@@ -414,9 +525,83 @@ function bindQuestionFilter() {
   }));
 }
 
+/* ============================================================
+   POMODORO ZAMANLAYICI (25 dk odak / 5 dk mola)
+   ============================================================ */
+const POMO = { total: 25 * 60, left: 25 * 60, mode: "odak", timer: null, running: false };
+
+function pomoTogglePanel() {
+  const p = $("#pomoPanel");
+  if (p) p.classList.toggle("open");
+}
+function pomoSet(mins, mode) {
+  clearInterval(POMO.timer);
+  POMO.running = false; POMO.mode = mode;
+  POMO.total = POMO.left = mins * 60;
+  pomoPaint();
+}
+function pomoStartPause() {
+  if (POMO.running) {
+    clearInterval(POMO.timer); POMO.running = false;
+  } else {
+    POMO.running = true;
+    POMO.timer = setInterval(() => {
+      POMO.left--;
+      if (POMO.left <= 0) {
+        clearInterval(POMO.timer); POMO.running = false; POMO.left = 0;
+        pomoPaint();
+        // Odak bitti → molayı öner; mola bitti → odağa dön
+        if (POMO.mode === "odak") pomoSet(5, "mola"); else pomoSet(25, "odak");
+        document.title = "⏰ Süre doldu! — Ders Defteri";
+        return;
+      }
+      pomoPaint();
+    }, 1000);
+  }
+  pomoPaint();
+}
+function pomoReset() { pomoSet(POMO.mode === "odak" ? 25 : 5, POMO.mode); }
+function pomoPaint() {
+  const m = String(Math.floor(POMO.left / 60)).padStart(2, "0");
+  const s = String(POMO.left % 60).padStart(2, "0");
+  const t = $("#pomoTime"), st = $("#pomoStart"), md = $("#pomoMode"), ring = $("#pomoRing");
+  if (t) t.textContent = `${m}:${s}`;
+  if (st) st.textContent = POMO.running ? "⏸ Duraklat" : "▶ Başlat";
+  if (md) md.textContent = POMO.mode === "odak" ? "ODAK" : "MOLA";
+  if (ring) ring.style.setProperty("--pct", (1 - POMO.left / POMO.total) * 100 + "%");
+  if (POMO.running) document.title = `${m}:${s} · ${POMO.mode === "odak" ? "Odak" : "Mola"} — Ders Defteri`;
+}
+function pomoHTML() {
+  return `
+  <button id="pomoBtn" class="theme-toggle" onclick="pomoTogglePanel()" title="Pomodoro zamanlayıcı" aria-label="Pomodoro">⏱</button>
+  <div id="pomoPanel" class="pomo-panel">
+    <div class="pomo-head"><span id="pomoMode" class="pomo-mode">ODAK</span>
+      <span class="pomo-hint">25 dk çalış · 5 dk dinlen</span></div>
+    <div id="pomoRing" class="pomo-ring"><span id="pomoTime">25:00</span></div>
+    <div class="pomo-actions">
+      <button id="pomoStart" onclick="pomoStartPause()">▶ Başlat</button>
+      <button onclick="pomoReset()">↺ Sıfırla</button>
+    </div>
+    <div class="pomo-presets">
+      <button onclick="pomoSet(25,'odak')">25 odak</button>
+      <button onclick="pomoSet(50,'odak')">50 odak</button>
+      <button onclick="pomoSet(5,'mola')">5 mola</button>
+    </div>
+  </div>`;
+}
+function mountPomodoro() {
+  const nav = document.querySelector(".nav-actions");
+  if (!nav) return;
+  const holder = document.createElement("div");
+  holder.className = "pomo-holder";
+  holder.innerHTML = pomoHTML();
+  nav.prepend(holder);
+}
+
 /* ---------- Başlat ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   setThemeBtnIcon();
+  mountPomodoro();
   renderHome();
   renderCourse();
 });
