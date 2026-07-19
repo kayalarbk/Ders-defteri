@@ -130,7 +130,9 @@ function updateCourseProgress(kod) {
 function renderHome() {
   const grid = $("#courseGrid");
   if (!grid) return;
-  grid.innerHTML = DERS_SIRASI.map(kod => {
+  // _ayarlar.js yüklenmezse sayfa tamamen boş kalmasın
+  const sira = (typeof DERS_SIRASI !== "undefined") ? DERS_SIRASI : Object.keys(DERSLER || {});
+  grid.innerHTML = sira.map(kod => {
     const d = DERSLER[kod]; if (!d) return "";
     const total = (d.konular || []).length;
     const done = getProgress(kod).filter(i => i < total).length;
