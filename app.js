@@ -180,7 +180,7 @@ function renderCourse() {
 
   if (!d) {
     root.innerHTML = `<div class="course-head"><h1>Ders bulunamadı</h1>
-      <p class="ozet">“${esc(kod || "—")}” kodu <code>data.js</code> içinde tanımlı değil.</p>
+      <p class="ozet">“${esc(kod || "—")}” kodu <code>data/</code> klasöründe tanımlı değil.</p>
       <p style="margin-top:16px"><a class="back-link" href="index.html">← Ana sayfaya dön</a></p></div>`;
     return;
   }
