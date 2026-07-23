@@ -1,0 +1,33 @@
+{
+  "name": "Ders Defteri — Kişisel Çalışma Arşivi",
+  "short_name": "Ders Defteri",
+  "description": "Elektrik-Elektronik Mühendisliği ders arşivi: konu anlatımları, formül kartları, video kaynakları ve çözümlü soru havuzu.",
+  "lang": "tr",
+  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "./",
+  "scope": "./",
+  "theme_color": "#12161D",
+  "background_color": "#12161D",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

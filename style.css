@@ -262,6 +262,44 @@ footer {
   font-family: var(--font-mono); font-size: .78rem;
 }
 
+/* ============================================================
+   PWA / iOS GÜVENLİ ALAN (safe area)
+   "Ana Ekrana Ekle" ile tam ekran açıldığında çentik ve
+   home bar'ın içerikle çakışmasını önler.
+   ============================================================ */
+:root {
+  --sa-top:    env(safe-area-inset-top, 0px);
+  --sa-bottom: env(safe-area-inset-bottom, 0px);
+  --sa-left:   env(safe-area-inset-left, 0px);
+  --sa-right:  env(safe-area-inset-right, 0px);
+}
+
+/* Yatay çentik boşluğu tüm içerik sarmalayıcılarına */
+.wrap {
+  padding-left:  calc(24px + var(--sa-left));
+  padding-right: calc(24px + var(--sa-right));
+}
+
+/* Üst bar çentiğin altına insin (status bar black-translucent) */
+.topbar { padding-top: var(--sa-top); }
+
+/* Home bar çubuğu footer'ı kesmesin */
+footer { padding-bottom: calc(32px + var(--sa-bottom)); }
+
+/* Sabit konumlu katmanlar da güvenli alana saygı duysun */
+.overlay {
+  padding-top:    calc(20px + var(--sa-top));
+  padding-bottom: calc(20px + var(--sa-bottom));
+  padding-left:   calc(20px + var(--sa-left));
+  padding-right:  calc(20px + var(--sa-right));
+}
+.pomo-panel { max-height: calc(100vh - 90px - var(--sa-top)); overflow: auto; }
+
+/* Standalone modda (ana ekran uygulaması) lastik bant kaydırmayı kıs */
+@media all and (display-mode: standalone) {
+  body { overscroll-behavior-y: none; }
+}
+
 /* ---------- Erişilebilirlik & mobil ---------- */
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -470,6 +508,34 @@ footer {
   background: var(--accent-dim); color: var(--accent);
   padding: 2px 6px; border-radius: 4px; vertical-align: 1px;
 }
+
+/* ---------- Yedekleme paneli ---------- */
+.bk-holder { position: relative; }
+.bk-panel {
+  display: none; position: absolute; right: 0; top: 48px;
+  width: 268px; max-width: calc(100vw - 24px); padding: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 60;
+  max-height: calc(100vh - 90px - var(--sa-top)); overflow: auto;
+}
+.bk-panel.open { display: block; }
+.bk-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.bk-title {
+  font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em;
+  background: var(--accent-dim); color: var(--accent); padding: 3px 8px; border-radius: 5px;
+}
+.bk-hint, .bk-note { font-size: .68rem; color: var(--muted); font-family: var(--font-mono); line-height: 1.5; }
+.bk-info { font-family: var(--font-mono); font-size: .74rem; color: var(--text); margin-bottom: 12px; }
+.bk-act {
+  display: block; width: 100%; margin-bottom: 8px; padding: 10px 12px;
+  font-family: var(--font-body); font-size: .82rem; font-weight: 600; text-align: center;
+  background: var(--accent); color: #0B1417; border: 1px solid var(--accent);
+  border-radius: 10px; cursor: pointer;
+}
+.bk-act.ghost { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+.bk-act.ghost:hover { border-color: var(--accent); }
+.bk-act:disabled { opacity: .6; cursor: progress; }
+.bk-file { margin-bottom: 12px; }
 
 /* ---------- Pomodoro ---------- */
 .pomo-holder { position: relative; }

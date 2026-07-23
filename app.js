@@ -100,11 +100,37 @@ function shrinkImage(file, maxDim = 1600, quality = 0.85) {
    İLERLEME TAKİBİ (localStorage)
    ============================================================ */
 function getProgress(kod) {
-  try { return JSON.parse(localStorage.getItem("dd-prog-" + kod)) || []; }
+  const key = "dd-prog-" + kod;
+  // Henüz diske yazılmamış (debounce bekleyen) değer varsa onu kullan
+  if (_pendingWrites.has(key)) return _pendingWrites.get(key);
+  try { return JSON.parse(localStorage.getItem(key)) || []; }
   catch { return []; }
 }
+/* Debounce'lu yazma: hızlı ardışık işaretlemelerde tek yazma yapılır,
+   sayfa kapanırken bekleyen yazmalar zorla diske aktarılır. */
+const _pendingWrites = new Map();
+let _writeTimer = null;
+function saveDebounced(key, value, delay = 250) {
+  _pendingWrites.set(key, value);
+  clearTimeout(_writeTimer);
+  _writeTimer = setTimeout(flushWrites, delay);
+}
+function flushWrites() {
+  clearTimeout(_writeTimer); _writeTimer = null;
+  for (const [k, v] of _pendingWrites) {
+    try { localStorage.setItem(k, JSON.stringify(v)); }
+    catch (e) { console.warn("Kaydedilemedi:", k, e); }
+  }
+  _pendingWrites.clear();
+}
+// Sayfa kapanırken / arka plana alınırken bekleyen veriyi kaydet
+window.addEventListener("pagehide", flushWrites);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") flushWrites();
+});
+
 function setProgress(kod, arr) {
-  localStorage.setItem("dd-prog-" + kod, JSON.stringify(arr));
+  saveDebounced("dd-prog-" + kod, arr);
 }
 function toggleTopicDone(kod, idx, btn) {
   let done = getProgress(kod);
@@ -600,10 +626,183 @@ function mountPomodoro() {
   nav.prepend(holder);
 }
 
+/* ============================================================
+   YEDEKLEME — dışa / içe aktarma (JSON)
+   iOS Safari uzun süre açılmayan sitelerin verisini silebildiği için
+   kullanıcının kendi yedeğini alabilmesi şart.
+   ============================================================ */
+async function idbAll() {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, "readonly");
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => res(req.result || []);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+const blobToDataURL = blob => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(r.result);
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(blob);
+});
+
+async function dataURLToBlob(u) { return (await fetch(u)).blob(); }
+
+/* Tüm dd-* localStorage anahtarları (ilerleme + tema) */
+function collectLocalStorage() {
+  const out = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("dd-")) out[k] = localStorage.getItem(k);
+  }
+  return out;
+}
+
+async function exportBackup(medyaDahil = true) {
+  flushWrites();
+  const btn = $("#bkExport");
+  if (btn) { btn.disabled = true; btn.textContent = "Hazırlanıyor…"; }
+  try {
+    const paket = {
+      uygulama: "ders-defteri",
+      surum: 1,
+      tarih: new Date().toISOString(),
+      ayarlar: collectLocalStorage(),
+      medya: []
+    };
+    if (medyaDahil) {
+      for (const m of await idbAll()) {
+        paket.medya.push({
+          ders: m.ders, tip: m.tip, ad: m.ad, mime: m.mime,
+          veri: await blobToDataURL(m.blob)
+        });
+      }
+    }
+    const blob = new Blob([JSON.stringify(paket)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const g = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `ders-defteri-yedek-${g}${medyaDahil ? "" : "-sadece-ilerleme"}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (err) {
+    console.error(err);
+    alert("Yedek oluşturulamadı: " + err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "⬇ Yedeği indir (JSON)"; }
+  }
+}
+
+async function importBackup(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  if (!confirm("Yedek geri yüklenecek.\n\nİlerleme kayıtları yedektekiyle DEĞİŞTİRİLECEK, " +
+               "yedekteki fotoğraf/dökümanlar mevcutlara EKLENECEK.\n\nDevam edilsin mi?")) return;
+  try {
+    const paket = JSON.parse(await file.text());
+    if (paket.uygulama !== "ders-defteri") throw new Error("Bu dosya Ders Defteri yedeği değil.");
+
+    for (const [k, v] of Object.entries(paket.ayarlar || {})) {
+      if (k.startsWith("dd-")) localStorage.setItem(k, v);
+    }
+    let eklenen = 0;
+    for (const m of paket.medya || []) {
+      if (!m.veri) continue;
+      await idbAdd({ ders: m.ders, tip: m.tip, ad: m.ad, mime: m.mime, blob: await dataURLToBlob(m.veri) });
+      eklenen++;
+    }
+    alert(`Yedek geri yüklendi.\n${Object.keys(paket.ayarlar || {}).length} ayar · ${eklenen} dosya.\n\nSayfa yenileniyor.`);
+    location.reload();
+  } catch (err) {
+    console.error(err);
+    alert("Yedek geri yüklenemedi: " + err.message);
+  }
+}
+
+async function bkUpdateInfo() {
+  const el = $("#bkInfo");
+  if (!el) return;
+  let satir = [];
+  try {
+    const medya = await idbAll();
+    satir.push(`${medya.filter(m => m.tip === "foto").length} fotoğraf · ${medya.filter(m => m.tip === "dok").length} doküman`);
+  } catch { satir.push("depolama okunamadı"); }
+  if (navigator.storage && navigator.storage.estimate) {
+    try {
+      const { usage } = await navigator.storage.estimate();
+      if (usage) satir.push(`${(usage / 1048576).toFixed(1)} MB kullanılıyor`);
+    } catch {}
+  }
+  el.textContent = satir.join(" · ");
+}
+
+function bkTogglePanel() {
+  const p = $("#bkPanel");
+  if (!p) return;
+  p.classList.toggle("open");
+  if (p.classList.contains("open")) bkUpdateInfo();
+}
+
+function backupHTML() {
+  return `
+  <button id="bkBtn" class="theme-toggle" onclick="bkTogglePanel()" title="Yedekleme" aria-label="Yedekleme">💾</button>
+  <div id="bkPanel" class="bk-panel">
+    <div class="bk-head">
+      <span class="bk-title">YEDEKLEME</span>
+      <span class="bk-hint">verilerin bu cihazda saklanır</span>
+    </div>
+    <p class="bk-info" id="bkInfo">…</p>
+    <button id="bkExport" class="bk-act" onclick="exportBackup(true)">⬇ Yedeği indir (JSON)</button>
+    <button class="bk-act ghost" onclick="exportBackup(false)">⬇ Sadece ilerleme (küçük)</button>
+    <label class="bk-act ghost bk-file">⬆ Yedekten geri yükle
+      <input type="file" accept="application/json,.json" class="file-hidden" onchange="importBackup(event)">
+    </label>
+    <p class="bk-note">iOS, uzun süre açılmayan sitelerin verisini silebilir. Ara ara yedek al.</p>
+  </div>`;
+}
+
+function mountBackup() {
+  const nav = document.querySelector(".nav-actions");
+  if (!nav) return;
+  const holder = document.createElement("div");
+  holder.className = "bk-holder";
+  holder.innerHTML = backupHTML();
+  nav.prepend(holder);
+}
+
+/* Panellerin dışına tıklanınca kapansınlar */
+document.addEventListener("click", e => {
+  if (!e.target.closest(".bk-holder")) $("#bkPanel")?.classList.remove("open");
+  if (!e.target.closest(".pomo-holder")) $("#pomoPanel")?.classList.remove("open");
+});
+
+/* ============================================================
+   SERVICE WORKER — offline çalışma
+   ============================================================ */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(err =>
+      console.warn("Service worker kaydedilemedi:", err));
+  });
+  // Yeni sürüm devreye girince sayfayı bir kez tazele
+  // (ilk kurulumda değil — o an sayfa zaten güncel)
+  let yenilendi = !navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (yenilendi) { yenilendi = false; return; }
+    yenilendi = true;
+    location.reload();
+  });
+}
+
 /* ---------- Başlat ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   setThemeBtnIcon();
   mountPomodoro();
+  mountBackup();
   renderHome();
   renderCourse();
 });
