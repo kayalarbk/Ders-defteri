@@ -37,9 +37,17 @@
     <section class="hero">
       <span class="eyebrow">Elektrik-Elektronik Mühendisliği</span>
       <h1>Ders Arşivim</h1>
-      <p>Konu anlatımları, formül kartları, video kaynakları ve çözümlü soru havuzu.
-         Konuları tamamladıkça ilerlemen kartlarda görünür. ⏱ ile pomodoro başlat.</p>
+
+      <div class="search-box">
+        <span class="search-ico">⌕</span>
+        <input id="searchInput" type="search" autocomplete="off"
+               placeholder="Konu, formül veya soru ara…  ( / )"
+               aria-label="Tüm derslerde ara">
+        <div id="searchResults" class="search-results"><!-- app.js doldurur --></div>
+      </div>
     </section>
+
+    <section id="homeOzet" class="ozet"><!-- app.js doldurur --></section>
 
     <section class="grid" id="courseGrid"><!-- app.js doldurur --></section>
 

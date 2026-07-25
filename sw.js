@@ -4,7 +4,7 @@
    Sürüm değişince eski cache'ler otomatik silinir.
    ============================================================ */
 
-const CACHE_VERSION = "dd-v1";
+const CACHE_VERSION = "dd-v2";
 const CACHE_STATIC  = CACHE_VERSION + "-static";   // uygulama dosyaları
 const CACHE_CDN     = CACHE_VERSION + "-cdn";      // font + MathJax (harici)
 

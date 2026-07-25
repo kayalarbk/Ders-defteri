@@ -34,6 +34,38 @@ function renderMath(el) {
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
 
+/* HTML + LaTeX içerikten okunabilir düz metin çıkarır
+   (soru başlıklarında önizleme ve aramada kullanılır) */
+const _metinKutu = document.createElement("div");
+/* Sık kullanılan LaTeX komutları — silmek yerine sembole çevrilir,
+   yoksa "X(j\omega)" başlıkta "X(j )" gibi görünüyor. */
+const _TEX_SEMBOL = {
+  omega:"ω", alpha:"α", beta:"β", gamma:"γ", delta:"δ", epsilon:"ε", theta:"θ",
+  lambda:"λ", mu:"μ", pi:"π", rho:"ρ", sigma:"σ", tau:"τ", phi:"φ", psi:"ψ",
+  Omega:"Ω", Delta:"Δ", Sigma:"Σ", Phi:"Φ", Gamma:"Γ",
+  infty:"∞", int:"∫", sum:"Σ", prod:"Π", partial:"∂", nabla:"∇", sqrt:"√",
+  le:"≤", ge:"≥", neq:"≠", approx:"≈", pm:"±", times:"×", cdot:"·",
+  to:"→", rightarrow:"→", leftrightarrow:"↔", in:"∈", forall:"∀", exists:"∃"
+};
+function duzMetin(html, max = 90) {
+  _metinKutu.innerHTML = String(html || "");
+  let s = (_metinKutu.textContent || "")
+    .replace(/\\[()[\]]/g, " ")                            // \( \) \[ \]
+    .replace(/\$\$?/g, " ")                                // $ ve $$
+    .replace(/\\([a-zA-Z]+)/g, (m, c) => _TEX_SEMBOL[c] || " ")
+    .replace(/[{}^_&\\]/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/\s+([),.;:])/g, "$1")                        // "X(j )" → "X(j)"
+    .replace(/([(])\s+/g, "$1")
+    .trim();
+  return s.length > max ? s.slice(0, max).trimEnd() + "…" : s;
+}
+
+/* Türkçe arama normalizasyonu: "olcum" yazınca "ölçüm" de bulunsun */
+const norm = s => String(s).toLocaleLowerCase("tr")
+  .replace(/[ıİ]/g, "i").replace(/[şŞ]/g, "s").replace(/[ğĞ]/g, "g")
+  .replace(/[üÜ]/g, "u").replace(/[öÖ]/g, "o").replace(/[çÇ]/g, "c");
+
 /* ============================================================
    INDEXEDDB — kullanıcı yüklemeleri (foto / doküman)
    ============================================================ */
@@ -178,7 +210,144 @@ function renderHome() {
         </div>
       </a>`;
   }).join("");
+  renderOzet();
   renderQuickLinks();
+}
+
+/* ---------- Genel durum + "kaldığın yer" ---------- */
+function dersSirasi() {
+  return (typeof DERS_SIRASI !== "undefined") ? DERS_SIRASI : Object.keys(DERSLER || {});
+}
+
+function renderOzet() {
+  const box = $("#homeOzet");
+  if (!box) return;
+  let tKonu = 0, tDone = 0, tForm = 0, tBil = 0, tSoru = 0, tCoz = 0, tTakil = 0;
+  dersSirasi().forEach(kod => {
+    const d = DERSLER[kod]; if (!d) return;
+    const k = (d.konular || []).length;
+    tKonu += k; tDone += getProgress(kod).filter(i => i < k).length;
+    tForm += (d.formuller || []).length;
+    tBil  += getFlashBilinen(kod).length;
+    tSoru += (d.sorular || []).length;
+    const sd = Object.values(getSoruDurum(kod));
+    tCoz   += sd.filter(v => v === "coz").length;
+    tTakil += sd.filter(v => v === "takil").length;
+  });
+  const pct = tKonu ? Math.round(tDone / tKonu * 100) : 0;
+
+  /* Kaldığın yer: en son açılan dersteki ilk bitmemiş konu */
+  const sonKod = localStorage.getItem("dd-son-ders");
+  const son = sonKod && DERSLER[sonKod] ? DERSLER[sonKod] : null;
+  let devam = "";
+  if (son) {
+    const done = getProgress(sonKod);
+    const nx = (son.konular || []).findIndex((_, i) => !done.includes(i));
+    devam = `
+      <a class="ozet-devam" style="--card-color:${son.renk}"
+         href="course.html?ders=${sonKod}${nx >= 0 ? "&git=konu-" + nx : ""}">
+        <span class="ozet-devam-lbl">${nx >= 0 ? "KALDIĞIN YER" : "TAMAMLANDI"}</span>
+        <span class="ozet-devam-ad">${esc(nx >= 0 ? son.konular[nx].baslik : son.ad)}</span>
+        <span class="ozet-devam-ders">${sonKod} · ${esc(son.ad)}</span>
+        <span class="ozet-devam-git">${nx >= 0 ? "Devam et →" : "Derse git →"}</span>
+      </a>`;
+  }
+
+  box.innerHTML = `
+    <div class="ozet-stats">
+      <div class="ozet-stat">
+        <span class="ozet-num">${tDone}<span class="ozet-tot">/${tKonu}</span></span>
+        <span class="ozet-lbl">konu tamamlandı</span>
+        <div class="ozet-bar"><div class="ozet-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="ozet-stat">
+        <span class="ozet-num">${tBil}<span class="ozet-tot">/${tForm}</span></span>
+        <span class="ozet-lbl">formül biliniyor</span>
+        <div class="ozet-bar"><div class="ozet-bar-fill" style="width:${tForm ? tBil/tForm*100 : 0}%"></div></div>
+      </div>
+      <div class="ozet-stat">
+        <span class="ozet-num">${tCoz}<span class="ozet-tot">/${tSoru}</span></span>
+        <span class="ozet-lbl">soru çözüldü${tTakil ? ` · ${tTakil} takılınan` : ""}</span>
+        <div class="ozet-bar"><div class="ozet-bar-fill" style="width:${tSoru ? tCoz/tSoru*100 : 0}%"></div></div>
+      </div>
+    </div>
+    ${devam}`;
+}
+
+/* ============================================================
+   ARAMA — tüm derslerdeki konu, formül ve sorularda
+   ============================================================ */
+let _aramaIndex = null;
+function aramaIndex() {
+  if (_aramaIndex) return _aramaIndex;
+  const idx = [];
+  dersSirasi().forEach(kod => {
+    const d = DERSLER[kod]; if (!d) return;
+    (d.konular || []).forEach((k, i) => idx.push({
+      kod, tur: "konu", turAd: "KONU", renk: d.renk,
+      ad: k.baslik, ek: duzMetin(k.icerik, 300), hedef: `konu-${i}`
+    }));
+    (d.formuller || []).forEach((x, i) => idx.push({
+      kod, tur: "formul", turAd: "FORMÜL", renk: d.renk,
+      ad: x.ad, ek: duzMetin(x.aciklama || "", 160), hedef: `formul-${i}`
+    }));
+    (d.sorular || []).forEach((x, i) => idx.push({
+      kod, tur: "soru", turAd: (x.tip || "vize").toUpperCase(), renk: d.renk,
+      ad: duzMetin(x.soru, 90), ek: duzMetin(x.soru, 300), hedef: `soru-${i}`
+    }));
+  });
+  return (_aramaIndex = idx.map(o => ({ ...o, _n: norm(o.ad + " " + o.ek + " " + o.kod) })));
+}
+
+function aramaYap(q) {
+  const kutu = $("#searchResults");
+  if (!kutu) return;
+  const t = norm(q).trim();
+  if (t.length < 2) { kutu.innerHTML = ""; kutu.classList.remove("open"); return; }
+  const kelimeler = t.split(/\s+/);
+  const sonuc = aramaIndex()
+    .filter(o => kelimeler.every(k => o._n.includes(k)))
+    /* Başlıkta geçenler önce gelsin */
+    .sort((a, b) => norm(b.ad).includes(kelimeler[0]) - norm(a.ad).includes(kelimeler[0]))
+    .slice(0, 25);
+
+  kutu.classList.add("open");
+  kutu.innerHTML = sonuc.length ? sonuc.map(o => `
+    <a class="sr-item" style="--card-color:${o.renk}" href="course.html?ders=${o.kod}&git=${o.hedef}">
+      <span class="sr-tur">${o.turAd}</span>
+      <span class="sr-body">
+        <span class="sr-ad">${esc(o.ad)}</span>
+        <span class="sr-ders">${o.kod} · ${esc(DERSLER[o.kod].ad)}</span>
+      </span>
+    </a>`).join("")
+    : `<p class="sr-bos">"${esc(q)}" için sonuç yok.</p>`;
+}
+
+function bindArama() {
+  const inp = $("#searchInput");
+  if (!inp) return;
+  let t = null;
+  inp.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(() => aramaYap(inp.value), 120);
+  });
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Escape") { inp.value = ""; aramaYap(""); inp.blur(); }
+    if (e.key === "Enter") {
+      const ilk = document.querySelector(".sr-item");
+      if (ilk) location.href = ilk.href;
+    }
+  });
+  /* Dışarı tıklayınca sonuçları kapat */
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".search-box")) $("#searchResults")?.classList.remove("open");
+  });
+  /* "/" ile aramaya odaklan */
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement !== inp && !FLASH.acik) {
+      e.preventDefault(); inp.focus();
+    }
+  });
 }
 
 function renderQuickLinks() {
@@ -218,20 +387,41 @@ function renderCourse() {
     ${headBlock(kod, d)}
     ${sectionNav(d)}
     ${konularBlock(kod, d)}
-    ${formullerBlock(d)}
+    ${formullerBlock(kod, d)}
     ${medyaBlock(kod, d)}
     ${dokumanBlock(kod, d)}
     ${videoBlock(d)}
     ${linklerBlock(d)}
-    ${sorularBlock(d)}
+    ${sorularBlock(kod, d)}
   `;
 
   bindAccordion();
   bindQuestionFilter();
   bindFlashcards();
   updateCourseProgress(kod);
+  updateSoruOzet(kod);
   renderMath();
   loadUploads(kod);   // IndexedDB'den foto + doküman çek
+
+  localStorage.setItem("dd-son-ders", kod);   // ana sayfadaki "kaldığın yer" için
+  gotoHedef();                                // ?git=konu-3 gibi doğrudan bağlantılar
+}
+
+/* Aramadan / "kaldığın yer" bağlantısından gelen hedefi aç ve vurgula */
+function gotoHedef() {
+  const h = new URLSearchParams(location.search).get("git");
+  if (!h) return;
+  const el = document.getElementById(h);
+  if (!el) return;
+  el.classList.add("hedef-vurgu");
+  /* Önce aç, SONRA kaydır: açılan panel ve MathJax yerleşimi
+     kaydırma sırasında sayfa yüksekliğini değiştirip hedefi kaçırıyor. */
+  const head = el.querySelector(".acc-head");
+  if (head && !el.classList.contains("open")) head.click();
+  const kaydir = () => el.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(kaydir, 350);    // akordeon açılma animasyonu bitince
+  setTimeout(kaydir, 900);    // MathJax yerleşimi oturunca son düzeltme
+  setTimeout(() => el.classList.remove("hedef-vurgu"), 3000);
 }
 
 /* ----- Başlık ----- */
@@ -265,7 +455,7 @@ function sectionNav(d) {
 function konularBlock(kod, d) {
   const done = getProgress(kod);
   const items = (d.konular || []).map((k, i) => `
-    <div class="topic-item ${done.includes(i) ? "done" : ""}">
+    <div class="topic-item ${done.includes(i) ? "done" : ""}" id="konu-${i}">
       <div class="topic-head">
         <button class="topic-check" type="button" title="Tamamlandı olarak işaretle"
           onclick="toggleTopicDone('${kod}',${i},this)" aria-label="Konuyu tamamlandı işaretle">✓</button>
@@ -281,11 +471,13 @@ function konularBlock(kod, d) {
     ${items || emptyMsg("Henüz konu eklenmemiş.")}</section>`;
 }
 
-/* ----- 02 Formül Kartları (flip) ----- */
-function formullerBlock(d) {
+/* ----- 02 Formül Kartları (flip + çalışma modu) ----- */
+function formullerBlock(kod, d) {
   const f = d.formuller || [];
-  const cards = f.map(x => `
-    <button class="flip" type="button" aria-label="${esc(x.ad)} — çevir">
+  const bilinen = getFlashBilinen(kod);
+  const cards = f.map((x, i) => `
+    <button class="flip ${bilinen.includes(i) ? "biliniyor" : ""}" id="formul-${i}"
+            type="button" aria-label="${esc(x.ad)} — çevir">
       <div class="flip-inner">
         <div class="flip-face flip-front">
           <span class="flip-tag">FORMÜL</span>
@@ -299,8 +491,148 @@ function formullerBlock(d) {
       </div>
     </button>`).join("");
   return `<section class="section" id="sec-formuller"><h2><span class="idx">02</span> Formül Kartları</h2>
-    ${f.length ? `<div class="cards">${cards}</div>` : emptyMsg("Henüz formül eklenmemiş.")}</section>`;
+    ${f.length ? `
+      <div class="study-row">
+        <button class="study-btn" type="button" onclick="openFlashStudy('${kod}')">
+          🎴 Çalışma Modu
+        </button>
+        <span class="study-note" id="flashOzet">${bilinen.length}/${f.length} formül biliniyor</span>
+      </div>
+      <div class="cards">${cards}</div>` : emptyMsg("Henüz formül eklenmemiş.")}</section>`;
 }
+
+/* ============================================================
+   FORMÜL ÇALIŞMA MODU
+   Kartlar karıştırılır, tek tek sorulur; "biliyorum" dediklerin
+   sonraki turlarda elenir (basit aralıklı tekrar).
+   ============================================================ */
+const FLASH = { kod: null, list: [], i: 0, acik: false };
+
+function getFlashBilinen(kod) {
+  const key = "dd-flash-" + kod;
+  if (_pendingWrites.has(key)) return _pendingWrites.get(key);
+  try { return JSON.parse(localStorage.getItem(key)) || []; }
+  catch { return []; }
+}
+function setFlashBilinen(kod, arr) { saveDebounced("dd-flash-" + kod, arr); }
+
+function openFlashStudy(kod, sadeceBilinmeyen = false) {
+  const f = (DERSLER[kod] || {}).formuller || [];
+  if (!f.length) return;
+  const bilinen = getFlashBilinen(kod);
+  let idx = f.map((_, i) => i);
+  if (sadeceBilinmeyen) idx = idx.filter(i => !bilinen.includes(i));
+  if (!idx.length) idx = f.map((_, i) => i);          // hepsi biliniyorsa baştan
+  for (let i = idx.length - 1; i > 0; i--) {          // Fisher-Yates karıştırma
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  FLASH.kod = kod; FLASH.list = idx; FLASH.i = 0; FLASH.acik = true;
+  ensureOverlay().classList.add("open");
+  document.body.style.overflow = "hidden";
+  paintFlash();
+}
+
+function paintFlash() {
+  const ov = $("#ddOverlay");
+  if (!ov || !FLASH.acik) return;
+  const kod = FLASH.kod, f = DERSLER[kod].formuller || [];
+  const bilinen = getFlashBilinen(kod);
+
+  /* Tur bitti ekranı */
+  if (FLASH.i >= FLASH.list.length) {
+    const kalan = FLASH.list.filter(i => !bilinen.includes(i)).length;
+    const bildi = FLASH.list.length - kalan;
+    ov.innerHTML = `<div class="flash-modal">
+      <div class="flash-head">
+        <span class="flash-title">${kod} · TUR BİTTİ</span>
+        <button class="ov-close" onclick="closeFlash()" aria-label="Kapat">×</button>
+      </div>
+      <div class="flash-done">
+        <p class="flash-score">${bildi}<span>/${FLASH.list.length}</span></p>
+        <p class="flash-done-txt">${kalan
+          ? `${kalan} formülü tekrar etmen gerekiyor.`
+          : "Bu turdaki tüm formülleri bildin. 👏"}</p>
+        <div class="flash-actions">
+          ${kalan ? `<button class="flash-ok" onclick="openFlashStudy('${kod}', true)">↻ Bilmediklerimi çalış</button>` : ""}
+          <button class="flash-no" onclick="openFlashStudy('${kod}')">🎴 Baştan karıştır</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const gi = FLASH.list[FLASH.i], x = f[gi];
+  const pct = Math.round(FLASH.i / FLASH.list.length * 100);
+  ov.innerHTML = `<div class="flash-modal">
+    <div class="flash-head">
+      <span class="flash-title">${kod} · FORMÜL ÇALIŞMA</span>
+      <span class="flash-count">${FLASH.i + 1} / ${FLASH.list.length}</span>
+      <button class="ov-close" onclick="closeFlash()" aria-label="Kapat">×</button>
+    </div>
+    <div class="flash-bar"><div class="flash-bar-fill" style="width:${pct}%"></div></div>
+    <div class="flash-card">
+      <span class="flip-tag">FORMÜL</span>
+      <strong class="flash-ad">${esc(x.ad)}</strong>
+      <div class="flash-cevap" id="flashCevap" hidden>
+        <div class="flip-formula">${x.formul}</div>
+        ${x.aciklama ? `<p class="flip-desc">${esc(x.aciklama)}</p>` : ""}
+      </div>
+      <button class="flash-show" id="flashShow" onclick="flashReveal()">Formülü göster</button>
+    </div>
+    <div class="flash-actions" id="flashActions" hidden>
+      <button class="flash-no" onclick="flashCevapla(false)">↻ Tekrar et</button>
+      <button class="flash-ok" onclick="flashCevapla(true)">✓ Biliyorum</button>
+    </div>
+    <p class="flash-foot">
+      ${bilinen.length}/${f.length} biliniyor ·
+      <button class="flash-reset" onclick="flashSifirla()">sıfırla</button>
+      <span class="flash-keys">boşluk: göster · ← tekrar · → biliyorum</span>
+    </p>
+  </div>`;
+}
+
+function flashReveal() {
+  const c = $("#flashCevap"), s = $("#flashShow"), a = $("#flashActions");
+  if (!c || c.hidden === false) return;
+  c.hidden = false; renderMath(c);
+  if (s) s.hidden = true;
+  if (a) a.hidden = false;
+}
+function flashCevapla(biliyor) {
+  if ($("#flashCevap") && $("#flashCevap").hidden) return;   // önce göster
+  const kod = FLASH.kod, gi = FLASH.list[FLASH.i];
+  let b = getFlashBilinen(kod);
+  if (biliyor) { if (!b.includes(gi)) b.push(gi); }
+  else b = b.filter(i => i !== gi);
+  setFlashBilinen(kod, b);
+  FLASH.i++;
+  paintFlash();
+}
+function flashSifirla() {
+  if (!confirm("Bu dersin formül çalışma ilerlemesi sıfırlansın mı?")) return;
+  setFlashBilinen(FLASH.kod, []); flushWrites(); paintFlash();
+}
+function closeFlash() {
+  const kod = FLASH.kod;
+  FLASH.acik = false; flushWrites(); closeOverlay();
+  /* Sayfadaki kart duvarını ve sayacı tazele */
+  if (kod && DERSLER[kod]) {
+    const bilinen = getFlashBilinen(kod), f = DERSLER[kod].formuller || [];
+    document.querySelectorAll("#sec-formuller .flip").forEach((el, i) =>
+      el.classList.toggle("biliniyor", bilinen.includes(i)));
+    const oz = $("#flashOzet");
+    if (oz) oz.textContent = `${bilinen.length}/${f.length} formül biliniyor`;
+  }
+}
+
+/* Çalışma modunda klavye kısayolları */
+document.addEventListener("keydown", e => {
+  if (!FLASH.acik) return;
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); flashReveal(); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); flashCevapla(true); }
+  else if (e.key === "ArrowLeft")  { e.preventDefault(); flashCevapla(false); }
+});
 
 /* ----- 03 Medya ve Görseller (yüklemeli) ----- */
 function medyaBlock(kod, d) {
@@ -370,27 +702,101 @@ function linklerBlock(d) {
     ${l.length ? `<div class="ql-grid">${items}</div>` : emptyMsg("Henüz kaynak eklenmemiş.")}</section>`;
 }
 
-/* ----- 07 Soru Havuzu ----- */
-function sorularBlock(d) {
+/* ----- 07 Soru Havuzu -----
+   Çözüm soruyla BİRLİKTE açılmaz: önce dene, sonra "Çözümü göster".
+   Çözüm görüldükten sonra kendini değerlendir (çözdüm / takıldım). */
+function sorularBlock(kod, d) {
   const q = d.sorular || [];
-  const items = q.map((x, i) => `
-    <div class="acc-item" data-tip="${x.tip || "vize"}">
+  const durum = getSoruDurum(kod);
+  const items = q.map((x, i) => {
+    const dr = durum[i] || "";
+    return `
+    <div class="acc-item q-item ${dr ? "q-" + dr : ""}" id="soru-${i}"
+         data-tip="${x.tip || "vize"}" data-durum="${dr}">
       <button class="acc-head" type="button">
         <span class="tag ${x.tip === "final" ? "final" : ""}">${x.tip || "vize"}</span>
-        Soru ${i + 1}<span class="chev">▾</span>
+        <span class="q-num">${i + 1}</span>
+        <span class="q-prev">${esc(duzMetin(x.soru, 84))}</span>
+        <span class="q-durum" title="Durum"></span>
+        <span class="chev">▾</span>
       </button>
       <div class="acc-body"><div class="inner">
-        ${x.soru}<div class="cozum-label">Çözüm</div>${x.cozum}
+        <div class="q-soru">${x.soru}</div>
+        <button class="q-reveal" type="button" onclick="revealCozum(this)">
+          Çözümü göster <span class="q-reveal-hint">önce kendin dene</span>
+        </button>
+        <div class="q-cozum" hidden>
+          <div class="cozum-label">Çözüm</div>
+          ${x.cozum}
+          <div class="q-mark">
+            <span class="q-mark-lbl">Kendini değerlendir:</span>
+            <button type="button" class="q-mark-ok"
+              onclick="setSoruDurum('${kod}',${i},'coz',this)">✓ Çözdüm</button>
+            <button type="button" class="q-mark-no"
+              onclick="setSoruDurum('${kod}',${i},'takil',this)">↻ Takıldım</button>
+          </div>
+        </div>
       </div></div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
   return `<section class="section" id="sec-sorular"><h2><span class="idx">07</span> Soru Havuzu</h2>
     ${q.length ? `
+      <p class="section-hint" id="qOzet"></p>
       <div class="q-filter">
         <button data-f="all" class="active">Tümü</button>
         <button data-f="vize">Vize</button>
         <button data-f="final">Final</button>
+        <button data-f="takil" class="q-f-takil">↻ Takıldıklarım</button>
+        <button data-f="yeni">Denemediklerim</button>
       </div><div class="accordion">${items}</div>
     ` : emptyMsg("Henüz soru eklenmemiş.")}</section>`;
+}
+
+/* Soru durumu: { indeks: 'coz' | 'takil' } */
+function getSoruDurum(kod) {
+  const key = "dd-soru-" + kod;
+  if (_pendingWrites.has(key)) return _pendingWrites.get(key);
+  try { return JSON.parse(localStorage.getItem(key)) || {}; }
+  catch { return {}; }
+}
+function setSoruDurum(kod, i, durum, btn) {
+  const cur = getSoruDurum(kod);
+  if (cur[i] === durum) delete cur[i]; else cur[i] = durum;
+  saveDebounced("dd-soru-" + kod, cur);
+  const item = btn.closest(".q-item");
+  item.classList.remove("q-coz", "q-takil");
+  if (cur[i]) item.classList.add("q-" + cur[i]);
+  item.dataset.durum = cur[i] || "";
+  updateSoruOzet(kod);
+}
+function updateSoruOzet(kod) {
+  const el = $("#qOzet");
+  if (!el) return;
+  const toplam = (DERSLER[kod].sorular || []).length;
+  const d = getSoruDurum(kod);
+  const coz = Object.values(d).filter(v => v === "coz").length;
+  const tak = Object.values(d).filter(v => v === "takil").length;
+  el.textContent =
+    `${toplam} sorudan ${coz}'i çözüldü · ${tak} takılınan · ${toplam - coz - tak} denenmedi`;
+}
+
+/* Çözümü açar, LaTeX'i işler ve akordeon yüksekliğini yeniden ölçer */
+function revealCozum(btn) {
+  const inner = btn.closest(".inner");
+  const coz = inner.querySelector(".q-cozum");
+  coz.hidden = false;
+  btn.remove();
+  renderMath(coz);
+  olcAkordeon(inner.closest(".acc-body"));
+}
+function olcAkordeon(body) {
+  if (!body) return;
+  const item = body.parentElement;
+  const uygula = () => {
+    if (item && item.classList.contains("open")) body.style.maxHeight = body.scrollHeight + "px";
+  };
+  uygula();
+  setTimeout(uygula, 500);   // MathJax yerleşimi bitince tekrar ölç
 }
 
 function emptyMsg(t) { return `<p class="empty">${t}</p>`; }
@@ -489,6 +895,7 @@ function closeOverlay() {
   const ov = $("#ddOverlay");
   if (ov) { ov.classList.remove("open"); ov.innerHTML = ""; }
   document.body.style.overflow = "";
+  FLASH.acik = false;
 }
 function openLightbox(url, ad) {
   const ov = ensureOverlay();
@@ -548,8 +955,14 @@ function bindQuestionFilter() {
     btns.forEach(x => x.classList.remove("active"));
     b.classList.add("active");
     const f = b.dataset.f;
-    document.querySelectorAll(".acc-item").forEach(it =>
-      it.style.display = (f === "all" || it.dataset.tip === f) ? "" : "none");
+    document.querySelectorAll("#sec-sorular .q-item").forEach(it => {
+      const gorunur =
+        f === "all"   ? true :
+        f === "takil" ? it.dataset.durum === "takil" :
+        f === "yeni"  ? !it.dataset.durum :
+                        it.dataset.tip === f;
+      it.style.display = gorunur ? "" : "none";
+    });
   }));
 }
 
@@ -805,4 +1218,5 @@ document.addEventListener("DOMContentLoaded", () => {
   mountBackup();
   renderHome();
   renderCourse();
+  bindArama();
 });
