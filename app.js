@@ -210,8 +210,97 @@ function renderHome() {
         </div>
       </a>`;
   }).join("");
+  renderTakvim();
   renderOzet();
   renderQuickLinks();
+}
+
+/* ============================================================
+   AKADEMİK TAKVİM — geri sayım + dönem çubuğu (ana sayfa)
+   Veri: data/_ayarlar.js içindeki TAKVIM.
+   ============================================================ */
+const GUN_MS = 86400000;
+
+/* "YYYY-MM-DD" → yerel gün başlangıcı (UTC kayması olmadan) */
+function tvGun(s) {
+  const [y, m, d] = String(s).split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function tvBugun() {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+/* Aradaki tam gün sayısı (a → b) */
+function tvFark(a, b) { return Math.round((b - a) / GUN_MS); }
+
+const TV_AY = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+function tvKisa(d) { return `${d.getDate()} ${TV_AY[d.getMonth()]}`; }
+/* "16 – 22 Kas" gibi; aylar farklıysa ikisi de yazılır */
+function tvAralik(a, b) {
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ${TV_AY[b.getMonth()]}`
+    : `${tvKisa(a)} – ${tvKisa(b)}`;
+}
+function tvGunAdi(n) { return n === 0 ? "bugün" : n === 1 ? "yarın" : `${n} gün`; }
+
+/* Dönemin o anki durumu; takvim tanımlı değilse null */
+function takvimDurum(bugun = tvBugun()) {
+  if (typeof TAKVIM === "undefined" || !TAKVIM || !TAKVIM.baslangic) return null;
+  const bas = tvGun(TAKVIM.baslangic);
+  const vB = tvGun(TAKVIM.vize.bas),  vS = tvGun(TAKVIM.vize.bit);
+  const fB = tvGun(TAKVIM.final.bas), fS = tvGun(TAKVIM.final.bit);
+
+  let faz, etiket, mesaj, hedef = null;
+  if (bugun < bas)       { faz = "oncesi"; etiket = "DÖNEM BAŞLIYOR"; hedef = bas; mesaj = `Derslere ${tvGunAdi(tvFark(bugun, bas))}`; }
+  else if (bugun < vB)   { faz = "ders";   etiket = "DERS DÖNEMİ";    hedef = vB;  mesaj = `Vize haftasına ${tvGunAdi(tvFark(bugun, vB))}`; }
+  else if (bugun <= vS)  { faz = "vize";   etiket = "VİZE HAFTASI";   hedef = vS;  mesaj = `Son gün ${tvKisa(vS)} · ${tvGunAdi(tvFark(bugun, vS))} kaldı`; }
+  else if (bugun < fB)   { faz = "ders2";  etiket = "FİNAL ÖNCESİ";   hedef = fB;  mesaj = `Finallere ${tvGunAdi(tvFark(bugun, fB))}`; }
+  else if (bugun <= fS)  { faz = "final";  etiket = "FİNAL DÖNEMİ";   hedef = fS;  mesaj = `Son gün ${tvKisa(fS)} · ${tvGunAdi(tvFark(bugun, fS))} kaldı`; }
+  else                   { faz = "bitti";  etiket = "DÖNEM BİTTİ";    mesaj = `${TAKVIM.ad} tamamlandı`; }
+
+  /* Kaçıncı ders haftası (yalnız dönem içindeyken anlamlı) */
+  const hafta = bugun >= bas ? Math.floor(tvFark(bas, bugun) / 7) + 1 : 0;
+  /* Çubuk için toplam aralık: başlangıç → final bitişi */
+  const yuzde = t => Math.max(0, Math.min(100, tvFark(bas, t) / tvFark(bas, fS) * 100));
+
+  return { faz, etiket, mesaj, hedef, hafta, bas, vB, vS, fB, fS, yuzde,
+           icinde: bugun >= bas && bugun <= fS, bugun };
+}
+
+function renderTakvim() {
+  const box = $("#homeTakvim");
+  if (!box) return;
+  const t = takvimDurum();
+  if (!t) { box.hidden = true; return; }
+
+  const seg = (a, b, cls) =>
+    `<div class="tv-seg ${cls}" style="left:${t.yuzde(a)}%;width:${Math.max(t.yuzde(b) - t.yuzde(a), 1.2)}%"></div>`;
+
+  box.hidden = false;
+  box.innerHTML = `
+    <div class="tv-card tv-${t.faz}">
+      <div class="tv-head">
+        <div class="tv-now">
+          <span class="tv-etiket">${t.etiket}</span>
+          <span class="tv-mesaj">${t.mesaj}</span>
+        </div>
+        <span class="tv-donem">${esc(TAKVIM.ad)}${t.icinde && t.faz !== "final" ? ` · ${t.hafta}. hafta` : ""}</span>
+      </div>
+
+      <div class="tv-bar" role="img"
+           aria-label="Dönem çizelgesi: ${tvKisa(t.bas)} başlangıç, ${tvAralik(t.vB, t.vS)} vize, ${tvAralik(t.fB, t.fS)} final">
+        ${t.icinde ? `<div class="tv-gecen" style="width:${t.yuzde(t.bugun)}%"></div>` : ""}
+        ${seg(t.vB, t.vS, "tv-seg-vize")}
+        ${seg(t.fB, t.fS, "tv-seg-final")}
+        ${t.icinde ? `<div class="tv-imlec" style="left:${t.yuzde(t.bugun)}%"></div>` : ""}
+      </div>
+
+      <div class="tv-kilo">
+        <span class="tv-kilo-it"><b>Başlangıç</b>${tvKisa(t.bas)}</span>
+        <span class="tv-kilo-it"><b>Vize</b>${tvAralik(t.vB, t.vS)}</span>
+        <span class="tv-kilo-it"><b>Final</b>${tvAralik(t.fB, t.fS)}</span>
+      </div>
+    </div>`;
 }
 
 /* ---------- Genel durum + "kaldığın yer" ---------- */
@@ -386,6 +475,7 @@ function renderCourse() {
   root.innerHTML = `
     ${headBlock(kod, d)}
     ${sectionNav(d)}
+    ${programBlock(kod, d)}
     ${konularBlock(kod, d)}
     ${formullerBlock(kod, d)}
     ${medyaBlock(kod, d)}
@@ -435,9 +525,105 @@ function headBlock(kod, d) {
   </header>`;
 }
 
+/* ============================================================
+   ÇALIŞMA PROGRAMI — takvimden + konu listesinden otomatik üretilir
+   Elle plan girilmez: ders dosyasındaki konular değişince program da değişir.
+   Kurgu: dönem başı → vize (ilk yarı konular), vize sonrası → final (ikinci yarı);
+   her iki bloğun son haftası sınav tekrarına ayrılır.
+   ============================================================ */
+
+/* Bir diziyi k parçaya olabildiğince eşit böler (k > uzunluk ise boş parça olur) */
+function esitBol(arr, k) {
+  const out = Array.from({ length: k }, () => []);
+  if (k <= 0) return out;
+  const tam = Math.floor(arr.length / k), fazla = arr.length % k;
+  let i = 0;
+  for (let w = 0; w < k; w++) {
+    const adet = tam + (w < fazla ? 1 : 0);
+    out[w] = arr.slice(i, i + adet);
+    i += adet;
+  }
+  return out;
+}
+
+/* [bas, bit) aralığını 7 günlük dilimlere böler; son dilim bit gününde kapanır */
+function haftalar(bas, bit) {
+  const out = [];
+  for (let g = new Date(bas); g < bit; g.setDate(g.getDate() + 7)) {
+    const son = new Date(g); son.setDate(son.getDate() + 6);
+    out.push({ bas: new Date(g), bit: son > bit ? new Date(bit.getTime() - GUN_MS) : son });
+  }
+  return out;
+}
+
+function dersProgrami(d) {
+  const t = takvimDurum();
+  const konular = (d && d.konular) || [];
+  if (!t || !konular.length) return null;
+
+  const idx = konular.map((k, i) => ({ i, baslik: k.baslik }));
+  const yarim = Math.ceil(idx.length / 2);
+
+  const h1 = haftalar(t.bas, t.vB);                                    // dönem başı → vize
+  const h2 = haftalar(new Date(t.vS.getTime() + GUN_MS), t.fB);        // vize sonrası → final
+
+  /* Her bloğun son haftası tekrar haftası; blok tek haftalıksa tekrar ayrılmaz */
+  const ders1 = Math.max(h1.length - 1, 1), ders2 = Math.max(h2.length - 1, 1);
+  const pay1 = esitBol(idx.slice(0, yarim), ders1);
+  const pay2 = esitBol(idx.slice(yarim),    ders2);
+
+  const satirlar = [];
+  let no = 0;
+  const ekle = (h, konu, tur, ad) => satirlar.push({
+    no: tur === "ders" ? ++no : null, bas: h.bas, bit: h.bit, konular: konu || [], tur, ad
+  });
+
+  h1.forEach((h, w) => w < ders1 ? ekle(h, pay1[w], "ders") : ekle(h, [], "tekrar", "Vize tekrarı"));
+  ekle({ bas: t.vB, bit: t.vS }, [], "sinav", "VİZE HAFTASI");
+  h2.forEach((h, w) => w < ders2 ? ekle(h, pay2[w], "ders") : ekle(h, [], "tekrar", "Final tekrarı"));
+  ekle({ bas: t.fB, bit: t.fS }, [], "sinav", "FİNAL");
+
+  return { satirlar, bugun: t.bugun, vizeKonu: yarim, finalKonu: idx.length - yarim };
+}
+
+function programBlock(kod, d) {
+  const p = dersProgrami(d);
+  if (!p) return "";
+  const done = getProgress(kod);
+
+  const satir = r => {
+    const aktif = p.bugun >= r.bas && p.bugun <= r.bit;
+    const gecti = p.bugun > r.bit;
+    const bitti = r.konular.length && r.konular.every(k => done.includes(k.i));
+    const etiket = r.tur === "ders" ? `${r.no}. hafta` : r.ad;
+    const konuHtml = r.konular.length
+      ? r.konular.map(k => `<a class="pr-konu${done.includes(k.i) ? " ok" : ""}"
+            href="course.html?ders=${kod}&git=konu-${k.i}">${esc(k.baslik)}</a>`).join("")
+      : `<span class="pr-bos">${r.tur === "ders" ? "Tekrar ve soru çözümü" : r.tur === "tekrar"
+            ? "Formül turu + çözülmemiş sorular" : "Sınav"}</span>`;
+    return `<li class="pr-satir pr-${r.tur}${aktif ? " aktif" : ""}${gecti ? " gecti" : ""}${bitti ? " bitti" : ""}">
+      <div class="pr-sol">
+        <span class="pr-no">${etiket}</span>
+        <span class="pr-tarih">${tvAralik(r.bas, r.bit)}</span>
+        ${aktif ? `<span class="pr-simdi">BU HAFTA</span>` : ""}
+      </div>
+      <div class="pr-konular">${konuHtml}</div>
+    </li>`;
+  };
+
+  return `
+  <section class="section" id="sec-program">
+    <h2><span class="num">00</span> Çalışma Programı</h2>
+    <p class="pr-ozet">Vizeye kadar <b>${p.vizeKonu}</b>, finale kadar <b>${p.finalKonu}</b> konu.
+       Program ${esc(TAKVIM.ad)} takviminden otomatik üretiliyor; tamamladığın konular ✓ ile işaretli.</p>
+    <ol class="pr-liste">${p.satirlar.map(satir).join("")}</ol>
+  </section>`;
+}
+
 /* ----- Bölüm içi hızlı gezinme ----- */
 function sectionNav(d) {
   const items = [
+    ["sec-program",  "Program"],
     ["sec-konular",  "Konular"],
     ["sec-formuller","Formüller"],
     ["sec-medya",    "Medya"],
@@ -979,6 +1165,7 @@ function pomoSet(mins, mode) {
   clearInterval(POMO.timer);
   POMO.running = false; POMO.mode = mode;
   POMO.total = POMO.left = mins * 60;
+  pomoMiniGoster(false);
   pomoPaint();
 }
 function pomoStartPause() {
@@ -986,6 +1173,7 @@ function pomoStartPause() {
     clearInterval(POMO.timer); POMO.running = false;
   } else {
     POMO.running = true;
+    pomoMiniGoster(true);       // çalışırken panel küçülüp sürüklenebilir kutuya döner
     POMO.timer = setInterval(() => {
       POMO.left--;
       if (POMO.left <= 0) {
@@ -1011,6 +1199,75 @@ function pomoPaint() {
   if (md) md.textContent = POMO.mode === "odak" ? "ODAK" : "MOLA";
   if (ring) ring.style.setProperty("--pct", (1 - POMO.left / POMO.total) * 100 + "%");
   if (POMO.running) document.title = `${m}:${s} · ${POMO.mode === "odak" ? "Odak" : "Mola"} — Ders Defteri`;
+
+  const mt = $("#pomoMiniTime"), mm = $("#pomoMiniMode"), mb = $("#pomoMiniBtn");
+  if (mt) mt.textContent = `${m}:${s}`;
+  if (mm) mm.textContent = POMO.mode === "odak" ? "ODAK" : "MOLA";
+  if (mb) { mb.textContent = POMO.running ? "⏸" : "▶"; mb.title = POMO.running ? "Duraklat" : "Devam et"; }
+  const mini = $("#pomoMini");
+  if (mini) mini.classList.toggle("mola", POMO.mode === "mola");
+}
+
+/* ---------- Mini pomodoro: çalışırken küçülen, sürüklenebilir kutu ---------- */
+function pomoMiniGoster(ac) {
+  const mini = $("#pomoMini");
+  if (!mini) return;
+  mini.hidden = !ac;
+  if (ac) { $("#pomoPanel")?.classList.remove("open"); pomoMiniYerlestir(); }
+}
+/* Kayıtlı konumu ekrana sığdırarak uygula (pencere küçülünce dışarıda kalmasın) */
+function pomoMiniYerlestir(x, y) {
+  const mini = $("#pomoMini");
+  if (!mini || mini.hidden) return;
+  if (x === undefined) {
+    let kayit = null;
+    try { kayit = JSON.parse(localStorage.getItem("dd-pomo-pos") || "null"); } catch {}
+    const r = mini.getBoundingClientRect();
+    x = kayit ? kayit.x : innerWidth - r.width - 18;
+    y = kayit ? kayit.y : innerHeight - r.height - 18;
+  }
+  const r = mini.getBoundingClientRect();
+  x = Math.max(8, Math.min(x, innerWidth  - r.width  - 8));
+  y = Math.max(8, Math.min(y, innerHeight - r.height - 8));
+  mini.style.left = x + "px";
+  mini.style.top  = y + "px";
+  mini.style.right = mini.style.bottom = "auto";   // CSS'teki sağ/alt sabitlemesini bırak
+  try { localStorage.setItem("dd-pomo-pos", JSON.stringify({ x, y })); } catch {}
+}
+/* Panele geri dön (mini'ye tıklanınca) */
+function pomoMiniAc() {
+  pomoMiniGoster(false);
+  $("#pomoPanel")?.classList.add("open");
+}
+function bindPomoMini() {
+  const mini = $("#pomoMini");
+  if (!mini) return;
+  let sx = 0, sy = 0, ox = 0, oy = 0, tasindi = false;
+
+  mini.addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;      // ⏸ / ✕ kendi işini yapsın
+    const r = mini.getBoundingClientRect();
+    sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top; tasindi = false;
+    mini.setPointerCapture(e.pointerId);
+    mini.classList.add("tasiniyor");
+  });
+  mini.addEventListener("pointermove", e => {
+    if (!mini.hasPointerCapture?.(e.pointerId)) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!tasindi && Math.hypot(dx, dy) < 4) return;   // titremeyi tıklama say
+    tasindi = true;
+    e.preventDefault();
+    pomoMiniYerlestir(ox + dx, oy + dy);
+  });
+  const bitir = e => {
+    if (!mini.hasPointerCapture?.(e.pointerId)) return;
+    mini.releasePointerCapture(e.pointerId);
+    mini.classList.remove("tasiniyor");
+    if (!tasindi) pomoMiniAc();                       // sürüklenmediyse: paneli aç
+  };
+  mini.addEventListener("pointerup", bitir);
+  mini.addEventListener("pointercancel", bitir);
+  addEventListener("resize", () => pomoMiniYerlestir());
 }
 function pomoHTML() {
   return `
@@ -1030,6 +1287,17 @@ function pomoHTML() {
     </div>
   </div>`;
 }
+/* Mini kutu topbar'a değil gövdeye asılır: sayfa içinde serbestçe taşınabilsin */
+function pomoMiniHTML() {
+  return `
+  <div id="pomoMini" class="pomo-mini" hidden title="Sürükleyerek taşı · tıklayınca panel açılır">
+    <span class="pomo-mini-grip" aria-hidden="true">⠿</span>
+    <span id="pomoMiniMode" class="pomo-mini-mode">ODAK</span>
+    <span id="pomoMiniTime" class="pomo-mini-time">25:00</span>
+    <button id="pomoMiniBtn" onclick="pomoStartPause()" title="Duraklat" aria-label="Duraklat">⏸</button>
+    <button class="pomo-mini-x" onclick="pomoReset()" title="Bitir" aria-label="Bitir">✕</button>
+  </div>`;
+}
 function mountPomodoro() {
   const nav = document.querySelector(".nav-actions");
   if (!nav) return;
@@ -1037,6 +1305,8 @@ function mountPomodoro() {
   holder.className = "pomo-holder";
   holder.innerHTML = pomoHTML();
   nav.prepend(holder);
+  document.body.insertAdjacentHTML("beforeend", pomoMiniHTML());
+  bindPomoMini();
 }
 
 /* ============================================================

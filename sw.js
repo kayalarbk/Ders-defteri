@@ -4,7 +4,7 @@
    Sürüm değişince eski cache'ler otomatik silinir.
    ============================================================ */
 
-const CACHE_VERSION = "dd-v2";
+const CACHE_VERSION = "dd-v3";
 const CACHE_STATIC  = CACHE_VERSION + "-static";   // uygulama dosyaları
 const CACHE_CDN     = CACHE_VERSION + "-cdn";      // font + MathJax (harici)
 
@@ -24,8 +24,7 @@ const PRECACHE = [
   "./data/EE3014.js",
   "./data/EE3016.js",
   "./data/STAT2056.js",
-  "./data/MATH2055.js",
-  "./data/MSE2051.js"
+  "./data/MATH2055.js"
 ];
 
 /* Offline çalışması için önbelleğe alınan harici kaynaklar */

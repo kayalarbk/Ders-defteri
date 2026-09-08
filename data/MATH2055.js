@@ -277,7 +277,8 @@ window.DERSLER["MATH2055"] = {
   dokumanlar: [],
   videolar: [
     { baslik: "TrevTutor — Discrete Math (Tam Kurs Playlist)", playlist: "PLDDGPdw7e6Ag1EIznZ-m-qXu4XX3A0cIz" },
-    { baslik: "Kimberly Brehm — Discrete Math I (Tam Kurs Playlist)", playlist: "PLl-gb0E4MII28GykmtuBXNUNoej-vY5Rz" }
+    { baslik: "SawFin Mathematics — Discrete Math I (Tam Kurs Playlist)", playlist: "PLl-gb0E4MII28GykmtuBXNUNoej-vY5Rz" },
+    { baslik: "MIT 6.042J — Mathematics for Computer Science (Tam Kurs Playlist)", playlist: "PLUl4u3cNGP60UlabZBeeqOuoLuj_KNphQ" }
   ],
   linkler: [
     { ad: "TrevTutor", url: "https://www.trevtutor.com/", aciklama: "Konu anlatımı + çözümlü örnekler" },

@@ -54,7 +54,10 @@ window.DERSLER["EE3014"] = {
   galeri: [],
   dokumanlar: [],
   videolar: [
-    { baslik: "Electrical Machines (Tam Kurs Playlist)", playlist: "PLuUdFsbOK_8qVROrfl2M2WSV2xAz-ABVU" }
+    { baslik: "Electrical Machines (Tam Kurs Playlist)", playlist: "PLuUdFsbOK_8qVROrfl2M2WSV2xAz-ABVU" },
+    { baslik: "NPTEL — Electrical Machines-1 (Trafo + DC Makineler, Tam Kurs)", playlist: "PLSYTQDtMTw0LGnOMI_lr6y_Q38V6RvNWr" },
+    { baslik: "3 Fazlı Asenkron Motor Nasıl Çalışır? (animasyon)", youtube: "LtJoJBUSe28" },
+    { baslik: "AC Asenkron Motor: eşdeğer devre ve tork–hız eğrisi", youtube: "_JWmXB7edYY" }
   ],
   linkler: [
     { ad: "Electrical4U — Electric Machines", url: "https://www.electrical4u.com/electric-machines/", aciklama: "Transformatör ve makine konu anlatımları" },

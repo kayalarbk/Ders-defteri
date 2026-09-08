@@ -22,6 +22,36 @@ kurulabilen bir PWA'dır ve çevrimdışı çalışır.
 
 ## Tamamlanan İşler (en yeni üstte)
 
+### 2026-09-09 — Dönem takvimi, çalışma programı, MSE2051'in kaldırılması
+
+Yeni dönem (2026 Güz) hazırlığı: uygulama artık takvim farkında.
+
+- **Akademik takvim** (`data/_ayarlar.js` → `TAKVIM`): dönem başı 28 Eyl 2026, vize 16–22 Kas,
+  final 4–14 Oca 2027. Ana sayfada geri sayım kartı: içinde bulunulan faz (ders / vize / final),
+  hedefe kalan gün, kaçıncı ders haftası ve dönem çubuğu (vize + final blokları işaretli,
+  bugünün konumu imleçle). Yeni döneme geçerken **sadece bu blok** güncellenir.
+- **Ders bazlı çalışma programı** (ders sayfasında yeni "00 Çalışma Programı" bölümü).
+  Elle plan girilmez: takvim + o dersin konu listesinden otomatik üretilir. Konuların ilk yarısı
+  vizeye kadarki haftalara, ikinci yarısı vize–final arasına eşit dağıtılır; her iki bloğun
+  son haftası sınav tekrarına ayrılır. İçinde bulunulan hafta vurgulanır, tamamlanan konular ✓,
+  konu etiketine tıklayınca ilgili akordeon açılır.
+- **MSE2051 (Materials Science) kaldırıldı** — ders verildi. `data/MSE2051.js`, script etiketleri,
+  `DERS_SIRASI` ve `sw.js` PRECACHE kaydı temizlendi. Toplam içerik 96→79 konu, 136→111 formül,
+  62→51 soru.
+- **Pomodoro artık çalışırken küçülüyor** ve sayfa içinde sürüklenebiliyor. Başlat'a basınca panel
+  kapanıp sağ altta bir kapsül beliriyor (mod + süre + duraklat + bitir); pointer olaylarıyla
+  taşınıyor, konum `dd-pomo-pos`'ta saklanıyor ve pencere küçülünce ekrana geri sığdırılıyor.
+  Sürüklenmeden tıklanınca tam panel geri açılıyor.
+- **Formül kartlarındaki kaydırma çubuğu sorunu giderildi.** Karta sığmayan MathJax formülleri
+  çubuk çıkarıyor (ve yatayda kırpılıyordu); artık SVG karta göre oransal küçültülüyor —
+  formülün tamamı görünüyor, çubuk yok. Kart yüksekliği 175→190px.
+- **Video kaynakları kontrol edildi ve güncellendi.** 14 bağlantının tamamı canlı (oEmbed ile
+  doğrulandı). MATH2055'teki "Kimberly Brehm" kanalı **SawFin Mathematics** olarak yeniden
+  adlandırılmış, etiket düzeltildi. Tek kaynaklı derslere ekleme yapıldı: EE3014'e NPTEL
+  Electrical Machines-1 kursu + 2 asenkron motor videosu, EE3016'ya MIT 8.02 (Walter Lewin),
+  MATH2055'e MIT 6.042J.
+- `sw.js` → `CACHE_VERSION = "dd-v3"`.
+
 ### 2026-07-25 — Öğrenci verimliliği revizyonu
 
 Site "okunan bir arşiv"di; aktif çalışma araçlarına dönüştürüldü. Yapılan test ve bulgular
@@ -97,12 +127,14 @@ Ders-defteri/
 │                       #   · IndexedDB (foto/doküman) + görsel küçültme
 │                       #   · ilerleme takibi (localStorage, debounce'lu)
 │                       #   · ana sayfa & ders sayfası render fonksiyonları
+│                       #   · akademik takvim: geri sayım + dönem çubuğu (takvimDurum/renderTakvim)
+│                       #   · ders bazlı haftalık çalışma programı (dersProgrami/programBlock)
 │                       #   · ana sayfa özeti + "kaldığın yer" (renderOzet)
 │                       #   · global arama (aramaIndex / aramaYap) + ?git= hedefe gitme
 │                       #   · soru havuzu: çözümü göster + çözdüm/takıldım + filtreler
 │                       #   · formül çalışma modu (karıştır, biliyorum/tekrar, tur skoru)
 │                       #   · galeri modalı / lightbox, akordeon
-│                       #   · pomodoro, yedekleme (JSON dışa/içe aktarma)
+│                       #   · pomodoro (+ çalışırken sürüklenebilir mini kutu), yedekleme
 │                       #   · service worker kaydı
 ├── style.css           # Tüm stiller; CSS değişkenleriyle koyu/açık tema + safe area
 ├── manifest.json       # PWA manifesti (standalone, ikonlar, tema renkleri)
@@ -112,14 +144,13 @@ Ders-defteri/
 ├── .nojekyll           # GitHub Pages'in Jekyll işlemesini kapatır
 ├── PROGRESS.md         # Bu dosya — proje hafızası
 └── data/
-    ├── _ayarlar.js     # DERS_SIRASI (kart sırası) + HIZLI_LINKLER — derslerden SONRA yüklenir
+    ├── _ayarlar.js     # DERS_SIRASI + HIZLI_LINKLER + TAKVIM — derslerden SONRA yüklenir
     ├── EE3061.js       # Signals and Systems
     ├── EE3012.js       # Electronics II
     ├── EE3014.js       # Energy Conversion
     ├── EE3016.js       # Fundamentals of Electromagnetics
     ├── STAT2056.js     # Probability and Random Variables
-    ├── MATH2055.js     # Discrete Mathematics
-    └── MSE2051.js      # Materials Science
+    └── MATH2055.js     # Discrete Mathematics
 ```
 
 Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
@@ -140,6 +171,10 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 | CDN kaynakları (Google Fonts, MathJax) da önbelleğe alınıyor | Aksi halde uçak modunda font ve formüller yüklenmiyor | 2026-07-23 |
 | Yedekleme JSON'unda medya base64 (data URL) olarak gömülü | Tek dosya = tek yedek; iOS'ta paylaş/İCloud'a kaydet ile kolay saklanıyor. "Sadece ilerleme" seçeneği büyük dosya istemeyenler için | 2026-07-23 |
 | `apple-mobile-web-app-status-bar-style: black-translucent` + `viewport-fit=cover` | Tam ekran his; buna karşılık safe-area padding'leri zorunlu hale geldi | 2026-07-23 |
+| Çalışma programı veriye değil, takvim + konu listesine dayanıyor | 6 ders için elle haftalık plan girmek ve her dönem güncellemek sürdürülemez; konu eklenince program kendiliğinden kayıyor | 2026-09-09 |
+| Takvim tek yerde (`TAKVIM`), tarihler `"YYYY-MM-DD"` ve yerel gün başlangıcı olarak çözülüyor | `new Date("2026-09-28")` UTC kabul edilip TR saatinde bir gün kayıyordu | 2026-09-09 |
+| Uzun formüller kaydırılmak yerine SVG'si oransal küçültülüyor | Kaydırma çubuğu hem çirkin hem de kartta formülün devamı olduğunu belli etmiyordu; kart küçük olduğu için ölçekleme okunabilirliği bozmuyor | 2026-09-09 |
+| Mini pomodoro `position: fixed` + pointer events, konum localStorage'da | Odaktayken panelin ekranı kaplaması ve içeriğin üstünü kapatması engellendi; kullanıcı kutuyu istediği köşeye taşıyabiliyor | 2026-09-09 |
 | MathJax SVG çıktısı (tex-svg) | Tema değişiminde ve akordeon yüksekliği ölçümünde daha kararlı | 2026-07-16 |
 | Çözüm soruyla birlikte değil, butonla açılıyor | Cevabı görerek "anladım" sanmak en yaygın çalışma hatası; önce deneme zorunlu hale getirildi | 2026-07-25 |
 | Soru başlıkları veriye elle girilmedi, `duzMetin()` ile soru metninden türetiliyor | 62 sorunun tamamına elle başlık girmek gerekmesin; veri şeması değişmedi, mevcut ders dosyaları olduğu gibi çalışıyor | 2026-07-25 |

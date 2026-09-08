@@ -210,7 +210,8 @@ window.DERSLER["EE3016"] = {
   galeri: [],
   dokumanlar: [],
   videolar: [
-    { baslik: "Engineering Electromagnetics — Hayt & Buck (Tam Kurs Playlist)", playlist: "PL5Lcr54DawvSCz7_u_2JX_0_Atv4u-9PD" }
+    { baslik: "Engineering Electromagnetics — Hayt & Buck (Tam Kurs Playlist)", playlist: "PL5Lcr54DawvSCz7_u_2JX_0_Atv4u-9PD" },
+    { baslik: "MIT 8.02 — Elektrik ve Manyetizma, Walter Lewin (Tam Kurs Playlist)", playlist: "PLUdYlQf0_sSsfcNOPSNPQKHDhSjTJATPu" }
   ],
   linkler: [
     { ad: "PhET Simülasyonları", url: "https://phet.colorado.edu/en/simulations/filter?subjects=electricity-magnets-and-circuits", aciklama: "İnteraktif E&M simülasyonları" },

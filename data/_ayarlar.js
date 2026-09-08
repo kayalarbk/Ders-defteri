@@ -9,7 +9,7 @@
    ============================================================ */
 
 /* Ana sayfadaki kart sırası */
-const DERS_SIRASI = ["EE3061", "EE3012", "EE3014", "EE3016", "STAT2056", "MATH2055", "MSE2051"];
+const DERS_SIRASI = ["EE3061", "EE3012", "EE3014", "EE3016", "STAT2056", "MATH2055"];
 
 /* Öğrencinin sık kullanacağı siteler (ana sayfa) */
 const HIZLI_LINKLER = [
@@ -24,3 +24,18 @@ const HIZLI_LINKLER = [
   { ad: "Overleaf",       url: "https://www.overleaf.com/",                ikon: "✍️", aciklama: "LaTeX ile rapor/ödev yazımı" },
   { ad: "Hyperphysics",   url: "http://hyperphysics.phy-astr.gsu.edu/",    ikon: "🧲", aciklama: "Hızlı fizik başvuru haritası" }
 ];
+
+/* ============================================================
+   AKADEMİK TAKVİM
+   ------------------------------------------------------------
+   Ana sayfadaki geri sayım ve dönem çubuğu bu tarihlerden üretilir.
+   Tarih formatı: "YYYY-MM-DD" (yerel saatle, gün başlangıcı).
+   Aralıklar kapsayıcıdır: bitis günü de o döneme dahildir.
+   Yeni döneme geçerken sadece bu bloğu güncellemek yeterli.
+   ============================================================ */
+const TAKVIM = {
+  ad: "2026 Güz",
+  baslangic: "2026-09-28",                        // derslerin başlangıcı
+  vize:  { bas: "2026-11-16", bit: "2026-11-22" }, // vize haftası
+  final: { bas: "2027-01-04", bit: "2027-01-14" }  // final dönemi
+};

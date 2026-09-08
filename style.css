@@ -309,6 +309,43 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 }
 
 /* ============================================================
+   ÇALIŞMA PROGRAMI (ders sayfası)
+   ============================================================ */
+.pr-ozet { color: var(--muted); margin-bottom: 14px; max-width: 640px; }
+.pr-ozet b { color: var(--text); }
+.pr-liste { list-style: none; display: grid; gap: 8px; }
+.pr-satir {
+  display: grid; grid-template-columns: 190px 1fr; gap: 14px; align-items: start;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface); border-left: 3px solid var(--border);
+}
+.pr-sol { display: flex; flex-direction: column; gap: 3px; }
+.pr-no { font-family: var(--font-display); font-weight: 600; font-size: .95rem; }
+.pr-tarih { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+.pr-simdi {
+  font-family: var(--font-mono); font-size: .62rem; letter-spacing: .12em;
+  color: var(--accent); margin-top: 2px;
+}
+.pr-konular { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.pr-konu {
+  font-size: .82rem; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); text-decoration: none;
+}
+.pr-konu:hover { border-color: var(--accent); color: var(--accent); }
+.pr-konu.ok { border-color: var(--accent); color: var(--muted); }
+.pr-konu.ok::before { content: "✓ "; color: var(--accent); }
+.pr-bos { font-size: .82rem; color: var(--muted); font-style: italic; }
+
+.pr-satir.aktif { border-left-color: var(--accent); background: var(--accent-dim); }
+.pr-satir.gecti:not(.aktif) { opacity: .62; }
+.pr-satir.bitti .pr-no::after { content: " ✓"; color: var(--accent); }
+.pr-tekrar { border-left-color: #FBBF24; }
+.pr-tekrar .pr-no { color: #FBBF24; }
+.pr-sinav { border-left-color: #F87171; background: var(--surface-2); }
+.pr-sinav .pr-no { color: #F87171; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .1em; }
+
+/* ============================================================
    FORMÜL KARTLARI (flip)
    ============================================================ */
 .cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
@@ -317,7 +354,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   cursor: pointer; font-family: inherit; color: inherit; text-align: inherit;
 }
 .flip-inner {
-  position: relative; width: 100%; height: 175px;
+  position: relative; width: 100%; height: 190px;
   transition: transform .5s; transform-style: preserve-3d;
 }
 .flip.flipped .flip-inner { transform: rotateY(180deg); }
@@ -325,8 +362,18 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   position: absolute; inset: 0; backface-visibility: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 8px; padding: 16px; border: 1px solid var(--border); border-radius: 14px;
-  text-align: center; overflow: auto;
+  text-align: center;
+  /* Uzun formüller: dikeyde kaydırılır, yatayda formülün kendi kutusu kaydırır.
+     Kalın sistem çubuğu köşe yuvarlaklığını bozuyordu — ince ve temaya uygun. */
+  overflow: hidden auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
 }
+.flip-face::-webkit-scrollbar { width: 5px; }
+.flip-face::-webkit-scrollbar-track { background: transparent; }
+.flip-face::-webkit-scrollbar-thumb {
+  background: var(--border); border-radius: 4px;
+}
+.flip-face::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 .flip-front { background: var(--surface); }
 .flip-front strong { font-family: var(--font-display); font-size: 1.15rem; }
 .flip-tag {
@@ -338,7 +385,17 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   background: var(--surface-2); transform: rotateY(180deg);
   border-color: var(--accent);
 }
-.flip-formula { font-size: 1.05rem; }
+/* flex kolonda align-items:center öğeyi max-content genişliğinde bırakıyor,
+   bu yüzden yüzdelerin çözülebilmesi için tam genişlik şart */
+.flip-formula { font-size: 1.05rem; width: 100%; max-width: 100%; }
+/* Karta sığmayan uzun formüller kaydırma çubuğu çıkarmak yerine küçültülür:
+   MathJax SVG'si oransal ölçeklenince kart temiz kalıyor, formül tam görünüyor. */
+/* svg'ye doğrudan max-width vermek işe yaramıyor: mjx-container inline-block
+   olduğu için yüzde, svg'nin kendi genişliğine göre çözülüyor. Kabı bloklayıp
+   tam genişlik verince svg gerçekten karta göre ölçekleniyor. */
+/* MathJax kabın display/margin'ini satır içi stille yazıyor — bastırmak şart */
+.flip-formula mjx-container { display: block !important; width: 100%; margin: 0 !important; }
+.flip-formula mjx-container > svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
 .flip-desc { font-size: .8rem; color: var(--muted); margin-top: 4px; }
 
 /* ============================================================
@@ -579,6 +636,34 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 }
 .pomo-presets button:hover { color: var(--accent); border-color: var(--accent); }
 
+/* ---------- Mini pomodoro (çalışırken; sürüklenebilir) ---------- */
+.pomo-mini {
+  position: fixed; z-index: 60; left: auto; top: auto; right: 18px; bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--accent);
+  box-shadow: var(--shadow); cursor: grab; user-select: none; touch-action: none;
+}
+.pomo-mini[hidden] { display: none; }
+.pomo-mini.tasiniyor { cursor: grabbing; opacity: .92; }
+.pomo-mini.mola { border-color: #FBBF24; }
+.pomo-mini-grip { color: var(--muted); font-size: .9rem; letter-spacing: -2px; }
+.pomo-mini-mode {
+  font-family: var(--font-mono); font-size: .6rem; letter-spacing: .12em; color: var(--accent);
+}
+.pomo-mini.mola .pomo-mini-mode { color: #FBBF24; }
+.pomo-mini-time {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.pomo-mini button {
+  border: 0; background: var(--surface-2); color: var(--text);
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .78rem;
+  display: grid; place-items: center;
+}
+.pomo-mini button:hover { background: var(--accent-dim); color: var(--accent); }
+.pomo-mini-x:hover { background: #e5484d22; color: #e5484d; }
+
 /* ============================================================
    ARAMA (ana sayfa)
    ============================================================ */
@@ -628,6 +713,45 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 /* ============================================================
    GENEL DURUM ÖZETİ + KALDIĞIN YER (ana sayfa)
    ============================================================ */
+/* ---------- Akademik takvim (ana sayfa) ---------- */
+.takvim { margin: 30px 0 0; }
+.tv-card {
+  border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
+  background: var(--surface); display: grid; gap: 13px;
+  border-left: 3px solid var(--tv-renk, var(--accent));
+}
+.tv-vize  { --tv-renk: #F87171; }
+.tv-final { --tv-renk: #F87171; }
+.tv-ders2 { --tv-renk: #FBBF24; }
+.tv-bitti { --tv-renk: var(--muted); }
+.tv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tv-now { display: grid; gap: 3px; }
+.tv-etiket {
+  font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em;
+  color: var(--tv-renk, var(--accent));
+}
+.tv-mesaj { font-family: var(--font-display); font-size: 1.12rem; font-weight: 600; }
+.tv-donem { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+
+.tv-bar {
+  position: relative; height: 10px; border-radius: 6px;
+  background: var(--border); overflow: hidden;
+}
+.tv-gecen { position: absolute; inset: 0 auto 0 0; background: var(--accent); opacity: .35; }
+.tv-seg { position: absolute; top: 0; bottom: 0; }
+.tv-seg-vize  { background: #FBBF24; }
+.tv-seg-final { background: #F87171; }
+.tv-imlec {
+  position: absolute; top: -3px; bottom: -3px; width: 2px;
+  background: var(--text); transform: translateX(-1px);
+}
+.tv-kilo { display: flex; gap: 18px; flex-wrap: wrap; }
+.tv-kilo-it {
+  font-family: var(--font-mono); font-size: .74rem; color: var(--text);
+  display: flex; gap: 6px;
+}
+.tv-kilo-it b { color: var(--muted); font-weight: 500; letter-spacing: .06em; }
+
 .ozet { margin: 34px 0 8px; display: grid; gap: 14px; }
 .ozet-stats { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .ozet-stat {
@@ -768,13 +892,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 .flash-ad { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.3; }
 .flash-cevap { width: 100%; }
 .flash-cevap[hidden] { display: none; }
-.flash-cevap .flip-formula {
-  font-size: 1.15rem; max-width: 100%; overflow: auto;
-  /* MathJax SVG satır kutusunu birkaç piksel aşıp gereksiz kaydırma
-     çubuğu çıkarıyor — çubuğu gizle, dokunmayla kaydırma yine çalışır */
-  scrollbar-width: none;
-}
-.flash-cevap .flip-formula::-webkit-scrollbar { display: none; }
+.flash-cevap .flip-formula { font-size: 1.15rem; max-width: 100%; }
 .flash-show {
   font-family: var(--font-body); font-weight: 600; font-size: .9rem;
   background: var(--surface-2); color: var(--text);
@@ -817,6 +935,10 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 /* ---------- Mobil ---------- */
 @media (max-width: 600px) {
   .search-box { margin-top: 20px; }
+  .takvim { margin: 22px 0 0; }
+  .tv-mesaj { font-size: 1rem; }
+  .tv-kilo { gap: 12px; }
+  .pr-satir { grid-template-columns: 1fr; gap: 8px; }
   .ozet { margin: 24px 0 4px; }
   .ozet-stats { grid-template-columns: 1fr 1fr; }
   .ozet-stats .ozet-stat:last-child { grid-column: 1 / -1; }
