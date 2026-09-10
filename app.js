@@ -7,22 +7,29 @@
    - Tema + MathJax
    ============================================================ */
 
-/* ---------- Tema ---------- */
+/* ---------- Tema ----------
+   Varsayılan AÇIK tema (kağıt); kullanıcı seçimi localStorage'da,
+   hiç seçim yapılmadıysa işletim sistemi tercihi kullanılır. */
 (function initTheme() {
   const saved = localStorage.getItem("dd-theme");
-  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  const tema = saved || (window.matchMedia &&
+    matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", tema);
 })();
 function toggleTheme() {
   const el = document.documentElement;
-  const next = el.getAttribute("data-theme") === "light" ? "dark" : "light";
+  const next = el.getAttribute("data-theme") === "dark" ? "light" : "dark";
   el.setAttribute("data-theme", next);
   localStorage.setItem("dd-theme", next);
   setThemeBtnIcon();
 }
 function setThemeBtnIcon() {
   const btn = document.getElementById("themeBtn");
-  if (btn) btn.textContent =
-    document.documentElement.getAttribute("data-theme") === "light" ? "🌙" : "☀️";
+  if (!btn) return;
+  const koyu = document.documentElement.getAttribute("data-theme") === "dark";
+  btn.textContent = koyu ? "☀️" : "🌙";
+  btn.title = koyu ? "Açık temaya geç" : "Koyu temaya geç";
+  btn.setAttribute("aria-label", btn.title);
 }
 
 /* ---------- LaTeX ---------- */
@@ -45,15 +52,52 @@ const _TEX_SEMBOL = {
   Omega:"Ω", Delta:"Δ", Sigma:"Σ", Phi:"Φ", Gamma:"Γ",
   infty:"∞", int:"∫", sum:"Σ", prod:"Π", partial:"∂", nabla:"∇", sqrt:"√",
   le:"≤", ge:"≥", neq:"≠", approx:"≈", pm:"±", times:"×", cdot:"·",
-  to:"→", rightarrow:"→", leftrightarrow:"↔", in:"∈", forall:"∀", exists:"∃"
+  to:"→", rightarrow:"→", leftrightarrow:"↔", in:"∈", forall:"∀", exists:"∃",
+  equiv:"≡", propto:"∝", sim:"~", ll:"≪", gg:"≫", cup:"∪", cap:"∩",
+  subset:"⊂", subseteq:"⊆", setminus:"\\", emptyset:"∅", angle:"∠",
+  ldots:"…", cdots:"⋯", dots:"…", oint:"∮", iint:"∬", div:"÷", ast:"*",
+  circ:"∘", perp:"⊥", parallel:"∥", degree:"°", ohm:"Ω", varepsilon:"ε",
+  varphi:"φ", eta:"η", zeta:"ζ", kappa:"κ", nu:"ν", xi:"ξ", chi:"χ",
+  Lambda:"Λ", Theta:"Θ", Psi:"Ψ", Pi:"Π", mid:"|", langle:"⟨", rangle:"⟩"
 };
+/* Üs/alt indis için Unicode karşılıkları — "e^{-2t}" başlıkta
+   "e-2t" olup anlamını yitiriyordu. */
+const _UST = { "0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹",
+  "+":"⁺","-":"⁻","n":"ⁿ","i":"ⁱ","t":"ᵗ","k":"ᵏ","x":"ˣ","j":"ʲ","a":"ᵃ","b":"ᵇ","m":"ᵐ" };
+const _ALT = { "0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉",
+  "+":"₊","-":"₋","n":"ₙ","i":"ᵢ","k":"ₖ","x":"ₓ","a":"ₐ","m":"ₘ","t":"ₜ" };
+/* Sembolü olmayan ama adı okunabilir olan komutlar: silinince
+   "\cos(2\pi t)" başlıkta " (2π t)" gibi anlamsız kalıyordu. */
+const _TEX_AD = /^(sin|cos|tan|cot|sec|csc|log|ln|exp|lim|max|min|arg|det|dim|gcd|lcm|mod|bmod|pmod|sinh|cosh|tanh|Re|Im)$/;
+
+/* Karakterleri üst/alt indise çevirir; karşılığı olmayan varsa
+   okunabilirlik için "^(...)" biçimine düşer. */
+function _kucult(t, tablo) {
+  t = String(t);
+  if (t && [...t].every(c => tablo[c])) return [...t].map(c => tablo[c]).join("");
+  const im = tablo === _UST ? "^" : "_";
+  return t.length > 1 ? im + "(" + t + ")" : im + t;
+}
+
 function duzMetin(html, max = 90) {
   _metinKutu.innerHTML = String(html || "");
   let s = (_metinKutu.textContent || "")
     .replace(/\\[()[\]]/g, " ")                            // \( \) \[ \]
     .replace(/\$\$?/g, " ")                                // $ ve $$
-    .replace(/\\([a-zA-Z]+)/g, (m, c) => _TEX_SEMBOL[c] || " ")
-    .replace(/[{}^_&\\]/g, "")
+    // Sadece dizgi biçimi veren sarmalayıcılar: içerik kalsın, komut gitsin
+    // ("1\,\text{mA}" başlıkta "1,textmA" oluyordu)
+    .replace(/\\(?:text|mathrm|mathbf|mathit|operatorname|hbox|mbox)\s*\{([^{}]*)\}/g, "$1")
+    .replace(/\\[,;!:> ]|\\q?quad/g, " ")                  // ince boşluk komutları
+    // \frac{a}{b} → (a)/(b) — kesirler başlıkta tamamen kayboluyordu
+    .replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "($1)/($2)")
+    .replace(/\\sqrt\s*\{([^{}]*)\}/g, "√($1)")
+    .replace(/\\(?:hat|bar|vec|tilde|dot)\s*\{([^{}]*)\}/g, "$1")
+    .replace(/\\([a-zA-Z]+)/g, (m, c) =>
+      _TEX_SEMBOL[c] || (_TEX_AD.test(c) ? c : " "))
+    // üs ve alt indis: ^{-2t} ve ^2 biçimlerinin ikisi de
+    .replace(/\^\{([^{}]*)\}|\^(\w)/g, (m, a, b) => _kucult(a !== undefined ? a : b, _UST))
+    .replace(/_\{([^{}]*)\}|_(\w)/g,   (m, a, b) => _kucult(a !== undefined ? a : b, _ALT))
+    .replace(/[{}&\\]/g, "")
     .replace(/\s+/g, " ")
     .replace(/\s+([),.;:])/g, "$1")                        // "X(j )" → "X(j)"
     .replace(/([(])\s+/g, "$1")
@@ -180,6 +224,22 @@ function updateCourseProgress(kod) {
   const bar = $("#progFill"), label = $("#progLabel");
   if (bar) bar.style.width = pct + "%";
   if (label) label.textContent = `${done}/${total} konu tamamlandı · %${pct}`;
+
+  const yaz = (id, a, b) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = `${a}/${b}`;
+      el.parentElement.classList.toggle("tam", b > 0 && a === b);
+    }
+  };
+  const f = (d.formuller || []).length;
+  const sorular = (d.sorular || []).length;
+  const durum = getSoruDurum(kod);
+  const cozulen = Object.keys(durum).filter(k => durum[k] === "coz").length;
+  yaz("ilrKonu",   done, total);
+  yaz("ilrFormul", getFlashBilinen(kod).length, f);
+  yaz("ilrSoru",   cozulen, sorular);
+  notSayacGuncelle(kod);
 }
 
 /* ============================================================
@@ -195,8 +255,15 @@ function renderHome() {
     const total = (d.konular || []).length;
     const done = getProgress(kod).filter(i => i < total).length;
     const pct = total ? Math.round(done / total * 100) : 0;
+    /* Kartta yalnızca konu ilerlemesi vardı; formül ve soru çalışması
+       ana sayfada hiç görünmüyordu. */
+    const fT = (d.formuller || []).length, fD = getFlashBilinen(kod).length;
+    const sT = (d.sorular || []).length;
+    const durum = getSoruDurum(kod);
+    const sD = Object.keys(durum).filter(k => durum[k] === "coz").length;
+    const notN = notSayaci(kod);
     return `
-      <a class="card" style="--card-color:${d.renk}" href="course.html?ders=${kod}">
+      <a class="card${pct === 100 ? " bitti" : ""}" style="--card-color:${d.renk}" href="course.html?ders=${kod}">
         <span class="code">${kod}</span>
         <h3>${esc(d.ad)}</h3>
         <div class="meta">${esc(d.donem)}</div>
@@ -204,8 +271,14 @@ function renderHome() {
         <div class="card-prog" title="Konu ilerlemesi">
           <div class="card-prog-fill" style="width:${pct}%"></div>
         </div>
+        <div class="card-mini">
+          <span title="tamamlanan konu">📖 ${done}/${total}</span>
+          <span title="bildiğin formül">🎴 ${fD}/${fT}</span>
+          <span title="çözdüğün soru">✎ ${sD}/${sT}</span>
+          ${notN ? `<span title="kendi notun olan konu sayısı">📝 ${notN}</span>` : ""}
+        </div>
         <div class="card-prog-row">
-          <span class="card-prog-label">${done}/${total} konu</span>
+          <span class="card-prog-label">${pct === 100 ? "konular tamam" : `%${pct} tamamlandı`}</span>
           <span class="go">Derse git →</span>
         </div>
       </a>`;
@@ -516,13 +589,40 @@ function gotoHedef() {
 
 /* ----- Başlık ----- */
 function headBlock(kod, d) {
+  /* Uzun ders özeti ilk ekranı dolduruyordu; iki satırda kırpılıp
+     "devamı" ile açılıyor. */
   return `<header class="course-head" style="--accent:${d.renk}">
     <span class="code">${kod} · ${esc(d.donem)}</span>
     <h1>${esc(d.ad)}</h1>
-    <p class="ozet">${esc(d.ozet)}</p>
+    <p class="ozet" id="dersOzet">${esc(d.ozet)}</p>
+    <button class="ozet-ac" type="button" id="ozetAc"
+      onclick="ozetToggle(this)">kapsamın tamamını gör</button>
     <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
     <p class="prog-label" id="progLabel"></p>
+    ${ilerlemeUcluBlock(kod, d)}
   </header>`;
+}
+
+function ozetToggle(btn) {
+  const p = document.getElementById("dersOzet");
+  if (!p) return;
+  const acik = p.classList.toggle("acik");
+  btn.textContent = acik ? "özeti kısalt" : "kapsamın tamamını gör";
+}
+
+/* Ders başında tek bir konu çubuğu vardı; formül ve soru çalışması
+   hiç görünmüyordu — öğrenci "bu derste ne kadar hazırım" sorusunun
+   cevabını tek bakışta göremiyordu. */
+function ilerlemeUcluBlock(kod, d) {
+  const kutu = (id, ad, link) =>
+    `<a class="ilr" href="#${link}"><span class="ilr-deger" id="${id}">–</span>
+       <span class="ilr-ad">${ad}</span></a>`;
+  return `<div class="ilr-satir">
+    ${kutu("ilrKonu",   "konu",   "sec-konular")}
+    ${kutu("ilrFormul", "formül", "sec-formuller")}
+    ${kutu("ilrSoru",   "soru",   "sec-sorular")}
+    <span class="ilr-not" id="notSayac">henüz not yok</span>
+  </div>`;
 }
 
 /* ============================================================
@@ -647,11 +747,72 @@ function konularBlock(kod, d) {
           <span class="chev">▾</span>
         </button>
       </div>
-      <div class="acc-body"><div class="inner topic-content">${k.icerik}</div></div>
+      <div class="acc-body"><div class="inner topic-content">
+        ${k.icerik}
+        ${notBlock(kod, i)}
+      </div></div>
     </div>`).join("");
   return `<section class="section" id="sec-konular"><h2><span class="idx">01</span> Konu Anlatımı</h2>
-    <p class="section-hint">Konuya tıklayınca içerik açılır · soldaki ✓ ile çalıştığın konuyu işaretle</p>
+    <p class="section-hint">Konuya tıklayınca içerik açılır · soldaki ✓ ile çalıştığın konuyu işaretle ·
+       her konunun altına kendi notunu yazabilirsin</p>
     ${items || emptyMsg("Henüz konu eklenmemiş.")}</section>`;
+}
+
+/* ============================================================
+   KONU NOTLARI
+   Öğrencinin kendi cümlesiyle yazdığı not, konuyu anlatan metinden
+   daha kalıcı oluyor; ayrıca "burayı anlamadım" işareti sınav öncesi
+   nereye döneceğini söylüyor. Notlar ders bazlı tek bir localStorage
+   kaydında ({konuIndex: metin}) tutulur — yedekleme `dd-*` anahtarlarını
+   zaten topladığı için dışa aktarmaya kendiliğinden dahil oluyor.
+   ============================================================ */
+function getNotlar(kod) {
+  try { return JSON.parse(localStorage.getItem("dd-not-" + kod)) || {}; }
+  catch { return {}; }
+}
+function notBlock(kod, i) {
+  const metin = getNotlar(kod)[i] || "";
+  return `<div class="not-kutu${metin ? " dolu" : ""}" id="not-${i}">
+    <label class="not-baslik" for="notta-${kod}-${i}">
+      <span class="not-ikon">✎</span> Kendi notum
+      <span class="not-durum" id="notdurum-${kod}-${i}">${metin ? "kaydedildi" : ""}</span>
+    </label>
+    <textarea id="notta-${kod}-${i}" class="not-alan" rows="2"
+      placeholder="Anlamadığın yeri, hocanın vurguladığı ayrıntıyı ya da kendi özetini buraya yaz…"
+      oninput="notYaz('${kod}',${i},this)">${esc(metin)}</textarea>
+  </div>`;
+}
+
+function notYaz(kod, i, ta) {
+  const obj = getNotlar(kod);
+  const v = ta.value.trim();
+  if (v) obj[i] = v; else delete obj[i];
+  /* Anında oku: getNotlar debounce'lu yazımdan önce çağrılabiliyor */
+  try { localStorage.setItem("dd-not-" + kod, JSON.stringify(obj)); } catch (e) {
+    console.warn("not kaydedilemedi:", e);
+  }
+  const kutu = ta.closest(".not-kutu");
+  if (kutu) kutu.classList.toggle("dolu", !!v);
+  const dur = document.getElementById(`notdurum-${kod}-${i}`);
+  if (dur) {
+    dur.textContent = v ? "kaydedildi" : "";
+    dur.classList.add("yanip");
+    setTimeout(() => dur.classList.remove("yanip"), 600);
+  }
+  /* Textarea büyüyünce akordeon yüksekliği yetmiyordu */
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + "px";
+  const body = ta.closest(".acc-body");
+  if (body) olcAkordeon(body);
+  notSayacGuncelle(kod);
+}
+
+function notSayaci(kod) { return Object.keys(getNotlar(kod)).length; }
+function notSayacGuncelle(kod) {
+  const el = document.getElementById("notSayac");
+  if (!el) return;
+  const n = notSayaci(kod);
+  el.textContent = n ? `${n} konuda notun var` : "henüz not yok";
 }
 
 /* ----- 02 Formül Kartları (flip + çalışma modu) ----- */
@@ -789,6 +950,7 @@ function flashCevapla(biliyor) {
   if (biliyor) { if (!b.includes(gi)) b.push(gi); }
   else b = b.filter(i => i !== gi);
   setFlashBilinen(kod, b);
+  updateCourseProgress(kod);
   FLASH.i++;
   paintFlash();
 }
@@ -951,6 +1113,7 @@ function setSoruDurum(kod, i, durum, btn) {
   if (cur[i]) item.classList.add("q-" + cur[i]);
   item.dataset.durum = cur[i] || "";
   updateSoruOzet(kod);
+  updateCourseProgress(kod);
 }
 function updateSoruOzet(kod) {
   const el = $("#qOzet");
@@ -1368,6 +1531,7 @@ async function exportBackup(medyaDahil = true) {
     a.download = `ders-defteri-yedek-${g}${medyaDahil ? "" : "-sadece-ilerleme"}.json`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
+    yedekTarihiYaz();
   } catch (err) {
     console.error(err);
     alert("Yedek oluşturulamadı: " + err);
@@ -1427,6 +1591,38 @@ function bkTogglePanel() {
   if (p.classList.contains("open")) bkUpdateInfo();
 }
 
+/* ---------- Yedek hatırlatıcısı ----------
+   Veri yalnızca bu tarayıcıda; iOS uzun süre açılmayan sitelerin
+   deposunu silebiliyor. Kendi notların da eklendikten sonra "yedek
+   almayı unutmak" en pahalı hata: 30 gün geçince 💾 düğmesi işaretlenir. */
+const YEDEK_GUN = 30;
+
+function yedekTarihiYaz() {
+  try { localStorage.setItem("dd-son-yedek", new Date().toISOString().slice(0, 10)); } catch {}
+  yedekUyariGuncelle();
+}
+function yedekGecenGun() {
+  const t = localStorage.getItem("dd-son-yedek");
+  if (!t) return null;                       // hiç yedek alınmamış
+  return Math.max(0, Math.round((tvBugun() - tvGun(t)) / GUN_MS));
+}
+function yedekUyariGuncelle() {
+  const btn = $("#bkBtn"); if (!btn) return;
+  const g = yedekGecenGun();
+  const eski = g === null || g >= YEDEK_GUN;
+  btn.classList.toggle("uyari", eski);
+  btn.title = g === null ? "Yedekleme — henüz hiç yedek almadın"
+            : eski ? `Yedekleme — son yedeğin ${g} gün önce`
+            : `Yedekleme — son yedek ${g} gün önce`;
+  const bilgi = $("#bkSon");
+  if (bilgi) {
+    bilgi.textContent = g === null ? "Henüz yedek almadın."
+      : g === 0 ? "Son yedeğini bugün aldın."
+      : `Son yedek: ${g} gün önce.`;
+    bilgi.classList.toggle("uyari", eski);
+  }
+}
+
 function backupHTML() {
   return `
   <button id="bkBtn" class="theme-toggle" onclick="bkTogglePanel()" title="Yedekleme" aria-label="Yedekleme">💾</button>
@@ -1436,6 +1632,7 @@ function backupHTML() {
       <span class="bk-hint">verilerin bu cihazda saklanır</span>
     </div>
     <p class="bk-info" id="bkInfo">…</p>
+    <p class="bk-son" id="bkSon"></p>
     <button id="bkExport" class="bk-act" onclick="exportBackup(true)">⬇ Yedeği indir (JSON)</button>
     <button class="bk-act ghost" onclick="exportBackup(false)">⬇ Sadece ilerleme (küçük)</button>
     <label class="bk-act ghost bk-file">⬆ Yedekten geri yükle
@@ -1452,6 +1649,7 @@ function mountBackup() {
   holder.className = "bk-holder";
   holder.innerHTML = backupHTML();
   nav.prepend(holder);
+  yedekUyariGuncelle();
 }
 
 /* Panellerin dışına tıklanınca kapansınlar */
@@ -1478,11 +1676,72 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+
+/* ============================================================
+   KLAVYE KISAYOLLARI + YAZDIRMA
+   Kısayollar vardı ama hiçbir yerde yazmıyordu; "?" ile açılan
+   küçük bir liste ve topbar'daki ⌨ düğmesi bunu görünür kılıyor.
+   ============================================================ */
+const KISAYOLLAR = [
+  ["/",     "aramaya odaklan (ana sayfa)"],
+  ["?",     "bu listeyi aç / kapat"],
+  ["p",     "pomodoro panelini aç / kapat"],
+  ["y",     "dersi yazdır veya PDF olarak kaydet"],
+  ["t",     "açık / koyu tema"],
+  ["Esc",   "açık pencereyi kapat"],
+  ["Boşluk","formül çalışmasında cevabı göster"],
+  ["← →",   "formül çalışmasında tekrar et / biliyorum"]
+];
+
+function kisayolHTML() {
+  return `<div class="overlay" id="ksOverlay" onclick="if(event.target===this)ksKapat()">
+    <div class="ks-modal" role="dialog" aria-label="Klavye kısayolları">
+      <div class="gm-head">
+        <h3>Klavye kısayolları</h3>
+        <button class="ov-close" onclick="ksKapat()" aria-label="Kapat">✕</button>
+      </div>
+      <div class="ks-liste">
+        ${KISAYOLLAR.map(([k, a]) =>
+          `<div class="ks-satir"><kbd>${esc(k)}</kbd><span>${esc(a)}</span></div>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+function ksKapat() { $("#ksOverlay")?.classList.remove("open"); }
+function ksToggle(){ $("#ksOverlay")?.classList.toggle("open"); }
+
+function mountKisayol() {
+  const nav = document.querySelector(".nav-actions");
+  if (!nav) return;
+  nav.insertAdjacentHTML("afterbegin",
+    `<button class="theme-toggle" onclick="window.print()" title="Yazdır / PDF olarak kaydet"
+       aria-label="Yazdır">🖨</button>
+     <button class="theme-toggle" onclick="ksToggle()" title="Klavye kısayolları (?)"
+       aria-label="Klavye kısayolları">⌨</button>`);
+  document.body.insertAdjacentHTML("beforeend", kisayolHTML());
+
+  document.addEventListener("keydown", e => {
+    /* Yazı yazarken kısayol tetiklenmesin */
+    const el = document.activeElement;
+    if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "?") { e.preventDefault(); ksToggle(); }
+    else if (e.key === "Escape") ksKapat();
+    else if (!FLASH.acik) {
+      if (e.key === "p" || e.key === "P") { e.preventDefault(); pomoTogglePanel(); }
+      else if (e.key === "t" || e.key === "T") { e.preventDefault(); toggleTheme(); }
+      else if (e.key === "y" || e.key === "Y") { e.preventDefault(); window.print(); }
+    }
+  });
+}
+
 /* ---------- Başlat ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   setThemeBtnIcon();
   mountPomodoro();
   mountBackup();
+  mountKisayol();
   renderHome();
   renderCourse();
   bindArama();

@@ -22,6 +22,57 @@ kurulabilen bir PWA'dır ve çevrimdışı çalışır.
 
 ## Tamamlanan İşler (en yeni üstte)
 
+### 2026-09-11 (2) — Yumuşak tema + kullanıcı gözüyle eksiklerin kapatılması
+
+Site "bir mühendislik terminali" gibi duruyordu; ders çalışılan bir yere dönüştürüldü.
+Ardından uygulama gerçek bir öğrenci akışıyla baştan sona gezilip eksikler çıkarıldı.
+
+**Tema — yumuşak / eğitim odaklı**
+- **Açık tema artık varsayılan** (kırık beyaz kağıt zemin, mürekkep grisi metin, yumuşak
+  yeşil vurgu). İlk açılışta kullanıcı seçimi yoksa işletim sistemi tercihi
+  (`prefers-color-scheme`) uygulanır; seçim yapılınca localStorage'a yazılır.
+- Koyu tema da yeniden ayarlandı: mavi-siyah yerine nötr gece grisi, vurgu neon değil pastel.
+- Marka noktasındaki **neon parlama kaldırıldı**, etiketlerdeki geniş harf aralığı
+  `.15em → .06em` (tek değişken `--iz`), defter karesi seyreltildi (32→40px, opaklık düşürüldü).
+- Gövde 16→16.5px, satır aralığı 1.75→1.8; **konu metni ~72 karakterde sınırlandı**
+  (uzun satır göz yoruyordu), paragraf/liste boşlukları düzenlendi.
+- Dağınık sabit renkler (`#06201E`, `#F0A868`, `#e5484d` …) temaya bağlı değişkenlere
+  taşındı: `--accent-fg`, `--accent-soft`, `--uyari`, `--uyari-soft`, `--hata`, `--sil`.
+  Açık temada okunamayan rozet/buton yazıları bu sayede düzeldi.
+
+**Kapatılan eksikler**
+- **Konu notu (en büyük eksik).** Fotoğraf ve PDF yüklenebiliyordu ama öğrenci tek satır
+  kendi notunu yazamıyordu. Artık her konunun altında "Kendi notum" alanı var; yazarken
+  kaydediliyor, akordeon yüksekliği yeniden ölçülüyor, notu olan konu farklı görünüyor.
+  Kayıt ders bazlı `dd-not-KOD` ({konuIndex: metin}); yedekleme `dd-*` anahtarlarını
+  topladığı için dışa aktarmaya kendiliğinden dahil.
+- **Soru başlıkları yanlış okunuyordu.** `duzMetin()` üsleri, kesirleri ve fonksiyon
+  adlarını siliyordu: `e^{-2t}u(t)` → "e-2tu(t)", `\cos(2\pi t)` → " (2π t)",
+  `\frac{s+1}{(s+2)}` → "s+1(s+2)". Artık üs/alt indis Unicode'a çevriliyor (`e⁻²ᵗu(t)`,
+  `aⁿu[n]`), kesir `(a)/(b)` oluyor, `\text{mA}` gibi sarmalayıcıların içeriği korunuyor,
+  40'a yakın sembol daha tanınıyor.
+- **İlerleme sadece konu içindi.** Ders başında artık üç kutu var: konu / formül / soru
+  (tamamlananda vurgulanır, tıklayınca ilgili bölüme gider) ve "N konuda notun var".
+  Ana sayfa kartlarında da `📖 8/15 · 🎴 4/22 · ✎ 3/10` özeti görünüyor.
+- **Uzun ders özeti ilk ekranı dolduruyordu** — iki satırda kırpıldı,
+  "kapsamın tamamını gör" ile açılıyor.
+- **Klavye kısayolları gizliydi.** `?` ile açılan liste ve topbar'da ⌨ düğmesi eklendi;
+  `p` pomodoro, `t` tema, `y` yazdır, `/` arama, `Esc` kapat.
+- **Yazdırma/PDF desteği yoktu.** `@media print` bloğu: arayüz (üst bar, filtreler,
+  butonlar, pomodoro) düşer, **kapalı akordeonlar ve çözümler açılır**, formül kartları
+  iki yüzüyle basılır, notlar da kağıda gelir. Topbar'da 🖨 düğmesi (`y` kısayolu).
+- **Yedek hatırlatıcısı** (eski TODO #1). Son yedek tarihi `dd-son-yedek`'te; hiç yedek
+  alınmamışsa veya 30 günü geçmişse 💾 düğmesinde uyarı noktası ve panelde "Son yedek:
+  N gün önce" satırı. Notlar eklendiği için yedek almamanın bedeli arttı.
+
+**Doğrulama:** yerel sunucuda açık ve koyu tema, ana sayfa, EE3014 ve EE3061 ders sayfaları
+gezildi; not yazma → localStorage → sayaç turu, kısayol paneli, yedek uyarısı ve düzeltilmiş
+soru başlıkları tarayıcıda çalışırken görüldü; konsolda hata yok. `sw.js` → `dd-v5`.
+
+**Not:** Geliştirme sırasında görüldü — service worker cache-first olduğu için değişiklikler
+`CACHE_VERSION` artırılmadan cihazda görünmüyor. Kural PROGRESS'te zaten kayıtlıydı,
+uygulandı.
+
 ### 2026-09-11 — EE3014 & EE3012 içeriği, "Bu Hafta" şeridi
 
 TODO #1 kapandı: içeriği en zayıf iki ders tamamlandı, ders sayfasındaki çalışma programı
@@ -203,6 +254,10 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 | Takvim tek yerde (`TAKVIM`), tarihler `"YYYY-MM-DD"` ve yerel gün başlangıcı olarak çözülüyor | `new Date("2026-09-28")` UTC kabul edilip TR saatinde bir gün kayıyordu | 2026-09-09 |
 | Uzun formüller kaydırılmak yerine SVG'si oransal küçültülüyor | Kaydırma çubuğu hem çirkin hem de kartta formülün devamı olduğunu belli etmiyordu; kart küçük olduğu için ölçekleme okunabilirliği bozmuyor | 2026-09-09 |
 | Mini pomodoro `position: fixed` + pointer events, konum localStorage'da | Odaktayken panelin ekranı kaplaması ve içeriğin üstünü kapatması engellendi; kullanıcı kutuyu istediği köşeye taşıyabiliyor | 2026-09-09 |
+| Açık tema varsayılan, ilk açılışta sistem tercihi okunuyor | Uygulama ders çalışmak için ve uzun süre açık kalıyor; kağıt zemin göz yormuyor. Yine de kullanıcının cihaz tercihi varsa ona uyuluyor | 2026-09-11 |
+| Renkler tek tek değil, tema değişkenleri üzerinden (`--accent-fg`, `--uyari`, `--sil` …) | Sabit hex'ler açık temada okunamaz kombinasyonlar üretiyordu (koyu yazı, koyu zemin); tek yerden değiştirilebilir olması gerekiyordu | 2026-09-11 |
+| Notlar konu bazlı tek localStorage kaydında (`dd-not-KOD`) | İlerleme/soru/formül kayıtlarıyla aynı desen; yedekleme `dd-*` anahtarlarını zaten topladığı için ek iş gerekmedi | 2026-09-11 |
+| Yazdırmada kapalı akordeonlar ve çözümler açılıyor | Ekranda "önce kendin dene" akışı doğru, ama kağıda basarken gizli kalan içerik işe yaramaz; basılı kopya tam olmalı | 2026-09-11 |
 | Ders sayfasında tüm program değil, yalnızca içinde bulunulan hafta gösteriliyor | 14+ satırlık liste sayfanın üstünü kaplıyor, asıl içeriği (konu anlatımı) katlamanın altına itiyordu; öğrencinin o an ihtiyacı olan bilgi zaten tek hafta | 2026-09-11 |
 | MathJax SVG çıktısı (tex-svg) | Tema değişiminde ve akordeon yüksekliği ölçümünde daha kararlı | 2026-07-16 |
 | Çözüm soruyla birlikte değil, butonla açılıyor | Cevabı görerek "anladım" sanmak en yaygın çalışma hatası; önce deneme zorunlu hale getirildi | 2026-07-25 |
@@ -215,18 +270,24 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 
 ## TODO (öncelik sırasına göre)
 
-1. Otomatik yedek hatırlatıcısı: son yedek tarihini localStorage'da tut, 30 günü geçince topbar'da uyarı göster.
+1. **Ders sayfası ilk açılışta ağır.** MathJax 15 konunun tamamını, akordeonlar kapalıyken
+   bile bir kerede render ediyor; yavaş cihazda sayfa birkaç saniye donuyor
+   (tarayıcı otomasyonunda da render zaman aşımı olarak görüldü).
+   Çözüm: akordeon açılınca o konuyu render etmek (lazy typeset).
 2. Ders sayfasında "çalışma süresi" istatistiği (pomodoro seansları ders bazında kaydedilsin).
-3. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek gerekiyor —
-   tek bir `data/_index.js` listesinden dinamik yüklemeye geçilebilir (`sw.js` PRECACHE listesi de aynı derdi yaşıyor).
-4. Soru havuzuna konu etiketi alanı (`sorular[].konu`) eklenip "bu konunun soruları" filtresi yapılabilir.
-   Şu an başlık soru metninden türetiliyor; veriye etiket girilirse eşleştirme kesinleşir.
+3. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek
+   gerekiyor — tek bir `data/_index.js` listesinden dinamik yüklemeye geçilebilir
+   (`sw.js` PRECACHE listesi de aynı derdi yaşıyor).
+4. Soru havuzuna konu etiketi alanı (`sorular[].konu`) eklenip "bu konunun soruları" filtresi
+   yapılabilir. Şu an başlık soru metninden türetiliyor; veriye etiket girilirse eşleşme kesinleşir.
 5. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
    Şu an "biliyorum" kalıcı işaret; zamanla unutma modellenmiyor.
+6. Notlar şu an yalnızca konu bazlı — "bütün notlarım" görünümü ve notta arama eklenebilir.
 
 ### Kapatılan TODO'lar (2026-09-11)
 - ~~EE3014 içeriği zayıf (5 konu / 5 formül / 1 soru)~~ → 15 konu / 28 formül / 10 soru.
   EE3012 de aynı turda derinleştirildi; artık tüm dersler 11-17 konu, 21-28 formül, 9-14 soru bandında.
+- ~~Otomatik yedek hatırlatıcısı~~ → 30 gün kuralı, 💾 düğmesinde uyarı noktası + panelde son yedek tarihi.
 
 ### Kapatılan TODO'lar (2026-07-25)
 - ~~`CACHE_VERSION` disiplini~~ → `dd-v2`'ye çıkarıldı, kural PROGRESS'te kayıtlı.
@@ -266,6 +327,7 @@ doğrulama hâlâ yapılmadı** (aşağıdaki PWA listesindeki açık madde ile 
 |---|---|---|
 | Yeni ders eklenince `sw.js` PRECACHE listesine elle eklenmezse ders çevrimdışı açılmıyor | `data/YENI.js` ekle, script tag'i ekle, uçak modunda ana sayfadan derse gir | **Açık** (TODO #3 ile çözülecek) |
 | GitHub Pages'te ders kartları görünmüyordu | Ana sayfayı Pages üzerinden aç, ızgara boştu | **Çözüldü** (2026-07-19, `DERS_SIRASI` fallback) |
+| Ders sayfası ilk açılışta 1-3 sn donuyor (MathJax tüm konuları birden render ediyor) | 15 konuluk bir dersi aç, hemen kaydırmayı dene | **Açık** (TODO #1) |
 | Gizli/özel sekmede IndexedDB açılmıyor, yükleme başarısız oluyor | Safari özel sekmede fotoğraf ekle | **Açık** — kullanıcıya açıklayıcı mesaj gösteriliyor, teknik çözümü yok |
 
 ---
