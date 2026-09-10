@@ -309,41 +309,33 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 }
 
 /* ============================================================
-   ÇALIŞMA PROGRAMI (ders sayfası)
+   BU HAFTA (ders sayfası — takvimden gelen tek satır)
    ============================================================ */
-.pr-ozet { color: var(--muted); margin-bottom: 14px; max-width: 640px; }
-.pr-ozet b { color: var(--text); }
-.pr-liste { list-style: none; display: grid; gap: 8px; }
-.pr-satir {
-  display: grid; grid-template-columns: 190px 1fr; gap: 14px; align-items: start;
-  padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
-  background: var(--surface); border-left: 3px solid var(--border);
+.bu-hafta {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  margin: 18px 0 4px; padding: 12px 16px;
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: 12px; background: var(--surface);
 }
-.pr-sol { display: flex; flex-direction: column; gap: 3px; }
-.pr-no { font-family: var(--font-display); font-weight: 600; font-size: .95rem; }
-.pr-tarih { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
-.pr-simdi {
-  font-family: var(--font-mono); font-size: .62rem; letter-spacing: .12em;
-  color: var(--accent); margin-top: 2px;
+.bh-sol { display: flex; flex-direction: column; gap: 2px; min-width: 132px; }
+.bh-etiket {
+  font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; color: var(--accent);
 }
-.pr-konular { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
-.pr-konu {
-  font-size: .82rem; padding: 4px 10px; border-radius: 20px;
+.bh-tarih { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+.bh-konular { display: flex; flex-wrap: wrap; gap: 6px; }
+.bh-konu {
+  font-size: .85rem; padding: 5px 11px; border-radius: 20px;
   border: 1px solid var(--border); background: var(--surface-2);
   color: var(--text); text-decoration: none;
 }
-.pr-konu:hover { border-color: var(--accent); color: var(--accent); }
-.pr-konu.ok { border-color: var(--accent); color: var(--muted); }
-.pr-konu.ok::before { content: "✓ "; color: var(--accent); }
-.pr-bos { font-size: .82rem; color: var(--muted); font-style: italic; }
-
-.pr-satir.aktif { border-left-color: var(--accent); background: var(--accent-dim); }
-.pr-satir.gecti:not(.aktif) { opacity: .62; }
-.pr-satir.bitti .pr-no::after { content: " ✓"; color: var(--accent); }
-.pr-tekrar { border-left-color: #FBBF24; }
-.pr-tekrar .pr-no { color: #FBBF24; }
-.pr-sinav { border-left-color: #F87171; background: var(--surface-2); }
-.pr-sinav .pr-no { color: #F87171; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .1em; }
+.bh-konu:hover { border-color: var(--accent); color: var(--accent); }
+.bh-konu.ok { color: var(--muted); border-color: var(--accent); }
+.bh-konu.ok::before { content: "✓ "; color: var(--accent); }
+.bh-bos { font-size: .85rem; color: var(--muted); font-style: italic; }
+.bh-tekrar { border-left-color: #FBBF24; }
+.bh-tekrar .bh-etiket { color: #FBBF24; }
+.bh-sinav { border-left-color: #F87171; }
+.bh-sinav .bh-etiket { color: #F87171; }
 
 /* ============================================================
    FORMÜL KARTLARI (flip)
@@ -938,7 +930,6 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   .takvim { margin: 22px 0 0; }
   .tv-mesaj { font-size: 1rem; }
   .tv-kilo { gap: 12px; }
-  .pr-satir { grid-template-columns: 1fr; gap: 8px; }
   .ozet { margin: 24px 0 4px; }
   .ozet-stats { grid-template-columns: 1fr 1fr; }
   .ozet-stats .ozet-stat:last-child { grid-column: 1 / -1; }

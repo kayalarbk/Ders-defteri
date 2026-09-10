@@ -22,6 +22,34 @@ kurulabilen bir PWA'dır ve çevrimdışı çalışır.
 
 ## Tamamlanan İşler (en yeni üstte)
 
+### 2026-09-11 — EE3014 & EE3012 içeriği, "Bu Hafta" şeridi
+
+TODO #1 kapandı: içeriği en zayıf iki ders tamamlandı, ders sayfasındaki çalışma programı
+tek satıra indirildi.
+
+- **EE3014 (Energy Conversion) yeniden yazıldı** — 5 → **15 konu**, 5 → **28 formül**,
+  1 → **10 soru**. Chapman "Electric Machinery Fundamentals" ve Fitzgerald temel alınarak
+  bir dönemlik çekirdek: manyetik devreler ve devre benzetimi, malzemeler/doyma/çekirdek
+  kayıpları, endüktans ve kaçak akı, ideal ve pratik transformatör, eşdeğer devre, regülasyon
+  ve verim, üç fazlı + ototransformatör, enerji–koenerji ile elektromekanik kuvvet, DC makinede
+  emk/moment/hız denetimi, döner manyetik alan, asenkron makinede kayma–eşdeğer devre–güç
+  akışı–moment, senkron makine ve güç açısı. Konular formül dökümü değil, "neden böyle" anlatan
+  metin olarak yazıldı (ör. hava aralığının relüktansı neden domine ettiği, sacların girdap
+  kaybını neden düşürdüğü). Ders özeti de kapsamı yansıtacak şekilde genişletildi.
+- **EE3012 (Electronics II) derinleştirildi** — konu sayısı 11'de kaldı ama içerikler genişletildi;
+  formül 14 → **26**, soru 8 → **14**.
+- **Çalışma programı → "BU HAFTA" şeridi.** Ders sayfasındaki "00 Çalışma Programı" bölümü
+  (14+ satırlık tam dönem listesi) kaldırıldı; yerine takvimden yalnızca **bugünün denk geldiği
+  haftayı** gösteren tek satırlık bir şerit kondu (başlık altında, bölüm navigasyonunun üstünde).
+  Dönem başlamadıysa ilk hafta "YAKLAŞAN" olarak, sınav/tekrar haftaları kendi renkleriyle
+  (sarı/kırmızı) gösteriliyor; dönem bittiyse şerit hiç basılmıyor. Tamamlanan konular ✓,
+  konuya tıklayınca ilgili akordeon açılıyor. `dersProgrami()` üretimi aynı kaldı, değişen
+  yalnızca sunum: `.pr-*` stilleri → `.bu-hafta` / `.bh-*`, section nav'dan "Program" çıkarıldı.
+- Toplam içerik: **89 konu, 146 formül, 66 soru, 19 video** (79 / 111 / 51 idi).
+- `sw.js` → `CACHE_VERSION = "dd-v4"`.
+- Doğrulama: 6 ders dosyası da Node ile parse edildi (sözdizimi + alan sayıları), yerel sunucuda
+  EE3014 sayfası açıldı — "1. HAFTA · YAKLAŞAN" şeridi ve 28 formül kartı doğru render edildi.
+
 ### 2026-09-09 — Dönem takvimi, çalışma programı, MSE2051'in kaldırılması
 
 Yeni dönem (2026 Güz) hazırlığı: uygulama artık takvim farkında.
@@ -175,6 +203,7 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 | Takvim tek yerde (`TAKVIM`), tarihler `"YYYY-MM-DD"` ve yerel gün başlangıcı olarak çözülüyor | `new Date("2026-09-28")` UTC kabul edilip TR saatinde bir gün kayıyordu | 2026-09-09 |
 | Uzun formüller kaydırılmak yerine SVG'si oransal küçültülüyor | Kaydırma çubuğu hem çirkin hem de kartta formülün devamı olduğunu belli etmiyordu; kart küçük olduğu için ölçekleme okunabilirliği bozmuyor | 2026-09-09 |
 | Mini pomodoro `position: fixed` + pointer events, konum localStorage'da | Odaktayken panelin ekranı kaplaması ve içeriğin üstünü kapatması engellendi; kullanıcı kutuyu istediği köşeye taşıyabiliyor | 2026-09-09 |
+| Ders sayfasında tüm program değil, yalnızca içinde bulunulan hafta gösteriliyor | 14+ satırlık liste sayfanın üstünü kaplıyor, asıl içeriği (konu anlatımı) katlamanın altına itiyordu; öğrencinin o an ihtiyacı olan bilgi zaten tek hafta | 2026-09-11 |
 | MathJax SVG çıktısı (tex-svg) | Tema değişiminde ve akordeon yüksekliği ölçümünde daha kararlı | 2026-07-16 |
 | Çözüm soruyla birlikte değil, butonla açılıyor | Cevabı görerek "anladım" sanmak en yaygın çalışma hatası; önce deneme zorunlu hale getirildi | 2026-07-25 |
 | Soru başlıkları veriye elle girilmedi, `duzMetin()` ile soru metninden türetiliyor | 62 sorunun tamamına elle başlık girmek gerekmesin; veri şeması değişmedi, mevcut ders dosyaları olduğu gibi çalışıyor | 2026-07-25 |
@@ -186,17 +215,18 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 
 ## TODO (öncelik sırasına göre)
 
-1. **EE3014 içeriği zayıf** — 5 konu / 5 formül / **1 soru**. Diğer dersler 15-17 konu, 21-25 formül,
-   8-12 soru seviyesinde. Yeni çalışma araçları (formül modu, soru pratiği) bu derste boş duruyor;
-   içerik girilmeden verimlilik artışı bu derse yansımaz. **Sıradaki en yüksek etkili iş bu.**
-2. Otomatik yedek hatırlatıcısı: son yedek tarihini localStorage'da tut, 30 günü geçince topbar'da uyarı göster.
-3. Ders sayfasında "çalışma süresi" istatistiği (pomodoro seansları ders bazında kaydedilsin).
-4. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek gerekiyor —
+1. Otomatik yedek hatırlatıcısı: son yedek tarihini localStorage'da tut, 30 günü geçince topbar'da uyarı göster.
+2. Ders sayfasında "çalışma süresi" istatistiği (pomodoro seansları ders bazında kaydedilsin).
+3. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek gerekiyor —
    tek bir `data/_index.js` listesinden dinamik yüklemeye geçilebilir (`sw.js` PRECACHE listesi de aynı derdi yaşıyor).
-5. Soru havuzuna konu etiketi alanı (`sorular[].konu`) eklenip "bu konunun soruları" filtresi yapılabilir.
+4. Soru havuzuna konu etiketi alanı (`sorular[].konu`) eklenip "bu konunun soruları" filtresi yapılabilir.
    Şu an başlık soru metninden türetiliyor; veriye etiket girilirse eşleştirme kesinleşir.
-6. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
+5. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
    Şu an "biliyorum" kalıcı işaret; zamanla unutma modellenmiyor.
+
+### Kapatılan TODO'lar (2026-09-11)
+- ~~EE3014 içeriği zayıf (5 konu / 5 formül / 1 soru)~~ → 15 konu / 28 formül / 10 soru.
+  EE3012 de aynı turda derinleştirildi; artık tüm dersler 11-17 konu, 21-28 formül, 9-14 soru bandında.
 
 ### Kapatılan TODO'lar (2026-07-25)
 - ~~`CACHE_VERSION` disiplini~~ → `dd-v2`'ye çıkarıldı, kural PROGRESS'te kayıtlı.
@@ -234,7 +264,7 @@ doğrulama hâlâ yapılmadı** (aşağıdaki PWA listesindeki açık madde ile 
 
 | Bug | Repro | Durum |
 |---|---|---|
-| Yeni ders eklenince `sw.js` PRECACHE listesine elle eklenmezse ders çevrimdışı açılmıyor | `data/YENI.js` ekle, script tag'i ekle, uçak modunda ana sayfadan derse gir | **Açık** (TODO #7 ile çözülecek) |
+| Yeni ders eklenince `sw.js` PRECACHE listesine elle eklenmezse ders çevrimdışı açılmıyor | `data/YENI.js` ekle, script tag'i ekle, uçak modunda ana sayfadan derse gir | **Açık** (TODO #3 ile çözülecek) |
 | GitHub Pages'te ders kartları görünmüyordu | Ana sayfayı Pages üzerinden aç, ızgara boştu | **Çözüldü** (2026-07-19, `DERS_SIRASI` fallback) |
 | Gizli/özel sekmede IndexedDB açılmıyor, yükleme başarısız oluyor | Safari özel sekmede fotoğraf ekle | **Açık** — kullanıcıya açıklayıcı mesaj gösteriliyor, teknik çözümü yok |
 

@@ -474,8 +474,8 @@ function renderCourse() {
 
   root.innerHTML = `
     ${headBlock(kod, d)}
-    ${sectionNav(d)}
     ${programBlock(kod, d)}
+    ${sectionNav(d)}
     ${konularBlock(kod, d)}
     ${formullerBlock(kod, d)}
     ${medyaBlock(kod, d)}
@@ -586,44 +586,41 @@ function dersProgrami(d) {
   return { satirlar, bugun: t.bugun, vizeKonu: yarim, finalKonu: idx.length - yarim };
 }
 
+/* Tüm program yerine yalnızca bugünün denk geldiği hafta gösterilir:
+   uzun liste ders sayfasını gereksiz şişiriyordu. */
 function programBlock(kod, d) {
   const p = dersProgrami(d);
   if (!p) return "";
   const done = getProgress(kod);
 
-  const satir = r => {
-    const aktif = p.bugun >= r.bas && p.bugun <= r.bit;
-    const gecti = p.bugun > r.bit;
-    const bitti = r.konular.length && r.konular.every(k => done.includes(k.i));
-    const etiket = r.tur === "ders" ? `${r.no}. hafta` : r.ad;
-    const konuHtml = r.konular.length
-      ? r.konular.map(k => `<a class="pr-konu${done.includes(k.i) ? " ok" : ""}"
-            href="course.html?ders=${kod}&git=konu-${k.i}">${esc(k.baslik)}</a>`).join("")
-      : `<span class="pr-bos">${r.tur === "ders" ? "Tekrar ve soru çözümü" : r.tur === "tekrar"
-            ? "Formül turu + çözülmemiş sorular" : "Sınav"}</span>`;
-    return `<li class="pr-satir pr-${r.tur}${aktif ? " aktif" : ""}${gecti ? " gecti" : ""}${bitti ? " bitti" : ""}">
-      <div class="pr-sol">
-        <span class="pr-no">${etiket}</span>
-        <span class="pr-tarih">${tvAralik(r.bas, r.bit)}</span>
-        ${aktif ? `<span class="pr-simdi">BU HAFTA</span>` : ""}
-      </div>
-      <div class="pr-konular">${konuHtml}</div>
-    </li>`;
-  };
+  /* Bugünün satırı; dönem başlamadıysa ilk hafta "yaklaşan" olarak gösterilir */
+  let r = p.satirlar.find(x => p.bugun >= x.bas && p.bugun <= x.bit);
+  const yaklasan = !r && p.bugun < p.satirlar[0].bas;
+  if (yaklasan) r = p.satirlar[0];
+  if (!r) return "";     // dönem bitti
+
+  const etiket = yaklasan ? `${r.no}. HAFTA · YAKLAŞAN`
+    : r.tur === "sinav" ? r.ad
+    : r.tur === "tekrar" ? r.ad.toUpperCase()
+    : "BU HAFTA";
+  const alt = r.tur === "ders" ? `${r.no}. hafta · ${tvAralik(r.bas, r.bit)}` : tvAralik(r.bas, r.bit);
+
+  const icerik = r.konular.length
+    ? r.konular.map(k => `<a class="bh-konu${done.includes(k.i) ? " ok" : ""}"
+          href="course.html?ders=${kod}&git=konu-${k.i}">${esc(k.baslik)}</a>`).join("")
+    : `<span class="bh-bos">${r.tur === "sinav" ? "Sınav dönemi"
+        : r.tur === "tekrar" ? "Formül turu + çözülmemiş sorular" : "Tekrar ve soru çözümü"}</span>`;
 
   return `
-  <section class="section" id="sec-program">
-    <h2><span class="num">00</span> Çalışma Programı</h2>
-    <p class="pr-ozet">Vizeye kadar <b>${p.vizeKonu}</b>, finale kadar <b>${p.finalKonu}</b> konu.
-       Program ${esc(TAKVIM.ad)} takviminden otomatik üretiliyor; tamamladığın konular ✓ ile işaretli.</p>
-    <ol class="pr-liste">${p.satirlar.map(satir).join("")}</ol>
-  </section>`;
+  <div class="bu-hafta bh-${r.tur}">
+    <div class="bh-sol"><span class="bh-etiket">${etiket}</span><span class="bh-tarih">${alt}</span></div>
+    <div class="bh-konular">${icerik}</div>
+  </div>`;
 }
 
 /* ----- Bölüm içi hızlı gezinme ----- */
 function sectionNav(d) {
   const items = [
-    ["sec-program",  "Program"],
     ["sec-konular",  "Konular"],
     ["sec-formuller","Formüller"],
     ["sec-medya",    "Medya"],
