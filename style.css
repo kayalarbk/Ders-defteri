@@ -273,6 +273,15 @@ a { color: inherit; text-decoration: none; }
 .acc-body .inner ol { padding-left: 22px; margin: 10px 0; }
 .acc-body .inner li { margin: 4px 0; }
 .acc-body .inner b { color: var(--text); font-weight: 600; }
+/* Konu içi tablolar (ör. Maxwell denklemleri özeti): dar ekranda yatay kaydırılır */
+.acc-body .inner table {
+  display: block; overflow-x: auto; border-collapse: collapse;
+  margin: 12px 0; font-size: .92em; max-width: 100%;
+}
+.acc-body .inner th, .acc-body .inner td {
+  border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top;
+}
+.acc-body .inner th { background: var(--surface); font-weight: 600; }
 .acc-body .cozum-label {
   font-family: var(--font-mono); font-size: .72rem; color: var(--accent);
   text-transform: uppercase; letter-spacing: var(--iz); margin: 14px 0 6px;

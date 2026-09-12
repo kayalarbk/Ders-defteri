@@ -22,6 +22,70 @@ kurulabilen bir PWA'dır ve çevrimdışı çalışır.
 
 ## Tamamlanan İşler (en yeni üstte)
 
+### 2026-09-13 — İçerik denetimi: eksik tespiti ve kapatılması
+
+Altı ders dosyası tek tek okunup içerik eksikleri çıkarıldı (konu derinliği, sorusuz konular,
+mükerrer sorular, müfredat boşlukları, render hatası) ve aynı turda kapatıldı.
+
+**Tespit edilen ve düzeltilen render hatası**
+- `MATH2055.js` içinde LaTeX'te kaçışsız `<` + harf (`O(1)<O(\log n)…`, `0\le r<n`) tarayıcıda HTML
+  etiketi olarak yorumlanıyor, Big-O sıralaması ve bölme algoritması satırı ekranda yutuluyordu.
+  Kural: LaTeX içinde harften önce gelen `<` daima `&lt;` yazılır (`<0`, `<1`, `<\infty` güvenli).
+  Yeni içerikte tüm `<` / `>` işaretleri `&lt;` / `&gt;` ile yazıldı.
+
+**Konu metinleri derinleştirildi** — EE3014/EE3012 standardına ("neden böyle", sık hata, çözüm şablonu,
+EE'de nerede kullanılır) getirildi. Ortalama konu uzunluğu: EE3061 570→1990, EE3016 580→2270,
+STAT2056 550→2480, MATH2055 700→3650 karakter.
+
+**Eklenen konular (89 → 98)**
+- EE3061: DT Fourier Serisi ve DFT; frekans yanıtı konusuna Bode çizimi + sistem bağlantıları; Laplace/z
+  konularına başlangıç koşullu diferansiyel/fark denklemi çözüm şablonları.
+- EE3016: Elektrik Dipolü ve Görüntü Yöntemi; Düzlem Dalganın Yansıması ve İletimi (Γ, τ, SWR, çeyrek dalga);
+  vektör analizine diferansiyel elemanlar, manyetostatiğe vektör potansiyel **A**, iletken/dielektrik konusuna
+  sınır koşulları, kayıplı ortama kayıp tanjantı.
+- STAT2056: Koşullu Beklenti ve MMSE Tahmin; dağılımlara Hipergeometrik, Negatif Binom, Gamma/Erlang, Rayleigh;
+  kovaryans konusuna iki değişkenli Gauss; MGF konusuna karakteristik fonksiyon ve Chernoff; rastgele süreçlere
+  ergodiklik, PSD ve LTI geçişi.
+- MATH2055: Bağıntı Matrisleri, Bileşke ve Kapanışlar (Warshall, ilişkisel cebir); Üreteç Fonksiyonları;
+  çizge konusuna Dijkstra, düzlemsellik, boyama; ağaçlara Huffman, MST, karar ağaçları; Boole konusuna
+  Karnaugh haritası ve devre tasarım akışı.
+- EE3012: Cascode Kuvvetlendirici (video listesinde vardı, konu yoktu).
+- EE3014: DC Generatörler ve Karakteristikleri; Senkron Motor, V-Eğrileri ve Güç Faktörü Düzeltme.
+
+**Sorular (66 → 109)** — her konuya en az bir soru düşecek şekilde 43 net soru eklendi; mevcut kısa sorular
+ikinci/üçüncü şıkla derinleştirildi (yorum, kontrol, "ne olurdu" soruları).
+- EE3012'de 6 mükerrer soru (Wien ×2, B sınıfı ×2, f_T ×2, Miller ×2, A_f ×2, CMRR ×2) kaldırıldı; yerine
+  alçak frekans SCTC, yüksek frekans OCTC, akım aynası/Widlar, faz payı + kompanzasyon, Colpitts/faz kaydırmalı,
+  A sınıfı verim, cascode ve op-amp kusurları soruları geldi.
+- Sorusuz konu kalmadı. Eklenen soru başlıkları: EE3061 (Fourier serisi, FT özellikleri, Bode, DFT, fark
+  denklemi), EE3016 (diverjans teoremi, Laplace, sınır koşulları, görüntü yöntemi, indüktans, hareket emk'si,
+  yansıma, anten gücü), STAT2056 (kart sayma, güvenilirlik + Bayes, PDF dönüşümü, birleşik dağılım, MMSE,
+  konvolüsyon, MGF türetme, otokorelasyon/PSD), MATH2055 (yanılgı, çelişki ispatı, kümeler, bağıntı özellikleri,
+  Big-O tanıkları, güvercin yuvası, ÇKT, Master teorem, üreteç fonksiyonu, gösterge değişkenler, Dijkstra/Kruskal,
+  m-li ağaç, K-map), EE3014 (çekirdek kaybı frekans ölçekleme, hava aralıklı endüktans, Δ–Y trafo + ototrafo,
+  DC generatör, döner alan, rotor direnci / Y–Δ yolverme, güç faktörü düzeltme, şönt motor hız/yolverme).
+
+**Formül kartları (146 → 237)** — dönüşüm çiftleri (rect↔sinc, Laplace/z çiftleri, DFT), sınır koşulları,
+Γ/τ/SWR, Bernoulli/Rayleigh/Erlang/Q fonksiyonu/Markov/Wiener–Khinchin, Master teorem, ÇKT, Catalan, Binet,
+cascode R_out, faz payı, Colpitts, Widlar, senkron moment, Q_c düzeltme, Y–Δ.
+
+**Teknik**
+- `style.css`: konu içi `<table>` stili (Maxwell denklemleri özeti tablo olarak yazıldı; dar ekranda yatay kaydırma).
+- Ders özetleri (`ozet`) yeni kapsama göre güncellendi.
+- İçerik üretimi scratchpad'de `KOD.parts.js` (String.raw ile düz LaTeX) + splice scripti ile yapıldı; veri
+  dosyası biçimi değişmedi. Dikkat: Bash heredoc çift ters bölüyü tek ters bölüye indiriyor — LaTeX içeren
+  dosyalar Write aracıyla yazılmalı.
+- `sw.js` → `dd-v6`.
+
+**Doğrulama:** yerel sunucuda 6 ders sayfası açıldı; MathJax hata (`data-mjx-error`) sayısı her derste 0,
+ekranda kaçmış `&lt;` yok, Maxwell tablosu doğru çizildi, ana sayfa özeti 98 / 237 / 109; konsol hatasız.
+Tüm dosyalar Node ile parse edildi; satır içi ve blok LaTeX ayraçları dengeli.
+
+**Kalan içerik eksikleri (bilinçli ertelendi)**
+- `dokumanlar: []` hâlâ her derste boş — ders notu PDF'i / geçmiş sınav eklenebilir (kullanıcı yüklemesi ayrıca var).
+- Videolar ders bazında playlist; konuya bağlı video (`videolar[].konu`) yok. Tüm kaynaklar İngilizce.
+- `sorular[].konu` etiketi yok (TODO #4) — sorular artık her konuyu kapsıyor ama eşleme başlıktan çıkarılıyor.
+
 ### 2026-09-11 (2) — Yumuşak tema + kullanıcı gözüyle eksiklerin kapatılması
 
 Site "bir mühendislik terminali" gibi duruyordu; ders çalışılan bir yere dönüştürüldü.
@@ -96,7 +160,7 @@ tek satıra indirildi.
   (sarı/kırmızı) gösteriliyor; dönem bittiyse şerit hiç basılmıyor. Tamamlanan konular ✓,
   konuya tıklayınca ilgili akordeon açılıyor. `dersProgrami()` üretimi aynı kaldı, değişen
   yalnızca sunum: `.pr-*` stilleri → `.bu-hafta` / `.bh-*`, section nav'dan "Program" çıkarıldı.
-- Toplam içerik: **89 konu, 146 formül, 66 soru, 19 video** (79 / 111 / 51 idi).
+- Toplam içerik: **89 konu, 146 formül, 66 soru, 19 video** (79 / 111 / 51 idi). *(2026-09-13 itibarıyla 98 / 237 / 109.)*
 - `sw.js` → `CACHE_VERSION = "dd-v4"`.
 - Doğrulama: 6 ders dosyası da Node ile parse edildi (sözdizimi + alan sayıları), yerel sunucuda
   EE3014 sayfası açıldı — "1. HAFTA · YAKLAŞAN" şeridi ve 28 formül kartı doğru render edildi.
@@ -259,6 +323,9 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 | Notlar konu bazlı tek localStorage kaydında (`dd-not-KOD`) | İlerleme/soru/formül kayıtlarıyla aynı desen; yedekleme `dd-*` anahtarlarını zaten topladığı için ek iş gerekmedi | 2026-09-11 |
 | Yazdırmada kapalı akordeonlar ve çözümler açılıyor | Ekranda "önce kendin dene" akışı doğru, ama kağıda basarken gizli kalan içerik işe yaramaz; basılı kopya tam olmalı | 2026-09-11 |
 | Ders sayfasında tüm program değil, yalnızca içinde bulunulan hafta gösteriliyor | 14+ satırlık liste sayfanın üstünü kaplıyor, asıl içeriği (konu anlatımı) katlamanın altına itiyordu; öğrencinin o an ihtiyacı olan bilgi zaten tek hafta | 2026-09-11 |
+| LaTeX içinde harf öncesi `<` daima `&lt;` | `<O(`, `<n` gibi diziler HTML etiketi sayılıp içeriği yutuyor (MATH2055'te yaşandı); `<0`, `<\infty` güvenli ama tutarlılık için hepsi kaçışlanıyor | 2026-09-13 |
+| İçerik derinliği standardı: konu ≈1200+ karakter, "neden", sık hata, çözüm şablonu | Formül dökümü seviyesindeki konular (EE3061/EE3016/STAT) sınav öncesi tek başına çalışılamıyordu; EE3014 yeniden yazımı iyi sonuç vermişti | 2026-09-13 |
+| Her konuya en az bir soru | Soru havuzu 89 konunun 40'ını hiç kapsamıyordu; "bu konudan soru çöz" akışı kopuyordu | 2026-09-13 |
 | MathJax SVG çıktısı (tex-svg) | Tema değişiminde ve akordeon yüksekliği ölçümünde daha kararlı | 2026-07-16 |
 | Çözüm soruyla birlikte değil, butonla açılıyor | Cevabı görerek "anladım" sanmak en yaygın çalışma hatası; önce deneme zorunlu hale getirildi | 2026-07-25 |
 | Soru başlıkları veriye elle girilmedi, `duzMetin()` ile soru metninden türetiliyor | 62 sorunun tamamına elle başlık girmek gerekmesin; veri şeması değişmedi, mevcut ders dosyaları olduğu gibi çalışıyor | 2026-07-25 |
@@ -283,6 +350,11 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 5. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
    Şu an "biliyorum" kalıcı işaret; zamanla unutma modellenmiyor.
 6. Notlar şu an yalnızca konu bazlı — "bütün notlarım" görünümü ve notta arama eklenebilir.
+
+### Kapatılan TODO'lar (2026-09-13)
+- ~~Konu metinleri sığ (EE3061/EE3016/STAT ~550 kr)~~ → tüm dersler 1990–3650 kr bandında.
+- ~~40 konuda soru yok, EE3012'de 6 mükerrer soru~~ → 109 soru, her konu kapsanıyor.
+- ~~Müfredat boşlukları (DFT, görüntü yöntemi, yansıma, MMSE, Karnaugh, cascode, senkron motor…)~~ → 9 yeni konu.
 
 ### Kapatılan TODO'lar (2026-09-11)
 - ~~EE3014 içeriği zayıf (5 konu / 5 formül / 1 soru)~~ → 15 konu / 28 formül / 10 soru.
