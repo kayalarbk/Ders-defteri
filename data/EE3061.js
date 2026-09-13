@@ -23,7 +23,7 @@ window.DERSLER["EE3061"] = {
   ad: "Signals and Systems",
   donem: "3. Sınıf · 1. Dönem",
   renk: "#4FD1C5",
-  ozet: "Sürekli/ayrık zaman sinyalleri ve sistem özellikleri; temel sinyaller; LTI sistemler ve konvolüsyon; Fourier serileri (CT ve DT), Fourier dönüşümü ve özellikleri; frekans yanıtı, Bode çizimi ve filtreleme; DTFT ve DFT; örnekleme ve örtüşme; Laplace ve z dönüşümleri ile diferansiyel/fark denklemi çözümü, ROC, kutup-sıfır ve kararlılık.",
+  ozet: "Sürekli/ayrık zaman sinyalleri ve sistem özellikleri; temel sinyaller; LTI sistemler ve konvolüsyon; Fourier serileri (CT ve DT), Fourier dönüşümü ve özellikleri; frekans yanıtı, Bode çizimi ve filtreleme; DTFT ve DFT; örnekleme ve örtüşme; Laplace ve z dönüşümleri ile diferansiyel/fark denklemi çözümü, ROC, kutup-sıfır ve kararlılık; ideal ve pratik filtreler, filtre tasarımına giriş (Butterworth derecesi, doğrusal faz, çift doğrusal dönüşüm).",
   konular: [
     {
       baslik: "1. Sinyaller ve Sistemlere Giriş (CT & DT)",
@@ -401,6 +401,52 @@ window.DERSLER["EE3061"] = {
         <p><b>Neden önemli:</b> Fark denklemi ↔ \\( H(z) \\) ↔ kutup-sıfır üçlüsü, sayısal filtre tasarımının (IIR/FIR), sayısal
         kontrolün ve ses/görüntü işlemenin ortak dilidir. "Bu filtre kararlı mı?" sorusu kutupları birim çembere göre
         konumlandırmakla biter.</p>`
+    },
+
+    {
+      baslik: "17. İdeal ve Pratik Filtreler, Filtre Tasarımına Giriş",
+      icerik: `
+        <p>Fourier ve Laplace bize bir sistemin frekans yanıtını okumayı öğretti. <b>Filtre</b>,
+        bu yanıtı bilerek şekillendirdiğimiz sistemdir: bazı frekansları geçirir, bazılarını
+        bastırır. Dersin geri kalanı (örnekleme, kararlılık, kutup-sıfır) burada birleşir.</p>
+        <p><b>İdeal filtre</b> geçirme bandında genliği 1, durdurma bandında tam sıfır olan
+        sistemdir. Alçak geçiren ideal filtre için</p>
+        \\[ H(j\\omega)=\\begin{cases}e^{-j\\omega t_0}, & |\\omega|&lt;\\omega_c\\\\ 0,&|\\omega|\\ge\\omega_c\\end{cases}
+           \\ \\Longleftrightarrow\\
+           h(t)=\\frac{\\omega_c}{\\pi}\\,\\operatorname{sinc}\\!\\left(\\frac{\\omega_c(t-t_0)}{\\pi}\\right) \\]
+        <p>Bu dürtü yanıtı <b>her \\( t \\) için sıfırdan farklıdır</b>, yani \\( t&lt;0 \\) bölgesine de
+        uzanır: ideal filtre <b>nedensel değildir</b>, gerçeklenemez. Ayrıca sonsuz uzundur.
+        Keskin geçişin bedeli budur — bu, örnekleme teoremindeki ideal yeniden yapılandırma
+        filtresinin neden yalnızca teorik olduğunun da cevabıdır.</p>
+        <p><b>Pratik filtre</b> ideali dört toleransla değiştirir: geçirme bandı dalgalanması
+        \\( \\delta_p \\), durdurma bandı bastırması \\( \\delta_s \\), geçiş bandı genişliği
+        \\( \\omega_s-\\omega_p \\) ve derece \\( n \\). Bu dördü birbirinin takasıdır; şartname
+        verildiğinde gereken derece bulunur.</p>
+        <p><b>Butterworth</b> ailesi en sık başlangıç noktasıdır:</p>
+        \\[ |H(j\\omega)|^{2}=\\frac{1}{1+(\\omega/\\omega_c)^{2n}},\\qquad
+           n\\ \\ge\\ \\frac{\\log_{10}\\!\\left(\\dfrac{10^{A_s/10}-1}{10^{A_p/10}-1}\\right)}{2\\log_{10}(\\omega_s/\\omega_p)} \\]
+        <p>Kutupları \\( s \\)-düzleminde \\( \\omega_c \\) yarıçaplı çemberin sol yarısında eşit
+        açılarla dizilir; sağ yarıdakiler kararlılık için atılır. Chebyshev dalgalanmaya izin
+        vererek aynı diklikte daha düşük derece verir; Bessel ise genlikten ödün verip
+        <b>sabit grup gecikmesi</b> \\( \\tau_g=-\\,d\\angle H(j\\omega)/d\\omega \\) sağlar.</p>
+        <p><b>Faz neden önemli?</b> Genlik doğru olsa bile faz doğrusal değilse farklı frekans
+        bileşenleri farklı gecikir ve darbe yayılır. Doğrusal faz \\( \\angle H=-\\omega t_0 \\)
+        demek, tüm bileşenlerin aynı \\( t_0 \\) kadar gecikmesi, yani biçimin korunması demektir.</p>
+        <p><b>Ayrık zamanda.</b> FIR filtreler kutupsuzdur: daima kararlıdır ve katsayıları
+        simetrik seçilirse <b>tam doğrusal faz</b> verir; bedeli yüksek derecedir. IIR filtreler
+        (\\( H(z) \\) kutuplu) aynı keskinliği çok daha az katsayıyla verir ama faz doğrusal değildir
+        ve kutuplar birim çember içinde tutulmalıdır. Analog bir tasarımı ayrık zamana taşımanın
+        klasik yolu <b>çift doğrusal (bilinear) dönüşüm</b>dür:</p>
+        \\[ s=\\frac{2}{T}\\cdot\\frac{1-z^{-1}}{1+z^{-1}},\\qquad
+           \\omega_{\\text{analog}}=\\frac{2}{T}\\tan\\!\\left(\\frac{\\omega_{\\text{ayrık}}T}{2}\\right) \\]
+        <p>Bu dönüşüm sol yarı düzlemi birim çemberin içine eşler — kararlılık korunur — ama
+        frekans eksenini büker (<b>frequency warping</b>). Bu yüzden tasarıma başlarken köşe
+        frekansları <b>ön bükme</b> (pre-warping) ile düzeltilir.</p>
+        <p><b>Sık yapılan hata:</b> şartnameyi yalnız köşe frekansıyla vermek. Derece, köşe
+        frekansından değil <b>geçiş bandının darlığından ve istenen bastırmadan</b> çıkar;
+        \\( \\omega_s/\\omega_p \\) 1'e yaklaştıkça derece hızla büyür.</p>
+        <p><b>EE'de nerede:</b> ADC öncesi örtüşme önleyici filtre, haberleşmede kanal seçimi,
+        güç elektroniğinde anahtarlama gürültüsünün süzülmesi, EKG/EEG'de şebeke (50 Hz) çentiği.</p>`
     }
   ],
   formuller: [
@@ -439,7 +485,13 @@ window.DERSLER["EE3061"] = {
     { ad: "Son Değer Teoremi", formul: `\\( x(\\infty)=\\lim_{s\\to0}sX(s) \\)`, aciklama: "Yalnızca kutuplar sol yarı düzlemdeyse geçerli." },
     { ad: "z Kaydırma (Tek Taraflı)", formul: `\\( x[n-1]\\leftrightarrow z^{-1}X(z)+x[-1] \\)`, aciklama: "Fark denkleminde başlangıç koşulu buradan gelir." },
     { ad: "Geometrik Frekans Yanıtı", formul: `\\( |H(e^{j\\omega})|=\\dfrac{\\prod|e^{j\\omega}-z_i|}{\\prod|e^{j\\omega}-p_i|} \\)`, aciklama: "Kutup yakın → tepe, sıfır yakın → çukur." },
-    { ad: "Negatif Geri Besleme", formul: `\\( H=\\dfrac{H_1}{1+H_1H_2} \\)`, aciklama: "Blok diyagram indirgemesi." }
+    { ad: "Negatif Geri Besleme", formul: `\\( H=\\dfrac{H_1}{1+H_1H_2} \\)`, aciklama: "Blok diyagram indirgemesi." },
+
+    { ad: "İdeal Alçak Geçiren Dürtü Yanıtı", formul: "\\( h(t)=\\dfrac{\\omega_c}{\\pi}\\operatorname{sinc}\\!\\left(\\dfrac{\\omega_c t}{\\pi}\\right) \\)", aciklama: "Her t için sıfırdan farklı → nedensel değil, gerçeklenemez." },
+    { ad: "Butterworth Derece Seçimi", formul: "\\( n\\ge\\dfrac{\\log_{10}\\!\\left(\\frac{10^{A_s/10}-1}{10^{A_p/10}-1}\\right)}{2\\log_{10}(\\omega_s/\\omega_p)} \\)", aciklama: "Derece, köşe frekansından değil geçiş bandı darlığından çıkar." },
+    { ad: "Grup Gecikmesi", formul: "\\( \\tau_g(\\omega)=-\\dfrac{d\\,\\angle H(j\\omega)}{d\\omega} \\)", aciklama: "Sabitse darbe biçimi korunur (doğrusal faz)." },
+    { ad: "Çift Doğrusal Dönüşüm", formul: "\\( s=\\dfrac{2}{T}\\cdot\\dfrac{1-z^{-1}}{1+z^{-1}} \\)", aciklama: "Sol yarı düzlemi birim çember içine eşler; kararlılığı korur." },
+    { ad: "Frekans Bükülmesi (Pre-warping)", formul: "\\( \\omega_a=\\dfrac{2}{T}\\tan\\!\\left(\\dfrac{\\omega_d T}{2}\\right) \\)", aciklama: "Çift doğrusal dönüşüm frekans eksenini büker; köşe önceden düzeltilir." }
   ],
   galeri: [
     /* Örnek: { src: "https://.../tahta.jpg", baslik: "Konvolüsyon çözümü" } */
@@ -462,6 +514,7 @@ window.DERSLER["EE3061"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>\\( x(t) = e^{-2t}u(t) \\) sinyalinin Fourier dönüşümü \\( X(j\\omega) \\) nedir? Genlik spektrumunun \\( \\omega=2 \\)'deki değeri ile \\( \\omega=0 \\)'daki değerini karşılaştırın.</p>`,
       cozum: `
         <p>Tanımdan:</p>
@@ -471,6 +524,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>\\( y(t)=t\\,x(t) \\) sistemi doğrusal mı, zamanla değişmez mi, nedensel mi, kararlı mı?</p>`,
       cozum: `
         <p><b>Doğrusal:</b> \\( t(ax_1+bx_2)=a\\,tx_1+b\\,tx_2 \\) → <b>evet</b>.</p>
@@ -480,6 +534,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 3,
       soru: `<p>\\( x[n]=\\{1,2,3\\} \\) (n=0,1,2) ile \\( h[n]=\\{1,1\\} \\) (n=0,1) konvolüsyonunu hesaplayın. Sonucun uzunluğunu önceden nasıl bilirdiniz?</p>`,
       cozum: `
         <p>Uzunluk \\( N_x+N_h-1=3+2-1=4 \\) → n=0..3.</p>
@@ -488,6 +543,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>\\( x(t)=\\cos(\\omega_0 t) \\) sinyalini \\( \\omega_0 \\) temel frekanslı Fourier serisine açın ve ortalama gücünü Parseval ile doğrulayın. Ardından \\( x[n]=\\cos(0.3\\pi n) \\) dizisinin periyodunu bulun; \\( \\cos(0.3n) \\) periyodik midir?</p>`,
       cozum: `
         <p>Euler: \\( \\cos\\omega_0t=\\tfrac12e^{j\\omega_0t}+\\tfrac12e^{-j\\omega_0t} \\) ⟹ \\( a_1=a_{-1}=\\tfrac12 \\), diğerleri 0.</p>
@@ -497,6 +553,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 7,
       soru: `<p>Fourier dönüşümü özelliklerini kullanarak \\( x(t)=e^{-3(t-2)}u(t-2)\\cos(10t) \\) sinyalinin dönüşümünü yazın.</p>`,
       cozum: `
         <p>Temel çift: \\( e^{-3t}u(t)\\leftrightarrow\\dfrac{1}{3+j\\omega} \\).</p>
@@ -507,6 +564,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 14,
       soru: `<p>\\( a^{n}u[n] \\) dizisinin z-dönüşümünü ve yakınsama bölgesini (ROC) bulun. \\( a=0.5 \\) ve \\( a=2 \\) için sistem (\\( h[n]=a^nu[n] \\)) kararlı mıdır?</p>`,
       cozum: `
         \\[ X(z)=\\sum_{n=0}^{\\infty}a^{n}z^{-n}=\\sum_{n=0}^{\\infty}(az^{-1})^{n}=\\frac{1}{1-az^{-1}}=\\frac{z}{z-a} \\]
@@ -516,6 +574,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "vize",
+      konu: 8,
       soru: `<p>\\( H(j\\omega)=\\dfrac{100}{(1+j\\omega/10)(1+j\\omega/1000)} \\) sistemi için Bode genlik asimptotlarını çizin: DC kazancı (dB), kırılma frekansları ve her bölgedeki eğim nedir? \\( \\omega=100 \\)'deki yaklaşık kazanç ve fazı bulun.</p>`,
       cozum: `
         <p>DC: \\( 20\\log100=40 \\) dB. Kutuplar \\( \\omega=10 \\) ve \\( 1000 \\) rad/s.</p>
@@ -529,6 +588,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 4,
       soru: `<p>Dürtü yanıtı \\( h(t)=u(t)-u(t-2) \\) olan LTI sistem BIBO kararlı mıdır? Basamak yanıtını bulun.</p>`,
       cozum: `
         \\[ \\int_{-\\infty}^{\\infty}|h(t)|\\,dt=\\int_{0}^{2}1\\,dt = 2 &lt; \\infty \\]
@@ -537,6 +597,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 3,
       soru: `<p>İki özdeş dikdörtgen darbenin konvolüsyonunu bulun: \\( x(t)=h(t)=u(t)-u(t-1) \\).</p>`,
       cozum: `
         <p>Çakışma aralıkları: \\( 0\\le t\\le1 \\)'de örtüşme uzunluğu \\( t \\); \\( 1\\le t\\le2 \\)'de \\( 2-t \\).</p>
@@ -546,6 +607,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>\\( H(s)=\\dfrac{s+1}{(s+2)(s+3)} \\) sisteminin dürtü yanıtı \\( h(t) \\) nedir? (nedensel) Sistem kararlı mı; \\( \\omega=1 \\) rad/s'deki kazancı nedir?</p>`,
       cozum: `
         <p>Kısmi kesirler: \\( \\dfrac{s+1}{(s+2)(s+3)}=\\dfrac{A}{s+2}+\\dfrac{B}{s+3} \\).</p>
@@ -556,6 +618,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>\\( x(t)=\\cos(2\\pi\\cdot1000\\,t)+\\cos(2\\pi\\cdot3000\\,t) \\) sinyali için minimum örnekleme frekansı nedir? \\( f_s=4000\\,\\text{Hz} \\) seçilirse ne olur? Bu durumu önlemek için ne yapılır?</p>`,
       cozum: `
         <p>En yüksek bileşen 3000 Hz → Nyquist: \\( f_s&gt;2(3000)=6000\\,\\text{Hz} \\).</p>
@@ -565,6 +628,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 4,
       soru: `<p>\\( e^{j\\omega_0 t} \\) girişi, dürtü yanıtı \\( h(t) \\) olan LTI sisteme uygulanıyor. Çıkış nedir? Buradan \\( x(t)=\\cos(\\omega_0 t) \\) için çıkışı yazın.</p>`,
       cozum: `
         <p>Kompleks üstel, LTI sistemin özfonksiyonudur:</p>
@@ -575,6 +639,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>\\( X(s)=\\dfrac{1}{(s+1)(s+2)} \\) ifadesinin (a) nedensel, (b) anti-nedensel, (c) iki taraflı ters Laplace dönüşümlerini ROC'leriyle yazın. Hangisi kararlı bir sisteme ait olabilir?</p>`,
       cozum: `
         \\[ \\frac{1}{(s+1)(s+2)}=\\frac{1}{s+1}-\\frac{1}{s+2} \\]
@@ -585,6 +650,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>\\( y'(t)+3y(t)=x(t) \\), \\( y(0^-)=2 \\), \\( x(t)=u(t) \\). Laplace ile \\( y(t) \\)'yi bulun; sıfır giriş ve sıfır durum yanıtlarını ayırın.</p>`,
       cozum: `
         <p>Tek taraflı Laplace: \\( sY-y(0^-)+3Y=\\frac1s \\) ⟹ \\( Y(s)=\\dfrac{2}{s+3}+\\dfrac{1}{s(s+3)} \\).</p>
@@ -595,6 +661,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>\\( y[n]=0.8\\,y[n-1]+x[n] \\) sistemi için \\( H(z) \\)'yi, ROC'yi, \\( h[n] \\)'i yazın; kararlı mı? \\( |H(e^{j\\omega})| \\) için \\( \\omega=0 \\) ve \\( \\omega=\\pi \\) değerlerini bulun ve filtre türünü söyleyin.</p>`,
       cozum: `
         <p>\\( Y(1-0.8z^{-1})=X \\) ⟹ \\( H(z)=\\dfrac{1}{1-0.8z^{-1}} \\), kutup \\( z=0.8 \\), nedensel → ROC \\( |z|&gt;0.8 \\).</p>
@@ -604,6 +671,7 @@ window.DERSLER["EE3061"] = {
     },
     {
       tip: "final",
+      konu: 9,
       soru: `<p>Bir DTFT'si \\( X(e^{j\\omega})=\\dfrac{1}{1-0.5e^{-j\\omega}} \\) olan diziden 8 noktalı DFT alınıyor (\\( f_s=8 \\) kHz). (a) DFT bin aralığı kaç Hz'dir? (b) \\( X[2] \\) hangi analog frekansa ve hangi \\( \\omega \\)'ya karşılık gelir? (c) 8 sıfır ekleyip 16 noktalı DFT almak frekans çözünürlüğünü artırır mı?</p>`,
       cozum: `
         <p>(a) \\( \\Delta f=f_s/N=8000/8=1000 \\) Hz.</p>
@@ -611,6 +679,124 @@ window.DERSLER["EE3061"] = {
         \\( X[2]=\\dfrac{1}{1-0.5e^{-j\\pi/2}}=\\dfrac{1}{1+0.5j}=0.8-0.4j \\).</p>
         <p>(c) <b>Hayır.</b> Sıfır ekleme DTFT'yi daha sık örnekler (500 Hz aralık), eğri daha pürüzsüz görünür; ama iki yakın
         tonu ayırma yeteneği (çözünürlük) gerçek kayıt süresine \\( N_{gerçek}T_s \\) bağlıdır — değişmez.</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 16,
+      soru: `<p>Bir alçak geçiren filtre için şartname: \\( f_p=1\\,\\text{kHz} \\)'de en fazla
+        \\( A_p=1\\,\\text{dB} \\) zayıflama, \\( f_s=4\\,\\text{kHz} \\)'de en az \\( A_s=40\\,\\text{dB} \\)
+        bastırma. (a) Gereken Butterworth derecesini bulun. (b) \\( f_s \\) 2 kHz'e indirilirse derece
+        ne olur? (c) Sonucu yorumlayın.</p>`,
+      cozum: `<p><b>(a)</b> \\( 10^{40/10}-1=9999 \\), \\( 10^{1/10}-1=0.2589 \\).
+        Oran \\( =38621 \\); \\( \\log_{10}(38621)=4.587 \\).
+        \\( \\log_{10}(4/1)=0.602 \\). Buradan
+        \\( n\\ge\\dfrac{4.587}{2\\cdot0.602}=3.81\\Rightarrow n=4 \\).</p>
+        <p><b>(b)</b> \\( \\log_{10}(2)=0.301 \\Rightarrow n\\ge\\dfrac{4.587}{0.602}=7.62\\Rightarrow n=8 \\).</p>
+        <p><b>(c)</b> Geçiş bandı yarıya inince derece iki katına çıktı; yani gereken op-amp/kat
+        sayısı da iki katına çıkar. <b>Ders:</b> maliyeti belirleyen köşe frekansı değil,
+        \\( \\omega_s/\\omega_p \\) oranıdır. Daha dik geçiş isteniyorsa Chebyshev ile aynı iş daha
+        düşük dereceyle yapılabilir — bedeli geçirme bandı dalgalanması ve bozulan fazdır.</p>`
+    },
+    {
+      tip: "final",
+      konu: 16,
+      soru: `<p>İdeal alçak geçiren filtrenin neden gerçeklenemediğini dürtü yanıtı üzerinden açıklayın.
+        Pratikte hangi üç ödün verilir? Doğrusal fazın darbe iletiminde ne anlama geldiğini yazın.</p>`,
+      cozum: `<p><b>Gerçeklenememe:</b> İdeal filtrenin frekans yanıtı dikdörtgen olduğundan dürtü yanıtı
+        \\( \\operatorname{sinc} \\) fonksiyonudur. \\( \\operatorname{sinc} \\) her \\( t \\) için sıfırdan
+        farklıdır, özellikle \\( t&lt;0 \\) için de değer alır. Yani sistem giriş gelmeden tepki verirdi:
+        <b>nedensel değil</b>. Ayrıca mutlak integrallenebilir olmadığından kesilip kısaltılması gerekir,
+        bu da Gibbs dalgalanması üretir.</p>
+        <p><b>Üç ödün:</b> (1) geçirme bandında bir miktar dalgalanma \\( \\delta_p \\),
+        (2) durdurma bandında sonlu bastırma \\( \\delta_s \\), (3) sıfır genişlikte değil sonlu
+        genişlikte bir geçiş bandı. Bunlar gevşedikçe gereken derece düşer.</p>
+        <p><b>Doğrusal faz:</b> \\( \\angle H(j\\omega)=-\\omega t_0 \\) ise grup gecikmesi
+        \\( \\tau_g=t_0 \\) sabittir; bütün frekans bileşenleri aynı süre gecikir ve çıkış, girişin
+        yalnızca <b>geciktirilmiş</b> hâli olur — darbe yayılmaz. Faz doğrusal değilse bileşenler
+        farklı gecikir, kare darbe çan/çınlama alır. Bu yüzden veri iletiminde Bessel veya simetrik
+        katsayılı FIR tercih edilir.</p>`
+    },
+
+    {
+      tip: "vize",
+      konu: 0,
+      soru: `<p>Aşağıdaki sinyalleri sınıflandırın ve istenenleri bulun.
+        (a) \\( x(t)=5\\cos(4t)+3\\cos(6t) \\) periyodik midir? Periyodu nedir?
+        (b) \\( x[n]=\\cos(n) \\) periyodik midir?
+        (c) \\( x(t)=e^{-2t}u(t) \\) enerji sinyali mi güç sinyali mi? Değerini bulun.</p>`,
+      cozum: `<p><b>(a)</b> \\( T_1=2\\pi/4=\\pi/2 \\), \\( T_2=2\\pi/6=\\pi/3 \\).
+        Oran \\( T_1/T_2=3/2 \\) <b>rasyonel</b>, öyleyse toplam periyodiktir. Ortak periyot,
+        \\( T_1 \\) ve \\( T_2 \\)'nin en küçük ortak katıdır: \\( T_0=\\pi \\)
+        (\\( \\pi=2T_1=3T_2 \\)). Eşdeğer olarak \\( \\omega_0=\\gcd(4,6)=2 \\Rightarrow T_0=2\\pi/2=\\pi \\).</p>
+        <p><b>(b)</b> Ayrık zamanda periyodiklik için \\( \\Omega_0/2\\pi \\) rasyonel olmalıdır.
+        Burada \\( \\Omega_0=1 \\) ve \\( 1/2\\pi \\) irrasyoneldir: \\( x[n]=\\cos(n) \\)
+        <b>periyodik değildir</b>. Sürekli zamandaki karşılığı \\( \\cos(t) \\) periyodik olduğu hâlde —
+        ayrık zamanda örnekleme bu özelliği bozabilir.</p>
+        <p><b>(c)</b> \\( E=\\int_0^{\\infty}e^{-4t}dt=\\dfrac{1}{4} \\) sonlu ve sıfırdan farklı.
+        Sonlu enerjili bir sinyalin ortalama gücü sıfırdır, dolayısıyla bu bir <b>enerji sinyalidir</b>,
+        \\( E=0.25\\ \\text{J} \\). Kural: enerjisi sonlu olan güç sinyali olamaz, gücü sonlu ve
+        sıfırdan farklı olan enerji sinyali olamaz.</p>`
+    },
+    {
+      tip: "vize",
+      konu: 1,
+      soru: `<p>Dürtü fonksiyonunun eleme (sifting) özelliğini kullanarak hesaplayın:
+        (a) \\( \\displaystyle\\int_{-\\infty}^{\\infty}(t^{2}+3)\\,\\delta(t-2)\\,dt \\)
+        (b) \\( \\displaystyle\\int_{0}^{5}e^{-t}\\delta(t-7)\\,dt \\)
+        (c) \\( \\displaystyle\\int_{-\\infty}^{\\infty}\\cos(\\pi t)\\,\\delta(2t-1)\\,dt \\)
+        (d) \\( x[n]=u[n]-u[n-3] \\) dizisini dürtülerle yazın.</p>`,
+      cozum: `<p><b>(a)</b> Eleme özelliği: \\( \\int f(t)\\delta(t-t_0)dt=f(t_0) \\).
+        \\( f(2)=2^{2}+3=\\mathbf{7} \\).</p>
+        <p><b>(b)</b> Dürtü \\( t=7 \\)'de, integral aralığı \\( [0,5] \\). Dürtü aralığın <b>dışında</b>
+        kaldığı için sonuç <b>0</b>. Sık yapılan hata, aralığa bakmadan \\( e^{-7} \\) yazmaktır.</p>
+        <p><b>(c)</b> Ölçekleme özelliği: \\( \\delta(at)=\\dfrac{1}{|a|}\\delta(t) \\), yani
+        \\( \\delta(2t-1)=\\delta\\bigl(2(t-\\tfrac12)\\bigr)=\\tfrac12\\delta(t-\\tfrac12) \\).
+        Sonuç: \\( \\tfrac12\\cos(\\pi/2)=\\mathbf{0} \\).</p>
+        <p><b>(d)</b> \\( u[n] \\) 0'dan itibaren 1, \\( u[n-3] \\) 3'ten itibaren 1 olduğundan fark
+        yalnız \\( n=0,1,2 \\)'de 1'dir: \\( x[n]=\\delta[n]+\\delta[n-1]+\\delta[n-2] \\).</p>`
+    },
+    {
+      tip: "final",
+      konu: 10,
+      soru: `<p>\\( x[n]=\\{1,1,1,1\\} \\) (\\( n=0,1,2,3 \\)) dizisinin 4 noktalı DFT'sini hesaplayın.
+        (a) \\( X[k] \\) değerlerini bulun. (b) Sonucu DTFT'siyle ilişkilendirin.
+        (c) Aynı diziyi 8 noktaya sıfır dolgusu (zero padding) yaparsak ne değişir — çözünürlük gerçekten artar mı?</p>`,
+      cozum: `<p><b>(a)</b> \\( X[k]=\\sum_{n=0}^{3}x[n]e^{-j2\\pi kn/4}=\\sum_{n=0}^{3}(-j)^{kn} \\).
+        \\( X[0]=1+1+1+1=4 \\).
+        \\( X[1]=1+(-j)+(-1)+(j)=0 \\). Benzer şekilde \\( X[2]=1-1+1-1=0 \\), \\( X[3]=0 \\).
+        Yani \\( X[k]=\\{4,0,0,0\\} \\).</p>
+        <p><b>(b)</b> Dizinin DTFT'si Dirichlet çekirdeğidir:
+        \\( X(e^{j\\Omega})=e^{-j3\\Omega/2}\\dfrac{\\sin(2\\Omega)}{\\sin(\\Omega/2)} \\).
+        DFT bu sürekli fonksiyonun \\( \\Omega_k=2\\pi k/4 \\) noktalarındaki <b>örnekleridir</b>.
+        \\( k=1,2,3 \\) tam olarak Dirichlet çekirdeğinin sıfırlarına denk geldiği için 0 çıktı.</p>
+        <p><b>(c)</b> Sıfır dolgusu DTFT'yi <b>daha sık örnekler</b> (8 nokta), bu yüzden grafik
+        yumuşar ve tepe konumu daha iyi okunur. Ama DTFT'nin kendisi değişmez: gerçek
+        <b>frekans ayırma gücü</b> yalnız gerçek veri uzunluğuna (\\( \\Delta f\\approx f_s/N_{\\text{gerçek}} \\))
+        bağlıdır. Sıfır dolgusu <b>interpolasyondur, çözünürlük artışı değildir</b> — sınavda en sık
+        sorulan ayrımlardan biri.</p>`
+    },
+    {
+      tip: "final",
+      konu: 15,
+      soru: `<p>\\( H(z)=\\dfrac{z}{(z-0.5)(z-2)} \\) sistemi için:
+        (a) olası tüm ROC'ları ve her birine karşılık gelen sistemin nedensel/kararlı olup olmadığını yazın.
+        (b) Hem nedensel hem kararlı bir seçim var mıdır? (c) Kararlı olan seçimin \\( h[n] \\)'ini bulun.</p>`,
+      cozum: `<p>Kutuplar \\( z=0.5 \\) ve \\( z=2 \\). Üç ROC olasıdır:</p>
+        <ul>
+          <li>\\( |z|&lt;0.5 \\): iki kutup da dışarıda → <b>anti-nedensel</b>. Birim çemberi içermez → <b>kararsız</b>.</li>
+          <li>\\( 0.5&lt;|z|&lt;2 \\): halka → <b>iki taraflı</b> (nedensel değil). Birim çemberi içerir → <b>kararlı</b>.</li>
+          <li>\\( |z|&gt;2 \\): en dış bölge → <b>nedensel</b>. Birim çemberi içermez → <b>kararsız</b>.</li>
+        </ul>
+        <p><b>(b)</b> Hayır. Nedensellik ROC'un en dış bölge olmasını, kararlılık ROC'un birim çemberi
+        içermesini gerektirir; \\( |z|=2>1 \\) kutbu dışarıda kaldığı için bu iki şart aynı anda
+        sağlanamaz. <b>Kural:</b> nedensel + kararlı ⇔ tüm kutuplar birim çemberin <b>içinde</b>.</p>
+        <p><b>(c)</b> Basit kesirlere ayırma:
+        \\( \\dfrac{H(z)}{z}=\\dfrac{1}{(z-0.5)(z-2)}=\\dfrac{-2/3}{z-0.5}+\\dfrac{2/3}{z-2} \\),
+        yani \\( H(z)=-\\dfrac{2}{3}\\dfrac{z}{z-0.5}+\\dfrac{2}{3}\\dfrac{z}{z-2} \\).
+        \\( 0.5&lt;|z|&lt;2 \\) için 0.5 kutbu sağa (nedensel), 2 kutbu sola (anti-nedensel) açılır:</p>
+        \\[ h[n]=-\\tfrac{2}{3}(0.5)^{n}u[n]-\\tfrac{2}{3}(2)^{n}u[-n-1] \\]
+        <p>Her iki terim de \\( |n|\\to\\infty \\) için sönüyor: mutlak toplanabilir, yani kararlı.</p>`
     }
   ]
 };

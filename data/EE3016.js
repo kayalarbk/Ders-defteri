@@ -14,7 +14,7 @@ window.DERSLER["EE3016"] = {
   ad: "Fundamentals of Electromagnetics",
   donem: "3. Sınıf · 1. Dönem",
   renk: "#60A5FA",
-  ozet: "Vektör analizi ve koordinat sistemleri; Coulomb ve Gauss yasasıyla elektrostatik; potansiyel, enerji, dipol ve görüntü yöntemi; iletken/dielektrik, sınır koşulları ve kapasitans; Poisson-Laplace; akım ve süreklilik; Biot-Savart/Ampere ve vektör potansiyel ile manyetostatik; kuvvet, malzeme ve indüktans; Faraday ve Maxwell denklemleri; düzlem dalgalar, kayıplı ortam ve deri derinliği, sınırdan yansıma/iletim, Poynting vektörü.",
+  ozet: "Vektör analizi ve koordinat sistemleri; Coulomb ve Gauss yasasıyla elektrostatik; potansiyel, enerji, dipol ve görüntü yöntemi; iletken/dielektrik, sınır koşulları ve kapasitans; Poisson-Laplace; akım ve süreklilik; Biot-Savart/Ampere ve vektör potansiyel ile manyetostatik; kuvvet, malzeme ve indüktans; Faraday ve Maxwell denklemleri; düzlem dalgalar, kayıplı ortam ve deri derinliği, sınırdan yansıma/iletim, Poynting vektörü; dalga polarizasyonu ve uyum kaybı; iletim hatları (karakteristik empedans, giriş empedansı, çeyrek dalga uyumlaştırma, Smith abağı).",
   konular: [
     {
       baslik: "1. Vektör Analizi ve Koordinat Sistemleri",
@@ -436,6 +436,91 @@ window.DERSLER["EE3016"] = {
         </ul>
         <p><b>Neden önemli:</b> Poynting vektörü, devrede "güç kablodan gider" sezgisini düzeltir ve anten kazancı, radar denklemi,
         mikrodalga ısıtma ve SAR (dokuda yutulan güç) hesaplarının başlangıç noktasıdır.</p>`
+    },
+
+    {
+      baslik: "18. Dalga Polarizasyonu",
+      icerik: `
+        <p>Düzlem dalga konusunda alanın genliğini ve yayılma sabitini bulduk, ama <b>\\( \\mathbf E \\)
+        vektörünün uç noktasının zamanla çizdiği şekli</b> hiç sormadık. Polarizasyon tam olarak budur
+        ve anten–alıcı eşleşmesinden uydu haberleşmesine kadar pratik sonuçları vardır.</p>
+        <p>\\( +z \\) yönünde giden bir dalgayı iki dik bileşene ayıralım:</p>
+        \\[ \\mathbf E(z,t)=E_{x0}\\cos(\\omega t-\\beta z)\\,\\hat{\\mathbf x}
+           +E_{y0}\\cos(\\omega t-\\beta z+\\delta)\\,\\hat{\\mathbf y} \\]
+        <p>Şekli belirleyen yalnızca genlik oranı \\( E_{y0}/E_{x0} \\) ve faz farkı \\( \\delta \\)'dır:</p>
+        <ul>
+          <li><b>Doğrusal:</b> \\( \\delta=0 \\) veya \\( \\delta=\\pi \\). Uç nokta sabit bir doğru
+          üzerinde gider gelir; doğrunun eğimi \\( \\arctan(E_{y0}/E_{x0}) \\).</li>
+          <li><b>Dairesel:</b> \\( E_{x0}=E_{y0} \\) <b>ve</b> \\( \\delta=\\pm90^\\circ \\). Uç nokta
+          çember çizer. \\( \\delta=-90^\\circ \\) sağ el dairesel (RHCP), \\( \\delta=+90^\\circ \\)
+          sol el dairesel (LHCP) — başparmak yayılma yönünde, parmaklar dönüş yönünde.</li>
+          <li><b>Eliptik:</b> genel durum. Eksenel oran \\( AR=E_{maj}/E_{min} \\) ile ölçülür;
+          \\( AR=1 \\) dairesel, \\( AR\\to\\infty \\) doğrusaldır. Pratikte \\( AR&lt;3\\ \\text{dB} \\)
+          "dairesel sayılır".</li>
+        </ul>
+        <p><b>Neden önemli?</b> Alıcı anten, gelen dalganın yalnızca kendi polarizasyonuna uyan
+        bileşenini toplar. <b>Polarizasyon uyumsuzluk kaybı</b>:</p>
+        \\[ \\text{PLF}=|\\hat{\\boldsymbol\\rho}_i\\cdot\\hat{\\boldsymbol\\rho}_a|^{2} \\]
+        <p>İki doğrusal anten arasında açı \\( \\psi \\) ise \\( \\text{PLF}=\\cos^{2}\\psi \\): 90°'de
+        <b>teorik olarak hiç sinyal alınmaz</b>. Doğrusal bir anten dairesel bir dalgayı alırsa
+        \\( \\text{PLF}=0.5 \\), yani sabit 3 dB kayıp; ama yönelimden bağımsızdır. RHCP anten LHCP
+        dalgayı alamaz — bu özellik uydu ve GPS'te frekans tekrar kullanımı için kullanılır.</p>
+        <p><b>Neden dairesel kullanılır?</b> İyonosferden geçen dalganın polarizasyon düzlemi
+        <b>Faraday dönmesi</b> ile döner; doğrusal polarizasyonda alınan güç öngörülemez biçimde
+        değişir, dairesel polarizasyonda değişmez. Aynı sebeple dönen/yalpalayan mobil terminallerde
+        ve yansımaların bol olduğu ortamlarda dairesel tercih edilir (zemin yansıması dönüş yönünü
+        tersine çevirir, bu da çok yollu girişimi bastırır).</p>
+        <p><b>Sık yapılan hata:</b> dairesel polarizasyon için yalnız \\( \\delta=90^\\circ \\) şartını
+        kontrol etmek. Genlikler eşit değilse sonuç elipstir. İki koşul birlikte sağlanmalıdır.</p>
+        <p><b>EE'de nerede:</b> GPS ve uydu TV alıcıları (RHCP), Wi-Fi ve mobil baz istasyonlarında
+        ±45° çapraz polarizasyonla kapasite ikiye katlama, RFID okuyucular, radar hedef sınıflandırma.</p>`
+    },
+    {
+      baslik: "19. İletim Hatları: Dalga Denklemi, Yansıma ve Smith Abağı",
+      icerik: `
+        <p>Devre teorisinde bir tel "her yerde aynı gerilim" demekti. Bu, ancak telin uzunluğu dalga
+        boyunun yanında küçükse doğrudur. \\( \\ell\\gtrsim\\lambda/10 \\) olduğunda gerilim ve akım
+        tel boyunca <b>dalga olarak</b> yayılır; hattı dağıtılmış \\( R,L,G,C \\) ile modellemek gerekir.</p>
+        <p>Telegrafçı denklemleri, kayıpsız hat için (\\( R=G=0 \\)) tanıdık dalga denklemine indirgenir:</p>
+        \\[ \\gamma=\\sqrt{(R+j\\omega L)(G+j\\omega C)}=\\alpha+j\\beta,\\qquad
+           Z_0=\\sqrt{\\frac{R+j\\omega L}{G+j\\omega C}}\\ \\xrightarrow{\\ \\text{kayıpsız}\\ }\\ \\sqrt{\\frac{L}{C}} \\]
+        <p>\\( Z_0 \\) bir "direnç" değildir; hat üzerinde ilerleyen tek bir dalga için gerilim/akım
+        oranıdır ve enerji harcamaz. Kayıpsız hatta \\( \\beta=\\omega\\sqrt{LC} \\), faz hızı
+        \\( u_p=1/\\sqrt{LC} \\).</p>
+        <p><b>Yansıma.</b> Hat \\( Z_L \\) ile sonlandırıldığında, ancak \\( Z_L=Z_0 \\) ise gelen
+        dalganın tamamı yüke aktarılır. Aksi hâlde bir kısmı geri döner:</p>
+        \\[ \\Gamma_L=\\frac{Z_L-Z_0}{Z_L+Z_0},\\qquad
+           \\text{SWR}=\\frac{1+|\\Gamma_L|}{1-|\\Gamma_L|},\\qquad
+           \\frac{P_{\\text{iletilen}}}{P_{\\text{gelen}}}=1-|\\Gamma_L|^{2} \\]
+        <p>Üç özel durum ezberlenmelidir: açık devre \\( \\Gamma=+1 \\), kısa devre \\( \\Gamma=-1 \\),
+        uyumlu yük \\( \\Gamma=0 \\). Bu ifadeler, düzlem dalganın ortam sınırından yansıması
+        konusundakilerle <b>birebir aynıdır</b>; \\( \\eta \\) yerine \\( Z_0 \\) yazılmıştır. Elektromanyetik
+        dalga ile iletim hattı aynı matematiğin iki yüzüdür.</p>
+        <p><b>Giriş empedansı.</b> Yükten \\( \\ell \\) kadar geride hattın girişinde görülen empedans:</p>
+        \\[ Z_{in}(\\ell)=Z_0\\,\\frac{Z_L+jZ_0\\tan\\beta\\ell}{Z_0+jZ_L\\tan\\beta\\ell} \\]
+        <p>Bu tek denklem üç önemli sonucu barındırır:</p>
+        <ul>
+          <li><b>\\( \\ell=\\lambda/2 \\):</b> \\( \\tan\\beta\\ell=0 \\Rightarrow Z_{in}=Z_L \\). Yarım dalga
+          hat empedansı aynen tekrarlar.</li>
+          <li><b>\\( \\ell=\\lambda/4 \\):</b> \\( Z_{in}=Z_0^{2}/Z_L \\). Empedansı tersine çevirir;
+          \\( Z_0=\\sqrt{Z_{in}Z_L} \\) seçilerek <b>çeyrek dalga uyumlaştırıcı</b> yapılır.
+          Kısa devre bir çeyrek dalga hat açık devre, açık devre olan ise kısa devre gibi görünür.</li>
+          <li><b>Kısa/açık sonlandırılmış kısa hatlar</b> saf reaktans verir: hat parçası bobin
+          veya kondansatör yerine kullanılabilir (stub).</li>
+        </ul>
+        <p><b>Smith abağı</b> bu hesabı grafikleştirir. Normalize empedans \\( z=Z/Z_0 \\) düzlemi,
+        \\( \\Gamma \\) düzlemindeki birim çembere eşlenir:</p>
+        \\[ z=\\frac{1+\\Gamma}{1-\\Gamma} \\]
+        <p>Sabit direnç ve sabit reaktans eğrileri çembere dönüşür. Hat boyunca yüke doğru veya
+        kaynağa doğru hareket, merkez etrafında <b>sabit yarıçaplı dönme</b> demektir; tam tur
+        \\( \\lambda/2 \\)'ye karşılık gelir. Abakla stub uyumlaştırma, SWR okuma ve empedans
+        dönüşümü cetvelsiz yapılır.</p>
+        <p><b>Sık yapılan hata:</b> \\( \\Gamma \\)'nın hat boyunca genliğinin değiştiğini sanmak.
+        Kayıpsız hatta \\( |\\Gamma| \\) sabittir, yalnız <b>fazı</b> \\( e^{-2j\\beta\\ell} \\) ile döner —
+        Smith abağındaki dairesel hareketin sebebi budur.</p>
+        <p><b>EE'de nerede:</b> PCB üzerindeki yüksek hızlı sayısal hatlar (50 Ω kontrollü empedans,
+        sonlandırma dirençleri), anten besleme hatları, RF güç kuvvetlendiricisi çıkış uyumlaştırması,
+        koaksiyel kablo ve zaman alanı reflektometresi (TDR) ile kablo arızası bulma.</p>`
     }
   ],
   formuller: [
@@ -476,7 +561,17 @@ window.DERSLER["EE3016"] = {
     { ad: "Kayıp Tanjantı", formul: `\\( \\tan\\delta=\\dfrac{\\sigma}{\\omega\\varepsilon} \\)`, aciklama: "≫1 iyi iletken, ≪1 düşük kayıplı dielektrik." },
     { ad: "Yansıma / İletim", formul: `\\( \\Gamma=\\dfrac{\\eta_2-\\eta_1}{\\eta_2+\\eta_1},\\;\\tau=\\dfrac{2\\eta_2}{\\eta_2+\\eta_1} \\)`, aciklama: "Dik geliş; 1+Γ=τ; güç oranı |Γ|²." },
     { ad: "Duran Dalga Oranı", formul: `\\( s=\\dfrac{1+|\\Gamma|}{1-|\\Gamma|} \\)`, aciklama: "VSWR; eşlenmiş yükte 1." },
-    { ad: "Ortalama Güç Yoğunluğu", formul: `\\( S_{ort}=\\dfrac{E_0^2}{2\\eta}=\\dfrac12\\text{Re}\\{\\mathbf E_s\\times\\mathbf H_s^*\\} \\)`, aciklama: "Kayıpsız düzlem dalga; W/m²." }
+    { ad: "Ortalama Güç Yoğunluğu", formul: `\\( S_{ort}=\\dfrac{E_0^2}{2\\eta}=\\dfrac12\\text{Re}\\{\\mathbf E_s\\times\\mathbf H_s^*\\} \\)`, aciklama: "Kayıpsız düzlem dalga; W/m²." },
+
+    { ad: "Polarizasyon Alan İfadesi", formul: "\\( \\mathbf E=E_{x0}\\cos(\\omega t-\\beta z)\\hat{\\mathbf x}+E_{y0}\\cos(\\omega t-\\beta z+\\delta)\\hat{\\mathbf y} \\)", aciklama: "Şekli yalnız genlik oranı ve faz farkı δ belirler." },
+    { ad: "Dairesel Polarizasyon Koşulu", formul: "\\( E_{x0}=E_{y0}\\ \\ \\text{ve}\\ \\ \\delta=\\pm90^\\circ \\)", aciklama: "İki koşul birlikte sağlanmazsa sonuç eliptiktir." },
+    { ad: "Eksenel Oran", formul: "\\( AR=\\dfrac{E_{maj}}{E_{min}},\\quad 1\\le AR\\le\\infty \\)", aciklama: "AR = 1 dairesel, AR → ∞ doğrusal; pratikte AR < 3 dB dairesel sayılır." },
+    { ad: "Polarizasyon Uyum Kaybı", formul: "\\( \\text{PLF}=|\\hat{\\boldsymbol\\rho}_i\\cdot\\hat{\\boldsymbol\\rho}_a|^{2}=\\cos^{2}\\psi \\)", aciklama: "Doğrusal–doğrusal 90°'de sıfır; doğrusal–dairesel daima 0.5 (3 dB)." },
+    { ad: "İletim Hattı Yayılma Sabiti", formul: "\\( \\gamma=\\sqrt{(R+j\\omega L)(G+j\\omega C)}=\\alpha+j\\beta \\)", aciklama: "Kayıpsızda \\( \\alpha=0,\\ \\beta=\\omega\\sqrt{LC} \\)." },
+    { ad: "Karakteristik Empedans", formul: "\\( Z_0=\\sqrt{\\dfrac{R+j\\omega L}{G+j\\omega C}}\\ \\to\\ \\sqrt{\\dfrac{L}{C}} \\)", aciklama: "Direnç değil; ilerleyen tek dalganın V/I oranı, güç harcamaz." },
+    { ad: "Hat Giriş Empedansı", formul: "\\( Z_{in}=Z_0\\dfrac{Z_L+jZ_0\\tan\\beta\\ell}{Z_0+jZ_L\\tan\\beta\\ell} \\)", aciklama: "λ/2'de tekrarlar, λ/4'te tersine çevirir." },
+    { ad: "Çeyrek Dalga Uyumlaştırıcı", formul: "\\( Z_{in}=\\dfrac{Z_0^{2}}{Z_L}\\ \\Rightarrow\\ Z_0=\\sqrt{Z_{in}Z_L} \\)", aciklama: "İki gerçek empedansı tek bir λ/4 hat parçasıyla uyumlar." },
+    { ad: "Smith Abağı Dönüşümü", formul: "\\( z=\\dfrac{1+\\Gamma}{1-\\Gamma},\\qquad \\Gamma(\\ell)=\\Gamma_L e^{-2j\\beta\\ell} \\)", aciklama: "Kayıpsız hatta |Γ| sabit, yalnız fazı döner; tam tur = λ/2." }
   ],
   galeri: [],
   dokumanlar: [],
@@ -493,6 +588,7 @@ window.DERSLER["EE3016"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 0,
       soru: `<p>\\( \\mathbf A=\\rho^2\\hat{\\boldsymbol\\rho}+z\\,\\hat{\\mathbf z} \\) (silindirik) alanının diverjansını bulun. Yarıçapı 2, yüksekliği 3 olan (z=0..3) kapalı silindirden çıkan toplam akıyı hem hacim integraliyle hem yüzey integraliyle hesaplayıp diverjans teoremini doğrulayın.</p>`,
       cozum: `
         <p>Silindirik diverjans: \\( \\nabla\\cdot\\mathbf A=\\dfrac1\\rho\\dfrac{\\partial(\\rho A_\\rho)}{\\partial\\rho}+\\dfrac{\\partial A_z}{\\partial z}
@@ -503,6 +599,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>Boşlukta \\( Q=4\\,\\text{nC} \\) noktasal yükten \\( r=2\\,\\text{m} \\) uzaklıkta elektrik alan şiddeti \\( E \\) ve potansiyel \\( V \\) nedir? \\( (k\\approx 9\\times10^{9}) \\)</p>`,
       cozum: `
         \\[ E=\\frac{kQ}{r^2}=\\frac{9\\times10^{9}\\cdot 4\\times10^{-9}}{2^2}=\\frac{36}{4}=9\\;\\text{V/m}, \\qquad V=\\frac{kQ}{r}=\\frac{36}{2}=18\\;\\text{V} \\]
@@ -510,6 +607,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>Sonsuz uzun bir çizgi yükünün yoğunluğu \\( \\rho_L=1\\,\\text{nC/m} \\). Gauss yasasıyla \\( r=2\\,\\text{m} \\) uzaklıkta elektrik alanı bulun; hangi Gauss yüzeyini seçtiğinizi ve neden kapakların katkı vermediğini açıklayın. \\( (k=9\\times10^9) \\)</p>`,
       cozum: `
         <p>Yüzey: çizgiyle eş eksenli, yarıçapı r, uzunluğu L silindir. Simetriden \\( \\mathbf D=D_\\rho\\hat{\\boldsymbol\\rho} \\):
@@ -518,6 +616,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>Plaka alanı \\( A=100\\,\\text{cm}^2 \\), aralık \\( d=1\\,\\text{mm} \\), dielektrik \\( \\varepsilon_r=4 \\) olan paralel plaka kapasitörün sığasını bulun. 100 V uygulanırsa depolanan enerji ve plakalardaki yük nedir? \\( (\\varepsilon_0=8.85\\times10^{-12}) \\)</p>`,
       cozum: `
         \\[ C=\\frac{\\varepsilon_r\\varepsilon_0 A}{d}=\\frac{4(8.85\\times10^{-12})(0.01)}{0.001}\\approx 3.54\\times10^{-10}\\,\\text{F}=354\\,\\text{pF} \\]
@@ -526,6 +625,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>İki iletken düzlem \\( x=0 \\)'da \\( V=0 \\), \\( x=d \\)'de \\( V=V_0 \\) tutuluyor; ara yüksüz (\\( \\varepsilon \\)). Laplace denklemiyle \\( V(x) \\), \\( \\mathbf E \\), plakalardaki \\( \\rho_S \\) ve birim alan kapasitansı bulun.</p>`,
       cozum: `
         <p>\\( \\nabla^2V=d^2V/dx^2=0 \\) ⟹ \\( V=Ax+B \\). \\( V(0)=0\\Rightarrow B=0 \\); \\( V(d)=V_0\\Rightarrow A=V_0/d \\).</p>
@@ -535,6 +635,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>\\( z&gt;0 \\) bölgesinde \\( \\varepsilon_{r1}=2 \\), \\( z&lt;0 \\) bölgesinde \\( \\varepsilon_{r2}=5 \\); sınırda yüzey yükü yok. 1. ortamda \\( \\mathbf E_1=3\\hat{\\mathbf x}+4\\hat{\\mathbf z} \\) V/m ise \\( \\mathbf E_2 \\)'yi bulun. Alanın normalle yaptığı açı hangi ortamda daha büyüktür?</p>`,
       cozum: `
         <p>Teğet E sürekli: \\( E_{2x}=3 \\). Normal D sürekli: \\( \\varepsilon_1E_{1z}=\\varepsilon_2E_{2z}\\Rightarrow E_{2z}=\\dfrac{2\\cdot4}{5}=1.6 \\).</p>
@@ -544,6 +645,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 4,
       soru: `<p>Topraklanmış sonsuz iletken düzlemden \\( h=2\\,\\text{cm} \\) yukarıda \\( Q=5\\,\\text{nC} \\) yük var. Yüke etkiyen kuvveti ve düzlemde yükün tam altındaki noktada indüklenen yüzey yük yoğunluğunu bulun.</p>`,
       cozum: `
         <p>Görüntü yükü \\( -Q \\), \\( 2h=4 \\) cm uzakta:</p>
@@ -553,6 +655,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 8,
       soru: `<p>Sonsuz uzun düz telden \\( I=10\\,\\text{A} \\) akıyor. \\( r=5\\,\\text{cm} \\) uzaklıkta \\( H \\) ve \\( B \\) nedir? Aynı akım yarıçapı 1 cm olan dolu iletkenden geçiyorsa \\( r=0.5 \\) cm'de (iletken içinde) H kaçtır? \\( (\\mu_0=4\\pi\\times10^{-7}) \\)</p>`,
       cozum: `
         \\[ H=\\frac{I}{2\\pi r}=\\frac{10}{2\\pi(0.05)}\\approx 31.8\\;\\text{A/m}, \\qquad B=\\mu_0 H\\approx 40\\;\\mu\\text{T} \\]
@@ -561,6 +664,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "vize",
+      konu: 10,
       soru: `<p>Uzunluğu 20 cm, kesiti \\( 4\\,\\text{cm}^2 \\), 500 sarımlı hava çekirdekli bir solenoidin indüktansını bulun. Çekirdeğe \\( \\mu_r=1000 \\) ferrit konursa L ne olur? 2 A akımda depolanan enerjiyi (ferritli) hesaplayın.</p>`,
       cozum: `
         \\[ L=\\frac{\\mu_0N^2A}{\\ell}=\\frac{(4\\pi\\times10^{-7})(500)^2(4\\times10^{-4})}{0.2}=6.28\\times10^{-4}\\,\\text{H}=0.63\\,\\text{mH} \\]
@@ -569,6 +673,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>Alanı \\( A=0.02\\,\\text{m}^2 \\) olan bir halkadan geçen manyetik alan \\( B(t)=0.5\\sin(100t)\\,\\text{T} \\). İndüklenen emk'nin tepe değeri nedir? Halka 50 sarımlı olsaydı?</p>`,
       cozum: `
         \\[ \\varepsilon=-A\\frac{dB}{dt}=-0.02\\cdot 0.5\\cdot100\\cos(100t)=-\\cos(100t) \\]
@@ -576,6 +681,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>Uzunluğu \\( L=0.5\\,\\text{m} \\) olan iletken çubuk, \\( B=0.4\\,\\text{T} \\) düzgün alana dik iki ray üzerinde \\( v=10\\,\\text{m/s} \\) ile kayıyor; raylar \\( R=2\\,\\Omega \\) ile kapatılmış. (a) emk, (b) akım, (c) çubuğu sabit hızda tutmak için gereken kuvvet ve mekanik güç, (d) dirençte harcanan güç nedir?</p>`,
       cozum: `
         <p>(a) \\( \\varepsilon=BLv=0.4\\cdot0.5\\cdot10=2 \\) V. (b) \\( I=\\varepsilon/R=1 \\) A.</p>
@@ -585,6 +691,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>Boşlukta yayılan düzlem dalganın alanı \\( E_0=10\\,\\text{V/m} \\), \\( f=100\\,\\text{MHz} \\). (a) \\( H_0 \\), (b) dalga boyu, (c) ortalama güç yoğunluğu nedir? \\( (\\eta_0=377\\,\\Omega) \\) (d) Aynı dalga \\( \\varepsilon_r=4 \\) ortama girse λ ve η ne olur?</p>`,
       cozum: `
         <p>(a) \\( H_0=\\dfrac{E_0}{\\eta_0}=\\dfrac{10}{377}\\approx 0.0265\\,\\text{A/m} \\).</p>
@@ -594,6 +701,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>\\( \\mathbf E=50\\cos(10^8t-\\beta z)\\,\\hat{\\mathbf x} \\) V/m alanı kayıpsız, manyetik olmayan (\\( \\mu_r=1 \\)) bir ortamda yayılıyor ve \\( \\beta=0.5 \\) rad/m ölçülüyor. Ortamın \\( \\varepsilon_r \\)'sini, dalga boyunu, öz empedansını ve \\( \\mathbf H \\)'yi bulun.</p>`,
       cozum: `
         <p>\\( v=\\omega/\\beta=10^8/0.5=2\\times10^8 \\) m/s ⟹ \\( \\varepsilon_r=(c/v)^2=(1.5)^2=2.25 \\).</p>
@@ -603,6 +711,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>Bakırda (\\( \\sigma=5.8\\times10^7\\,\\text{S/m} \\), \\( \\mu=\\mu_0 \\)) \\( f=1\\,\\text{MHz} \\) için deri derinliğini bulun. Çapı 2 mm bir bakır telin bu frekanstaki AC direncinin DC direncine oranını tahmin edin.</p>`,
       cozum: `
         \\[ \\delta=\\frac{1}{\\sqrt{\\pi f\\mu_0\\sigma}}=\\frac{1}{\\sqrt{\\pi(10^6)(4\\pi\\times10^{-7})(5.8\\times10^7)}}\\approx 6.6\\times10^{-5}\\,\\text{m}=66\\,\\mu\\text{m} \\]
@@ -611,6 +720,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 15,
       soru: `<p>Havadan (\\( \\eta_1=377\\,\\Omega \\)) \\( \\varepsilon_r=9 \\) kayıpsız dielektriğe dik gelen düzlem dalganın \\( E_{i0}=6 \\) V/m. Yansıma ve iletim katsayılarını, yansıyan ve iletilen E genliklerini, güç oranlarını ve 1. ortamdaki duran dalga oranını bulun.</p>`,
       cozum: `
         <p>\\( \\eta_2=377/\\sqrt9=125.7\\,\\Omega \\).</p>
@@ -620,6 +730,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 16,
       soru: `<p>İzotropik bir anten 1 kW yayıyor. 10 km uzaklıkta ortalama güç yoğunluğunu ve elektrik alanın tepe genliğini bulun. Bir alıcı anten etkin alanı \\( 0.5\\,\\text{m}^2 \\) ise aldığı güç nedir?</p>`,
       cozum: `
         \\[ S=\\frac{P_t}{4\\pi r^2}=\\frac{1000}{4\\pi(10^4)^2}=7.96\\times10^{-7}\\,\\text{W/m}^2 \\]
@@ -628,6 +739,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 9,
       soru: `<p>\\( q=1\\,\\text{mC} \\) yük, \\( \\mathbf{v}=100\\,\\hat{\\mathbf{x}}\\,\\text{m/s} \\) hızıyla \\( \\mathbf{B}=0.2\\,\\hat{\\mathbf{z}}\\,\\text{T} \\) alanında hareket ediyor. Manyetik kuvveti bulun. Bu kuvvet yükün kinetik enerjisini değiştirir mi?</p>`,
       cozum: `
         \\[ \\mathbf{F}=q\\,\\mathbf{v}\\times\\mathbf{B}=(10^{-3})(100\\,\\hat{\\mathbf{x}})\\times(0.2\\,\\hat{\\mathbf{z}}) \\]
@@ -636,6 +748,7 @@ window.DERSLER["EE3016"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>Yer değiştirme akımı nedir ve Maxwell neden Ampere yasasına bu terimi ekledi? Plaka alanı \\( 1\\,\\text{cm}^2 \\), aralığı 1 mm hava kapasitörüne \\( v(t)=10\\sin(2\\pi\\cdot10^6t) \\) V uygulanırsa yer değiştirme akımının tepe değeri nedir?</p>`,
       cozum: `
         <p>\\( \\mathbf{J}_d=\\partial\\mathbf{D}/\\partial t \\). Orijinal Ampere yasası (\\( \\nabla\\times\\mathbf{H}=\\mathbf{J} \\)) diverjans alınınca
@@ -643,6 +756,85 @@ window.DERSLER["EE3016"] = {
         yokken H nasıl oluşur sorusuna cevap veremez. \\( \\mathbf J_d \\) eklenince hem süreklilik korunur hem de dalga çözümleri ortaya çıkar.</p>
         <p>Sayısal: \\( C=\\varepsilon_0A/d=8.85\\times10^{-12}\\cdot10^{-4}/10^{-3}=0.885 \\) pF;
         \\( I_d=C\\,dV/dt \\) tepe \\( =C\\omega V_0=0.885\\times10^{-12}\\cdot2\\pi10^6\\cdot10=55.6\\,\\mu\\text{A} \\) — tel akımıyla aynı.</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 17,
+      soru: `<p>Bir dalganın alanı \\( \\mathbf E=3\\cos(\\omega t-\\beta z)\\hat{\\mathbf x}
+        +3\\cos(\\omega t-\\beta z-90^\\circ)\\hat{\\mathbf y} \\) V/m.
+        (a) Polarizasyon türü nedir? (b) Bu dalga \\( x \\) eksenine paralel doğrusal bir antenle
+        alınırsa kaç dB kayıp olur? (c) Genlikler 3 ve 5 V/m olsaydı sonuç ne değişirdi?</p>`,
+      cozum: `<p><b>(a)</b> Genlikler eşit (\\( 3=3 \\)) ve faz farkı \\( \\delta=-90^\\circ \\): iki koşul da
+        sağlandığı için <b>dairesel</b> polarizasyon. \\( \\delta=-90^\\circ \\) olduğundan yayılma yönü
+        \\( +z \\) için <b>sağ el dairesel (RHCP)</b>.</p>
+        <p><b>(b)</b> Doğrusal anten dairesel dalganın yalnız yarısını toplar:
+        \\( \\text{PLF}=0.5\\Rightarrow 10\\log_{10}(0.5)=-3.01\\ \\text{dB} \\).
+        Önemli nokta: bu kayıp antenin açısından <b>bağımsızdır</b> — anteni döndürmek bir şey değiştirmez.</p>
+        <p><b>(c)</b> \\( E_{x0}\\ne E_{y0} \\) olduğundan artık dairesel değil <b>eliptik</b> polarizasyon
+        olurdu; eksenel oran \\( AR=5/3\\approx1.67 \\) (4.4 dB). Bu durumda doğrusal antenle alınan güç
+        antenin yönelimine bağlı hâle gelir: büyük eksene hizalanınca daha çok, küçük eksene hizalanınca
+        daha az güç alınır.</p>`
+    },
+    {
+      tip: "final",
+      konu: 18,
+      soru: `<p>\\( Z_0=50\\,\\Omega \\) kayıpsız bir hat \\( Z_L=100+j0\\,\\Omega \\) ile sonlandırılmış.
+        (a) \\( \\Gamma_L \\) ve SWR nedir? (b) Yükün ne kadarlık güç payı yansır?
+        (c) \\( \\lambda/4 \\) geride giriş empedansı nedir? (d) Bu yükü 50 Ω'a uyumlamak için gereken
+        çeyrek dalga hattın \\( Z_0' \\) değeri kaçtır?</p>`,
+      cozum: `<p><b>(a)</b> \\( \\Gamma_L=\\dfrac{100-50}{100+50}=\\dfrac{50}{150}=0.333 \\).
+        \\( \\text{SWR}=\\dfrac{1+0.333}{1-0.333}=\\dfrac{1.333}{0.667}=2.0 \\).</p>
+        <p><b>(b)</b> Yansıyan güç oranı \\( |\\Gamma|^{2}=0.111 \\), yani gücün \\( \\%11.1 \\)'i geri döner;
+        yüke \\( \\%88.9 \\)'u ulaşır.</p>
+        <p><b>(c)</b> \\( \\ell=\\lambda/4 \\Rightarrow \\beta\\ell=\\pi/2 \\Rightarrow \\tan\\beta\\ell\\to\\infty \\),
+        formül \\( Z_{in}=Z_0^{2}/Z_L=50^{2}/100=25\\,\\Omega \\) hâline gelir. Empedans tersine döndü.</p>
+        <p><b>(d)</b> Uyumlama için \\( Z_0'=\\sqrt{Z_{in}Z_L}=\\sqrt{50\\cdot100}=70.7\\,\\Omega \\).
+        Bu değerde bir \\( \\lambda/4 \\) hat parçası araya konursa kaynak tarafından bakıldığında
+        \\( 50\\,\\Omega \\) görülür ve \\( \\Gamma=0 \\) olur. <b>Dikkat:</b> uyumlama yalnız tasarım
+        frekansında tamdır; frekans kayınca \\( \\beta\\ell\\ne\\pi/2 \\) olur ve SWR yükselir.</p>`
+    },
+
+    {
+      tip: "vize",
+      konu: 3,
+      soru: `<p>Boşlukta potansiyel \\( V=2x^{2}y-5z \\) volt olarak veriliyor.
+        (a) \\( P(1,-1,2) \\) noktasında \\( \\mathbf E \\) alanını bulun.
+        (b) Aynı noktada \\( \\rho_v \\) yük yoğunluğunu bulun.
+        (c) \\( 2\\,\\mu\\text{C} \\) yükü \\( A(0,0,0) \\)'dan \\( P \\)'ye taşımak için gereken işi hesaplayın.</p>`,
+      cozum: `<p><b>(a)</b> \\( \\mathbf E=-\\nabla V=-\\left(\\dfrac{\\partial V}{\\partial x}\\hat{\\mathbf x}
+        +\\dfrac{\\partial V}{\\partial y}\\hat{\\mathbf y}+\\dfrac{\\partial V}{\\partial z}\\hat{\\mathbf z}\\right) \\).
+        \\( \\partial_x V=4xy \\), \\( \\partial_y V=2x^{2} \\), \\( \\partial_z V=-5 \\).
+        \\( P \\)'de: \\( \\mathbf E=-(-4)\\hat{\\mathbf x}-(2)\\hat{\\mathbf y}-(-5)\\hat{\\mathbf z}
+        =4\\hat{\\mathbf x}-2\\hat{\\mathbf y}+5\\hat{\\mathbf z}\\ \\text{V/m} \\).</p>
+        <p><b>(b)</b> Poisson: \\( \\nabla^{2}V=-\\rho_v/\\varepsilon_0 \\).
+        \\( \\nabla^{2}V=4y+0+0=4y \\); \\( y=-1 \\) için \\( -4 \\).
+        \\( \\rho_v=-\\varepsilon_0(-4)=4\\varepsilon_0=3.54\\times10^{-11}\\ \\text{C/m}^{3} \\).</p>
+        <p><b>(c)</b> \\( V(A)=0 \\), \\( V(P)=2(1)^{2}(-1)-5(2)=-12\\ \\text{V} \\).
+        \\( W=q\\,[V(P)-V(A)]=2\\times10^{-6}\\cdot(-12)=-24\\ \\mu\\text{J} \\).
+        İşaret negatif: alan yükü kendisi o yöne taşır, dışarıdan iş yapmak yerine
+        sistemden \\( 24\\ \\mu\\text{J} \\) iş <b>alınır</b>. Potansiyel korunumlu olduğu için
+        izlenen yol önemsizdir.</p>`
+    },
+    {
+      tip: "vize",
+      konu: 7,
+      soru: `<p>Bakır bir telde (\\( \\sigma=5.8\\times10^{7}\\ \\text{S/m} \\), serbest elektron yoğunluğu
+        \\( n=8.5\\times10^{28}\\ \\text{m}^{-3} \\)) kesit \\( A=1\\ \\text{mm}^{2} \\), akım \\( I=10\\ \\text{A} \\).
+        (a) Akım yoğunluğu ve elektrik alan nedir? (b) Sürüklenme hızı nedir?
+        (c) Süreklilik denklemini yazın; bir düğümde yük birikmemesi ne anlama gelir?</p>`,
+      cozum: `<p><b>(a)</b> \\( J=I/A=10/(10^{-6})=10^{7}\\ \\text{A/m}^{2} \\).
+        Ohm yasasının nokta biçimi \\( \\mathbf J=\\sigma\\mathbf E \\):
+        \\( E=J/\\sigma=10^{7}/5.8\\times10^{7}=0.172\\ \\text{V/m} \\).
+        (1 metrelik telde 0.172 V düşer — \\( R=\\ell/\\sigma A \\) ile aynı sonuç.)</p>
+        <p><b>(b)</b> \\( J=nqu_d \\Rightarrow
+        u_d=\\dfrac{10^{7}}{8.5\\times10^{28}\\cdot1.6\\times10^{-19}}=7.4\\times10^{-4}\\ \\text{m/s} \\),
+        yani <b>saatte ~2.7 metre</b>. Elektronlar çok yavaş ilerlediği hâlde lambanın hemen yanması,
+        taşınanın elektron değil <b>alan/enerji</b> olmasındandır.</p>
+        <p><b>(c)</b> \\( \\nabla\\cdot\\mathbf J=-\\dfrac{\\partial\\rho_v}{\\partial t} \\).
+        Kararlı durumda \\( \\partial\\rho_v/\\partial t=0 \\Rightarrow \\nabla\\cdot\\mathbf J=0 \\):
+        bir hacme giren akım çıkan akıma eşittir. Bu, <b>Kirchhoff akım yasasının</b> alan
+        kuramındaki karşılığıdır — KAY bir varsayım değil, süreklilik denkleminin kararlı durum hâlidir.</p>`
     }
   ]
 };

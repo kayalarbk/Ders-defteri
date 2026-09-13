@@ -1,59 +1,114 @@
 /* ============================================================
    DERS DEFTERİ — STİL DOSYASI
-   Tema: mühendislik defteri / osiloskop ekranı
+   Tasarım ilkesi: SAATLERCE OKUNAN BİR DERS KİTABI.
+   Ekran bir arayüz değil, sayfa gibi görünmeli; göz gezdirdiği
+   her yerde renk, çerçeve ve hareket bulmamalı.
+   ------------------------------------------------------------
+   1) Renk yalnız ANLAM taşıdığında kullanılır (durum, uyarı, vurgu).
+      Dekoratif renk yok; ders rengi yalnız ince bir kenar şeridinde.
+   2) Kontrast yüksek ama saf siyah/beyaz yok — ikisi de parlama yapar.
+   3) Hareket en aza indirildi: hover'da zıplama, parlaklık oynatma yok.
+   4) Metin ölçüsü ve boyutu kullanıcı ayarına bağlı (Aa paneli).
    ============================================================ */
 
 /* ---------- Tema değişkenleri ----------
-   Açık tema VARSAYILAN: uygulama ders çalışmak için, çoğunlukla gündüz
-   ve uzun süre açık kalıyor; kağıt hissi veren yumuşak zemin göz yormuyor.
-   Palet düşük doygunlukta tutuldu — neon/terminal görüntüsü yerine
-   ders kitabı ve defter tonları.                                          */
-:root {
-  /* Açık tema — kırık beyaz kağıt, mürekkep grisi, yumuşak yeşil vurgu */
-  --bg:        #F7F5F0;
-  --bg-grid:   rgba(90, 80, 60, 0.022);   /* zar zor seçilen defter karesi */
-  --surface:   #FFFDFA;
-  --surface-2: #F0EDE6;
-  --border:    #E4E0D6;
-  --text:      #343A42;   /* saf siyah değil: kontrast yumuşatıldı */
-  --muted:     #6E757D;
-  --accent:    #2E7D6E;
-  --accent-soft:#DCEFE9;  /* vurgunun açık zemin karşılığı */
-  --accent-dim:#DCEFE9;
-  --shadow:    0 2px 10px rgba(70, 60, 40, 0.05);
+   Üç tema: kagit (gündüz, varsayılan) · ilik (akşam, düşük mavi ışık)
+   · gece (karanlık oda). Eski "light"/"dark" kayıtları app.js'te
+   kagit/gece olarak göçürülür.                                            */
+:root,
+[data-theme="kagit"] {
+  /* KAĞIT — kırık beyaz sayfa, mürekkep grisi, yumuşak yeşil vurgu */
+  --bg:        #F5F2EB;
+  --surface:   #FFFDF8;
+  --surface-2: #EDE9DF;
+  --border:    #E0DACC;
+  --border-yumusak: #EBE6DA;   /* liste içi ayraçlar: kutu hissi vermeyen çizgi */
+  --text:      #32373D;   /* saf siyah değil: uzun okumada parlama yapmaz */
+  --muted:     #646970;
+  --accent:    #2B7466;
+  --accent-soft:#DEEDE7;
+  --accent-dim:#DEEDE7;
+  --shadow:    0 1px 3px rgba(70, 60, 40, 0.05);
 
   --accent-fg: #FFFFFF;   /* vurgu zemini üzerindeki yazı */
-  --uyari:     #B7791F;   /* tekrar haftası / uyarı */
-  --uyari-soft:#FBEFD8;
-  --hata:      #C05621;   /* sınav / dikkat */
-  --sil:       #C13A3F;   /* silme / tehlike */
+  --uyari:     #936117;   /* tekrar haftası / uyarı */
+  --uyari-soft:#F7EDD8;
+  --hata:      #B24E1D;   /* sınav / dikkat */
+  --sil:       #B33A3F;   /* silme / tehlike */
 
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body:    "Inter", system-ui, sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, monospace;
-  --radius: 16px;
-  --iz: .06em;            /* etiketlerde harf aralığı (eskiden .15em idi) */
+  --radius: 14px;
+  --iz: .04em;            /* etiketlerde harf aralığı */
+
+  /* Okuma ayarları — Aa panelinden değiştirilir */
+  --govde:  17px;         /* gövde punto */
+  --satir:  1.75;         /* satır aralığı */
+  --olcu:   68ch;         /* satır uzunluğu (metin genişliği) */
 }
 
-[data-theme="dark"] {
-  /* Koyu tema — mavi-siyah yerine nötr gece grisi, vurgu pastelleştirildi */
-  --bg:        #191D23;
-  --bg-grid:   rgba(255, 255, 255, 0.012);
-  --surface:   #21262E;
-  --surface-2: #2A303A;
-  --border:    #333A45;
-  --text:      #DCE1E6;   /* saf beyaz değil: parlama azaltıldı */
-  --muted:     #98A0AA;
-  --accent:    #7CC5B8;
-  --accent-soft:#24403C;
-  --accent-dim:#24403C;
-  --shadow:    0 4px 18px rgba(0, 0, 0, 0.25);
+[data-theme="ilik"] {
+  /* ILIK — akşam okuması: mavi ışık kısılmış, kağıt sarıya çalıyor.
+     Gece temasına geçmek istemeyip ekranı yumuşatmak isteyen için. */
+  --bg:        #F0E6D6;
+  --surface:   #F8F1E3;
+  --surface-2: #E7DAC5;
+  --border:    #DACAAC;
+  --border-yumusak: #E4D7BE;
+  --text:      #43372A;
+  --muted:     #6E5E4B;
+  --accent:    #7C5426;
+  --accent-soft:#E9DBC2;
+  --accent-dim:#E9DBC2;
+  --shadow:    0 1px 3px rgba(90, 70, 40, 0.07);
 
-  --accent-fg: #16221F;
-  --uyari:     #E0B457;
-  --uyari-soft:#3A2E18;
-  --hata:      #E08B6B;
-  --sil:       #E5484D;
+  --accent-fg: #FBF5EA;
+  --uyari:     #825C11;
+  --uyari-soft:#EDDFBE;
+  --hata:      #A0471B;
+  --sil:       #A03A36;
+}
+
+[data-theme="gece"] {
+  /* GECE — karanlık odada parlamayan nötr gri; vurgular pastel.
+     Saf beyaz metin ve saf siyah zemin bilinçli olarak kullanılmadı. */
+  --bg:        #16191D;
+  --surface:   #1E2227;
+  --surface-2: #272C32;
+  --border:    #343A41;
+  --border-yumusak: #2B3036;
+  --text:      #CED4DA;
+  --muted:     #8F979F;
+  --accent:    #7FC4B4;
+  --accent-soft:#22352F;
+  --accent-dim:#22352F;
+  --shadow:    0 2px 10px rgba(0, 0, 0, 0.3);
+
+  --accent-fg: #15211E;
+  --uyari:     #D9B267;
+  --uyari-soft:#342A17;
+  --hata:      #DB8B6B;
+  --sil:       #D96A6D;
+}
+
+/* ---------- Okuma ayarları: punto ve satır genişliği ---------- */
+[data-yazi="kucuk"]  { --govde: 15.5px; --satir: 1.7;  }
+[data-yazi="orta"]   { --govde: 17px;   --satir: 1.75; }
+[data-yazi="buyuk"]  { --govde: 18.5px; --satir: 1.8;  }
+[data-yazi="cok"]    { --govde: 20.5px; --satir: 1.85; }
+
+[data-olcu="dar"]    { --olcu: 58ch; }
+[data-olcu="normal"] { --olcu: 68ch; }
+[data-olcu="genis"]  { --olcu: 82ch; }
+
+/* Hareketi azalt (ayardan veya işletim sisteminden) */
+[data-hareket="az"] *,
+[data-hareket="az"] *::before,
+[data-hareket="az"] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
 }
 
 /* ---------- Reset & gövde ---------- */
@@ -62,16 +117,14 @@
 body {
   font-family: var(--font-body);
   background-color: var(--bg);
-  /* milimetrik mühendislik grid zemini */
-  background-image:
-    linear-gradient(var(--bg-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-  background-size: 40px 40px;
+  /* Defter karesi kaldırıldı: sayfa boyunca tekrar eden ince çizgiler
+     uzun okumada göz için sürekli bir gürültü kaynağıydı. */
   color: var(--text);
-  font-size: 16.5px;
-  line-height: 1.8;   /* okuma konforu için ferah satır aralığı */
+  font-size: var(--govde);
+  line-height: var(--satir);
   -webkit-font-smoothing: antialiased;
-  transition: background-color .3s, color .3s;
+  text-rendering: optimizeLegibility;
+  transition: background-color .25s, color .25s;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -110,7 +163,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--text); width: 38px; height: 38px; border-radius: 10px;
   cursor: pointer; font-size: 1rem; transition: border-color .2s, transform .15s;
 }
-.theme-toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
+.theme-toggle:hover { border-color: var(--accent); background: var(--accent-soft); }
 
 /* ---------- Hero (ana sayfa) ---------- */
 .hero { padding: 72px 0 40px; }
@@ -137,14 +190,13 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--radius);
   padding: 24px;
   overflow: hidden;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
 .card::before {  /* sol kenarda ders rengi şeridi */
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
   background: var(--card-color, var(--accent));
 }
 .card:hover {
-  transform: translateY(-4px);
   border-color: var(--card-color, var(--accent));
   box-shadow: var(--shadow);
 }
@@ -211,7 +263,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px; transition: border-color .2s, transform .15s;
 }
-.doc:hover { border-color: var(--accent); transform: translateY(-2px); }
+.doc:hover { border-color: var(--accent); background: var(--surface-2); }
 .doc .ico {
   width: 42px; height: 42px; border-radius: 8px; flex: none;
   background: var(--accent-dim); color: var(--accent);
@@ -267,7 +319,7 @@ a { color: inherit; text-decoration: none; }
    Formül ve tablolar bu sınırın dışında, tam genişlikte kalır. */
 .acc-body .inner > p,
 .acc-body .inner > ul,
-.acc-body .inner > ol { max-width: 72ch; }
+.acc-body .inner > ol { max-width: var(--olcu); }
 .acc-body .inner > p + p { margin-top: 12px; }
 .acc-body .inner ul,
 .acc-body .inner ol { padding-left: 22px; margin: 10px 0; }
@@ -406,10 +458,6 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 .flip-face::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 .flip-front { background: var(--surface); }
 .flip-front strong { font-family: var(--font-display); font-size: 1.15rem; }
-.flip-tag {
-  font-family: var(--font-mono); font-size: .62rem; letter-spacing: var(--iz);
-  color: var(--accent); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 20px;
-}
 .flip-hint { font-family: var(--font-mono); font-size: .68rem; color: var(--muted); }
 .flip-back {
   background: var(--surface-2); transform: rotateY(180deg);
@@ -437,9 +485,9 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   font-family: var(--font-body); font-weight: 600; font-size: .9rem;
   background: var(--accent); color: var(--accent-fg); border: 0;
   padding: 10px 18px; border-radius: 10px; cursor: pointer;
-  transition: transform .15s, filter .15s;
+  transition: background .15s;
 }
-.btn-upload:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.btn-upload:hover { background: color-mix(in srgb, var(--accent) 86%, var(--text)); }
 /* dosya seçiciyi görünmez ama TIKLANABİLİR yapar (display:none KULLANMA — iOS engelliyor) */
 .file-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -529,7 +577,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 .topic-item.done .topic-check { background: var(--accent); color: var(--accent-fg); }
 .topic-item.done .topic-title { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent); }
 .topic-toggle { flex: 1; }
-.topic-content { max-width: 72ch; }   /* uzun satır okumayı yorar */
+.topic-content { max-width: var(--olcu); }   /* uzun satır okumayı yorar */
 .topic-content p { margin-bottom: 10px; }
 .topic-content ul { margin: 8px 0 10px 22px; }
 
@@ -580,7 +628,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   border-radius: 10px; padding: 12px 14px;
   transition: border-color .2s, transform .15s;
 }
-.ql:hover { border-color: var(--accent); transform: translateY(-2px); }
+.ql:hover { border-color: var(--accent); background: var(--surface-2); }
 .ql-ico {
   width: 38px; height: 38px; flex: none; border-radius: 8px;
   background: var(--surface-2); display: grid; place-items: center; font-size: 1.05rem;
@@ -810,7 +858,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   border-radius: 12px; padding: 16px 18px;
   transition: border-color .2s, transform .15s;
 }
-.ozet-devam:hover { transform: translateY(-2px); border-color: var(--card-color, var(--accent)); }
+.ozet-devam:hover { border-color: var(--card-color, var(--accent)); background: var(--surface-2); }
 .ozet-devam-lbl {
   font-family: var(--font-mono); font-size: .66rem; letter-spacing: var(--iz);
   color: var(--card-color, var(--accent));
@@ -844,7 +892,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 .q-filter { flex-wrap: wrap; }
 .q-f-takil.active { background: var(--uyari); border-color: var(--uyari); color: var(--accent-fg); }
 
-.q-soru { max-width: 72ch; }
+.q-soru { max-width: var(--olcu); }
 .q-reveal {
   display: inline-flex; align-items: center; gap: 10px; margin-top: 18px;
   font-family: var(--font-body); font-weight: 600; font-size: .9rem;
@@ -854,7 +902,7 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 }
 .q-reveal:hover { background: var(--accent-dim); }
 .q-reveal-hint { font-family: var(--font-mono); font-size: .7rem; color: var(--muted); font-weight: 400; }
-.q-cozum { max-width: 72ch; }
+.q-cozum { max-width: var(--olcu); }
 .q-cozum[hidden] { display: none; }
 
 .q-mark {
@@ -890,9 +938,9 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
   font-family: var(--font-body); font-weight: 600; font-size: .9rem;
   background: var(--accent); color: var(--accent-fg); border: 0;
   padding: 10px 20px; border-radius: 10px; cursor: pointer;
-  transition: transform .15s, filter .15s;
+  transition: background .15s;
 }
-.study-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.study-btn:hover { background: color-mix(in srgb, var(--accent) 86%, var(--text)); }
 .study-note { font-family: var(--font-mono); font-size: .76rem; color: var(--muted); }
 .flip.biliniyor .flip-front { border-color: var(--accent); }
 .flip.biliniyor .flip-front::after {
@@ -937,9 +985,9 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 .flash-actions button {
   flex: 1; font-family: var(--font-body); font-weight: 600; font-size: .92rem;
   padding: 14px 18px; border-radius: 12px; cursor: pointer; border: 1px solid var(--border);
-  transition: transform .15s, filter .15s;
+  transition: background .15s, border-color .15s;
 }
-.flash-actions button:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.flash-actions button:hover { border-color: var(--accent); }
 .flash-ok { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .flash-no { background: var(--surface-2); color: var(--text); }
 
@@ -1108,4 +1156,144 @@ footer { padding-bottom: calc(32px + var(--sa-bottom)); }
 #bkBtn.uyari::after {
   content: ""; position: absolute; top: 3px; right: 3px;
   width: 7px; height: 7px; border-radius: 50%; background: var(--uyari);
+}
+
+/* ============================================================
+   OKUMA AYARLARI PANELİ (Aa)
+   Tema, punto, satır genişliği ve hareket tek yerden ayarlanır.
+   Ders çalışan kişi ortam ışığına ve yorgunluğuna göre bunları
+   gün içinde değiştiriyor; ayarların topbar'da olması şart.
+   ============================================================ */
+.oa-holder { position: relative; }
+.oa-panel {
+  display: none; position: absolute; right: 0; top: 48px;
+  width: 268px; max-width: calc(100vw - 24px); padding: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 60;
+  max-height: calc(100vh - 90px - var(--sa-top)); overflow: auto;
+}
+.oa-panel.open { display: block; }
+.oa-grup + .oa-grup { margin-top: 16px; }
+.oa-baslik {
+  font-size: .74rem; color: var(--muted); margin-bottom: 7px;
+  letter-spacing: var(--iz);
+}
+.oa-secim { display: flex; gap: 6px; }
+.oa-secim button {
+  flex: 1; padding: 8px 4px; cursor: pointer;
+  font-family: var(--font-body); font-size: .8rem; line-height: 1.25;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 9px;
+  transition: border-color .15s, background .15s;
+}
+.oa-secim button:hover { border-color: var(--accent); }
+.oa-secim button[aria-pressed="true"] {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+  font-weight: 600;
+}
+/* Tema düğmeleri kendi rengini önizlesin — isim okumaya gerek kalmasın */
+.oa-tema button { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.oa-ornek {
+  width: 100%; height: 16px; border-radius: 4px;
+  border: 1px solid rgba(128,128,128,.35);
+}
+.oa-ornek.kagit { background: linear-gradient(90deg, #F5F2EB 60%, #2B7466 60%); }
+.oa-ornek.ilik  { background: linear-gradient(90deg, #F0E6D6 60%, #7C5426 60%); }
+.oa-ornek.gece  { background: linear-gradient(90deg, #16191D 60%, #7FC4B4 60%); }
+.oa-not { font-size: .72rem; color: var(--muted); margin-top: 14px; line-height: 1.5; }
+.oa-aa { font-weight: 700; letter-spacing: -.03em; }
+
+/* ============================================================
+   KONU ↔ SORU BAĞI
+   Sorular artık `konu` etiketi taşıyor: konunun altından doğrudan
+   o konunun sorularına gidilebiliyor, soru havuzunda da konuya göre
+   süzülebiliyor. Önceden bu eşleşme başlık metninden tahmin ediliyordu.
+   ============================================================ */
+.konu-soru {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 18px; padding: 8px 14px;
+  font-size: .85rem; color: var(--accent);
+  background: var(--accent-soft); border: 1px solid transparent;
+  border-radius: 999px; transition: border-color .15s;
+}
+.konu-soru:hover { border-color: var(--accent); }
+.konu-soru .ks-say { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* Soru havuzunda konuya göre süzme */
+.q-konu-satir {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: -8px 0 18px;
+}
+.q-konu-secim {
+  font-family: var(--font-body); font-size: .85rem; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 7px 10px; max-width: 100%;
+}
+.q-konu-secim:focus { outline: none; border-color: var(--accent); }
+.q-konu-lbl { font-size: .8rem; color: var(--muted); }
+.q-konu-ad {
+  font-size: .78rem; color: var(--muted); margin-left: auto;
+}
+
+/* ============================================================
+   SADELEŞTİRME — göz gezdirirken takılacak eleman sayısını düşür
+   ============================================================ */
+/* Marka noktasındaki halka ve hero'nun ekranı kaplaması azaltıldı */
+.brand .dot { box-shadow: none; width: 8px; height: 8px; }
+.hero { padding: 48px 0 28px; }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.hero .eyebrow { text-transform: none; letter-spacing: 0; color: var(--muted); font-size: .82rem; }
+
+/* Bölüm çipleri ve ders kartı kodu: mono-büyük harf yığını gürültüydü */
+.sec-nav { padding: 10px 0; gap: 6px; }
+.sec-nav a {
+  font-family: var(--font-body); font-size: .82rem;
+  background: transparent; border-color: transparent;
+  padding: 5px 10px;
+}
+.sec-nav a:hover { background: var(--surface-2); border-color: var(--border); }
+
+/* Kart ve bölüm çerçeveleri: gölge yerine tek ince çizgi */
+.card:hover { box-shadow: none; }
+.section { border-bottom: 1px solid var(--border-yumusak); }
+
+/* Konu satırları liste gibi görünsün, kutu yığını gibi değil */
+.topic-item { border-color: var(--border-yumusak); border-radius: 10px; margin-bottom: 6px; }
+.topic-item:hover { border-color: var(--border); }
+.topic-item.open { background: var(--surface); }
+.topic-check { background: transparent; border-right: 1px solid var(--border-yumusak); }
+.topic-title { font-weight: 500; }
+
+.flip-face { border-color: var(--border-yumusak); }
+.flip-front strong { font-size: 1.05rem; font-weight: 600; }
+
+/* Okuma alanı: konu metni sayfanın ortasında, sağ boşlukla nefes alsın */
+.acc-body .inner { padding: 18px 22px 24px; }
+.topic-content p + p { margin-top: .9em; }
+.topic-content b { font-weight: 600; }
+
+/* Bağlantılar altı çizili olmadan da ayırt edilebilsin (renk tek başına yetmez) */
+.topic-content a, .q-soru a, .q-cozum a {
+  color: var(--accent); text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+
+/* Odaklanma halkası her temada görünür olsun */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* Hedef vurgusu: yanıp sönmek yerine tek seferlik yumuşak halka */
+@keyframes vurgula {
+  0%, 70% { box-shadow: 0 0 0 3px var(--accent-soft); }
+  100%    { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Yazdırmada yeni öğeler düşsün */
+@media print {
+  .oa-panel, .oa-holder, .konu-soru, .q-konu-satir { display: none !important; }
+}
+
+@media (max-width: 600px) {
+  .oa-panel { width: 252px; }
+  .q-konu-satir { gap: 8px; }
+  .q-konu-ad { margin-left: 0; width: 100%; }
 }

@@ -15,7 +15,7 @@ window.DERSLER["EE3014"] = {
   ad: "Energy Conversion",
   donem: "3. Sınıf · 1. Dönem",
   renk: "#A78BFA",
-  ozet: "Manyetik devreler, malzemeler ve çekirdek kayıpları; endüktans ve kaçak akı; ideal/pratik transformatör, eşdeğer devre, regülasyon ve verim; üç fazlı ve ototransformatörler; enerji–koenerji ile elektromekanik kuvvet; DC motor ve generatörlerin emk, moment, hız denetimi ve karakteristikleri; döner manyetik alan; asenkron makinede kayma, eşdeğer devre, güç akışı, moment ve yolverme; senkron generatör ve motor, güç açısı, V-eğrileri ve güç faktörü düzeltme.",
+  ozet: "Manyetik devreler, malzemeler ve çekirdek kayıpları; endüktans ve kaçak akı; ideal/pratik transformatör, eşdeğer devre, regülasyon ve verim; üç fazlı ve ototransformatörler; enerji–koenerji ile elektromekanik kuvvet; DC motor ve generatörlerin emk, moment, hız denetimi ve karakteristikleri; döner manyetik alan; asenkron makinede kayma, eşdeğer devre, güç akışı, moment ve yolverme; senkron generatör ve motor, güç açısı, V-eğrileri ve güç faktörü düzeltme; tek fazlı asenkron motorlar (çift döner alan, kalkış düzenekleri) ve özel makineler (üniversal, adım, BLDC, relüktans).",
   konular: [
     {
       baslik: "1. Manyetik Devreler ve Devre Benzetimi",
@@ -359,6 +359,56 @@ window.DERSLER["EE3014"] = {
         senkron hıza yakınken alan uyarması verilir ve rotor "kilitlenir". Kalkış sırasında alan sargısı kısa devre edilir ya da bir dirence bağlanır (yüksek gerilim indüklenir).</p>
         <p><b>Neden önemli:</b> Büyük sanayi tesislerinde senkron motor hem yük sürer hem güç faktörü cezasını sıfırlar; sabit mıknatıslı senkron motor (PMSM) ise
         elektrikli araç ve servo dünyasının hâkim makinesidir — aynı fazör diyagramı, \\( E_A \\) sabit mıknatıstan gelir ve uyarma yerine akım açısı (alan zayıflatma) ayarlanır.</p>`
+    },
+
+    {
+      baslik: "18. Tek Fazlı Asenkron Motorlar ve Özel Makineler",
+      icerik: `
+        <p>Sanayide üç fazlı asenkron motor kuraldır, ama evde ve küçük güçlerde şebeke tek fazlıdır.
+        Tek fazlı bir sargı ise <b>döner alan üretemez</b>: ürettiği alan yerinde duran, genliği
+        \\( \\cos\\omega t \\) ile salınan bir alandır. Çift döner alan kuramına göre bu alan, zıt
+        yönde dönen iki eşit alana ayrıştırılabilir:</p>
+        \\[ B\\cos(\\omega t)\\cos\\theta=\\tfrac{1}{2}B\\cos(\\omega t-\\theta)+\\tfrac{1}{2}B\\cos(\\omega t+\\theta) \\]
+        <p>Rotor dururken iki alan eşit ve zıt moment üretir, net moment sıfırdır — <b>tek fazlı
+        asenkron motor kendi kendine kalkamaz</b>. Ama elle döndürülürse, dönüş yönündeki alana
+        göre kayma küçülür, ters yöndekine göre büyür (\\( s \\) ve \\( 2-s \\)); momentler artık
+        eşit olmaz ve motor o yönde hızlanır. Bu yüzden bütün tek fazlı motorlar bir
+        <b>kalkış düzeneği</b> taşır:</p>
+        <ul>
+          <li><b>Yardımcı sargılı (split-phase):</b> ana sargıya 90° elektriksel açıda, daha ince
+          telli (yüksek \\( R/X \\)) bir yardımcı sargı eklenir. İki akım arasındaki faz farkı
+          zayıf da olsa döner alan üretir. Kalkış momenti düşük, ucuz.</li>
+          <li><b>Kalkış kondansatörlü:</b> yardımcı sargıya seri kondansatör konur, faz farkı 90°'ye
+          yaklaşır ve kalkış momenti anma momentinin 3–4 katına çıkar. Motor hızının ~%75'ine
+          geldiğinde <b>merkezkaç anahtarı</b> yardımcı sargıyı devreden çıkarır.</li>
+          <li><b>Sürekli kondansatörlü (PSC):</b> kondansatör hep devrede kalır; kalkış momenti
+          orta, ama çalışma sırasında güç faktörü ve verim iyi, gürültü düşük. Fan ve pompalarda yaygın.</li>
+          <li><b>Gölge kutuplu (shaded pole):</b> kutbun bir köşesine kısa devre bileziği takılır,
+          o bölgedeki akı gecikir ve zayıf bir kayan alan oluşur. Çok ucuz, verimi düşük (%20–40);
+          küçük fanlarda kullanılır.</li>
+        </ul>
+        <p><b>Özel makineler.</b> Dönem sonunda kısaca görülen bu aileler, aynı temel denklemlerin
+        farklı paketlenmiş hâlleridir:</p>
+        <ul>
+          <li><b>Üniversal motor:</b> seri uyartımlı DC motorun laminasyonlu hâli; \\( T\\propto I^2 \\)
+          olduğu için akım yön değiştirse de moment yönü değişmez, bu yüzden hem AC hem DC ile çalışır.
+          Yüksek devir (10–30 bin d/dk) ve yüksek güç/ağırlık oranı verir; el aletleri ve süpürgeler.
+          Yüksüz kalırsa tehlikeli biçimde hızlanır.</li>
+          <li><b>Adım motoru:</b> her darbede sabit bir açı döner, geri besleme gerektirmez.
+          Adım açısı \\( \\theta_s=360^\\circ/(mN_r) \\); yarım adım ve mikro adım ile çözünürlük artırılır.
+          Yüksek hızda moment düşer ve <b>adım kaçırma</b> riski vardır.</li>
+          <li><b>Fırçasız DC (BLDC) / PMSM:</b> rotorda sürekli mıknatıs, statorda elektronik
+          komütasyon. Fırça-kolektör aşınması yoktur, verim yüksektir; moment yine
+          \\( T=k_t I \\), zıt emk \\( e=k_e\\omega \\) bağıntılarına uyar. Elektrikli araç ve dronlar.</li>
+          <li><b>Relüktans motoru:</b> mıknatıs ve rotor sargısı yok; rotor, relüktansı en küçük
+          yapan konuma dönme eğilimindedir (\\( T=\\tfrac{1}{2}i^{2}\\,dL/d\\theta \\) — koenerji
+          konusundaki denklemin doğrudan uygulaması). Ucuz ve dayanıklı, ama moment dalgalı ve gürültülü.</li>
+        </ul>
+        <p><b>Sık yapılan hata:</b> tek fazlı motorun dönüş yönünü ana sargıyı ters çevirerek
+        değiştirmeye çalışmak. Yön, <b>yardımcı sargının</b> ana sargıya göre bağlantısı ters
+        çevrilerek değişir; ana sargı simetrik olduğu için tek başına ters çevrilmesi bir şey değiştirmez.</p>
+        <p><b>EE'de nerede:</b> buzdolabı ve klima kompresörleri (PSC), çamaşır makinesi (üniversal),
+        3B yazıcı ve CNC eksenleri (adım), elektrikli araç ve dron (BLDC), havalandırma (gölge kutuplu).</p>`
     }
   ],
   formuller: [
@@ -397,7 +447,13 @@ window.DERSLER["EE3014"] = {
     { ad: "Senkron Moment", formul: `\\( \\tau=\\dfrac{3V_\\phi E_A}{\\omega_sX_S}\\sin\\delta \\)`, aciklama: "δ=90°'de kopma momenti; hız sabit, δ değişir." },
     { ad: "Güç Faktörü Düzeltme", formul: `\\( Q_c=P(\\tan\\theta_1-\\tan\\theta_2) \\)`, aciklama: "Hedef cosθ₂ için gereken ileri reaktif güç (kVAr)." },
     { ad: "Yolverme Akımı (Y–Δ)", formul: `\\( I_{Y}=\\dfrac{I_\\Delta}{3},\\quad \\tau_Y=\\dfrac{\\tau_\\Delta}{3} \\)`, aciklama: "Yıldız kalkış akımı ve momenti üçte bire düşer." },
-    { ad: "Rotor Direnci ve Kalkış", formul: `\\( s_{max}=\\dfrac{R_2}{\\sqrt{R_1^2+(X_1+X_2)^2}} \\)`, aciklama: "R₂ artar → τ_max aynı, s_max artar → kalkış momenti artar." }
+    { ad: "Rotor Direnci ve Kalkış", formul: `\\( s_{max}=\\dfrac{R_2}{\\sqrt{R_1^2+(X_1+X_2)^2}} \\)`, aciklama: "R₂ artar → τ_max aynı, s_max artar → kalkış momenti artar." },
+
+    { ad: "Çift Döner Alan Ayrışımı", formul: "\\( B\\cos\\omega t\\cos\\theta=\\tfrac{1}{2}B\\cos(\\omega t-\\theta)+\\tfrac{1}{2}B\\cos(\\omega t+\\theta) \\)", aciklama: "Tek fazlı sargının pulsasyonlu alanı iki zıt döner alana ayrılır." },
+    { ad: "Tek Fazlı Motorda İki Kayma", formul: "\\( s_{\\text{ileri}}=s,\\qquad s_{\\text{geri}}=2-s \\)", aciklama: "Rotor dönerken momentler eşitsizleşir; kalkış momenti sıfırdır." },
+    { ad: "Adım Motoru Adım Açısı", formul: "\\( \\theta_s=\\dfrac{360^\\circ}{m\\,N_r} \\)", aciklama: "m: faz sayısı, N_r: rotor diş sayısı." },
+    { ad: "Relüktans Momenti", formul: "\\( T=\\dfrac{1}{2}i^{2}\\dfrac{dL}{d\\theta} \\)", aciklama: "Koenerji denkleminin doğrudan uygulaması; mıknatıs gerektirmez." },
+    { ad: "BLDC Moment ve Zıt EMK", formul: "\\( T=k_t I,\\qquad e=k_e\\,\\omega \\)", aciklama: "SI birimlerinde \\( k_t=k_e \\); DC makine denklemlerinin aynısı." }
   ],
   galeri: [],
   dokumanlar: [],
@@ -416,6 +472,7 @@ window.DERSLER["EE3014"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 3,
       soru: `<p>1000:100 sarımlı ideal bir transformatörün primer gerilimi 220 V'tur.
              Sekonder gerilimi \\( V_2 \\) kaç volttur?</p>`,
       cozum: `
@@ -423,6 +480,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 0,
       soru: `<p>Ortalama akı yolu \\( l_c=0.4\\,\\text{m} \\), kesit \\( A=4\\,\\text{cm}^2 \\),
              \\( \\mu_r=2000 \\) olan bir çekirdeğe 200 sarım sarılmış ve sargıdan 2 A geçiyor.
              Relüktansı, akıyı ve akı yoğunluğunu bulun.</p>`,
@@ -440,6 +498,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>50 Hz'de çalışan bir transformatörün çekirdeğinde \\( B_{max}=1.2\\,\\text{T} \\),
              kesit \\( A=50\\,\\text{cm}^2 \\), primer sarım sayısı \\( N_1=300 \\)'dür.
              Primer anma gerilimini bulun.</p>`,
@@ -449,6 +508,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>Bir transformatörde primere yansıtılmış değerler \\( R_{eq}=0.5\\,\\Omega \\),
              \\( X_{eq}=1.2\\,\\Omega \\)'dur. Yansıtılmış sekonder gerilimi 2400 V, yansıtılmış yük
              akımı 20 A ve güç katsayısı 0.8 geridir. Gerilim regülasyonunu bulun.</p>`,
@@ -461,6 +521,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>10 kVA'lık bir transformatörün çekirdek kaybı 100 W, anma yükündeki bakır kaybı
              250 W'tır. (a) Anma yükünde ve güç katsayısı 1'de verimi, (b) maksimum verimin hangi
              yük oranında oluştuğunu bulun.</p>`,
@@ -474,6 +535,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 9,
       soru: `<p>Ayrı uyarmalı bir DC motorda \\( V_t=240\\,\\text{V} \\), \\( R_A=0.4\\,\\Omega \\),
              \\( I_A=25\\,\\text{A} \\) ve hız 1200 d/dk'dır. Akı sabit tutulup yük momenti iki katına
              çıkarılırsa yeni hız ne olur?</p>`,
@@ -489,6 +551,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 7,
       soru: `<p>Bir röle nüvesinin endüktansı hava aralığı \\( x \\) ile
              \\( L(x)=\\dfrac{0.08}{0.5+x}\\;\\text{H} \\) (x metre) biçiminde değişiyor.
              Sargıdan 3 A geçerken \\( x=0.1\\,\\text{m} \\) konumundaki kuvveti bulun ve yönünü yorumlayın.</p>`,
@@ -504,6 +567,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>4 kutuplu, 50 Hz, 3 fazlı bir asenkron motor 1440 d/dk ile dönüyor.
              (a) Senkron hızı, (b) kaymayı, (c) rotor frekansını bulun.</p>`,
       cozum: `
@@ -515,6 +579,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>Yukarıdaki motorun hava aralığı gücü \\( P_{AG}=12\\,\\text{kW} \\)'tır. Sürtünme ve
              rüzgâr kaybı 300 W ise (a) rotor bakır kaybını, (b) mekanik gelişen gücü, (c) mil çıkış
              gücünü ve (d) indüklenen momenti bulun.</p>`,
@@ -528,6 +593,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 15,
       soru: `<p>Bir senkron jeneratörde \\( V_\\phi=277\\,\\text{V} \\), \\( E_A=350\\,\\text{V} \\),
              \\( X_S=2.5\\,\\Omega \\) ve güç açısı \\( \\delta=20° \\)'dir.
              (a) Üç fazlı çıkış gücünü, (b) makinenin çıkarabileceği maksimum gücü bulun.</p>`,
@@ -540,6 +606,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>Bir trafo çekirdeğinde 50 Hz, \\( B_{max}=1.2\\,\\text{T} \\)'de histerezis kaybı 200 W, girdap akımı kaybı 100 W ölçülmüştür. (a) Aynı \\( B_{max} \\) ile 60 Hz'de toplam çekirdek kaybı ne olur (histerezis \\( \\propto f \\), girdap \\( \\propto f^2 \\))? (b) Gerilim de %20 artırılıp 60 Hz'de çalıştırılırsa \\( B_{max} \\) ne olur? (c) Sac kalınlığı yarıya indirilse hangi kayıp nasıl değişir?</p>`,
       cozum: `
         <p>(a) \\( P_h=200\\cdot\\frac{60}{50}=240 \\) W; \\( P_e=100\\cdot(\\frac{60}{50})^2=144 \\) W → toplam <b>384 W</b> (300'den).</p>
@@ -549,6 +616,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>Ortalama uzunluğu 50 cm, kesiti \\( 10\\,\\text{cm}^2 \\), \\( \\mu_r=1500 \\) olan çekirdeğe 1 mm hava aralığı açılmış ve 400 sarım sarılmıştır. (a) Bobinin endüktansını bulun; hava aralığı olmasa ne olurdu? (b) Aynı çekirdeğe 100 sarımlık ikinci bir bobin sarılırsa karşılıklı endüktans (kaçaksız) nedir?</p>`,
       cozum: `
         <p>Relüktanslar: \\( \\mathcal R_c=\\dfrac{0.5}{1500\\cdot4\\pi10^{-7}\\cdot10^{-3}}=2.65\\times10^5 \\), \\( \\mathcal R_g=\\dfrac{10^{-3}}{4\\pi10^{-7}\\cdot10^{-3}}=7.96\\times10^5 \\) A/Wb.
@@ -559,6 +627,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>Üç fazlı 34.5 kV / 480 V, 500 kVA, Δ–Y bağlı bir trafo. (a) Her fazın sarım oranı, (b) anma yükünde hat ve faz akımları (her iki tarafta), (c) tek fazlı 480/120 V, 10 kVA trafo ototransformatöre çevrilip 600/480 V olarak bağlanırsa aktarabileceği görünür güç nedir?</p>`,
       cozum: `
         <p>(a) Primer Δ → faz gerilimi = hat = 34.5 kV; sekonder Y → faz = \\( 480/\\sqrt3=277 \\) V. Oran \\( a=34500/277=\\mathbf{124.5} \\) (hat oranı 71.9 ile karıştırılmamalı).</p>
@@ -569,6 +638,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "vize",
+      konu: 11,
       soru: `<p>Ayrı uyarmalı DC generatör 1200 d/dk'da yüksüz 250 V üretiyor; \\( R_A=0.3\\,\\Omega \\). (a) 40 A yükte uç gerilimi ve regülasyon (endüvi reaksiyonu ihmal), (b) aynı alan akımı ve yükte hız 1500 d/dk olursa uç gerilimi, (c) makine motor olarak 250 V'tan 40 A çekerse hızı nedir?</p>`,
       cozum: `
         <p>(a) \\( V_t=250-40(0.3)=\\mathbf{238\\;V} \\); VR \\( =\\dfrac{250-238}{238}=\\%5 \\).</p>
@@ -578,6 +648,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>Üç fazlı 4 kutuplu bir statorda faz sargılarına 50 Hz dengeli akım veriliyor. (a) Döner alanın hızını bulun; (b) iki faz bağlantısı yer değiştirirse ne olur; (c) 60 Hz'e geçilirse hız; (d) tek fazlı sargıda neden döner alan oluşmaz, tek fazlı motor nasıl kalkar?</p>`,
       cozum: `
         <p>(a) \\( n_s=\\dfrac{120f}{P}=\\dfrac{120\\cdot50}{4}=\\mathbf{1500\\;d/dk} \\) (\\( \\omega_s=157 \\) rad/s).</p>
@@ -588,6 +659,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>6 kutuplu, 50 Hz asenkron motorun kalkış momenti 60 N·m, maksimum momenti 150 N·m ve maksimum moment kayması 0.2'dir. (a) Rotor direnci iki katına çıkarılırsa (bilezikli rotor) \\( \\tau_{max} \\), \\( s_{max} \\) ve yaklaşık kalkış momenti ne olur? (b) Δ bağlı motor Y ile kalkarsa kalkış akımı ve momenti ne olur? (c) Anma hızı 960 d/dk ise anma kayması ve rotor frekansı?</p>`,
       cozum: `
         <p>(a) \\( \\tau_{max} \\) \\( R_2 \\)'den <b>bağımsız</b>: 150 N·m kalır. \\( s_{max}\\propto R_2 \\): 0.4. Moment–kayma eğrisi sağa kayar; kalkış (s=1) artık tepeye daha yakın →
@@ -599,6 +671,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 16,
       soru: `<p>Bir tesis 400 kW çekiyor, güç faktörü 0.7 geri. Güç faktörünü 0.95'e çıkarmak için 100 kW'lık bir yükü süren senkron motor aşırı uyarılacak. (a) Gereken reaktif güç, (b) senkron motorun görünür gücü ve çalışma güç faktörü, (c) düzeltme öncesi/sonrası şebekeden çekilen hat akımı (400 V, 3 faz).</p>`,
       cozum: `
         <p>(a) Mevcut yük 400 kW, \\( \\tan\\theta_1=\\tan(\\arccos0.7)=1.02 \\) → \\( Q_1=408 \\) kVAr. Motor eklenince toplam \\( P=500 \\) kW; hedef \\( \\tan\\theta_2=0.329 \\) →
@@ -609,6 +682,7 @@ window.DERSLER["EE3014"] = {
     },
     {
       tip: "final",
+      konu: 10,
       soru: `<p>Şönt DC motor 240 V, \\( R_A=0.5\\,\\Omega \\), \\( R_F=120\\,\\Omega \\), 1000 d/dk'da 40 A hat akımı çekiyor. (a) Endüvi akımı ve zıt emk, (b) hız 1500 d/dk'ya nasıl çıkarılır (alan direnci kaç Ω olmalı — moment sabit, doyma yok), (c) kalkış anında endüvi akımı ve onu 2×anma ile sınırlayan yolverme direnci?</p>`,
       cozum: `
         <p>(a) \\( I_F=240/120=2 \\) A; \\( I_A=38 \\) A; \\( E_A=240-38(0.5)=221 \\) V.</p>
@@ -616,6 +690,82 @@ window.DERSLER["EE3014"] = {
         \\( n=1000\\cdot\\dfrac{211.5}{221}\\cdot1.5=1435 \\) d/dk — yaklaşık; tam 1500 için akı oranı yinelenir (\\( \\phi_2/\\phi_1\\approx0.64 \\)). \\( I_F=2\\cdot0.64=1.28 \\) A →
         \\( R_F\\approx\\mathbf{188\\;\\Omega} \\). Alan zayıflatma = temel hızın üstü; altı için endüvi gerilimi düşürülür.</p>
         <p>(c) Kalkışta \\( E_A=0 \\): \\( I_A=240/0.5=480 \\) A (12× anma!). Sınır 76 A → \\( R_{top}=240/76=3.16 \\) Ω → seri \\( R_{st}=\\mathbf{2.66\\;\\Omega} \\), hızlandıkça kademeli çıkarılır.</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 17,
+      soru: `<p>Tek fazlı asenkron motorun neden kendi kendine kalkamadığını çift döner alan kuramıyla
+        açıklayın. (a) Rotor dururken net moment neden sıfırdır? (b) Motor elle \\( s=0.05 \\) kaymaya
+        kadar döndürülürse ileri ve geri alanlara göre kaymalar ne olur? (c) Kalkış kondansatörü
+        neden merkezkaç anahtarıyla devreden çıkarılır?</p>`,
+      cozum: `<p><b>(a)</b> Tek sargının pulsasyonlu alanı, eşit genlikli ileri ve geri dönen iki alana
+        ayrılır. Rotor dururken her ikisine göre kayma \\( s=1 \\)'dir; ürettikleri momentler eşit
+        büyüklükte ve zıt yönlüdür, toplamı sıfırdır.</p>
+        <p><b>(b)</b> İleri alana göre \\( s_f=0.05 \\), geri alana göre \\( s_b=2-0.05=1.95 \\).
+        Geri alanın gördüğü kayma çok büyük olduğundan rotor devresi neredeyse tamamen endüktiftir
+        ve ürettiği moment küçülür; ileri momenti baskın gelir, motor o yönde hızlanır.</p>
+        <p><b>(c)</b> Kalkış kondansatörü büyük kapasiteli, kısa süreli çalışmaya göre boyutlandırılmış
+        (elektrolitik) bir elemandır; sürekli akım taşırsa ısınıp bozulur. Ayrıca hız yükseldikten
+        sonra yardımcı sargı verimi düşürür ve gereksiz kayıp üretir. Bu yüzden ~%75 hızda merkezkaç
+        anahtarı devreyi açar. Sürekli kondansatörlü (PSC) motorlarda ise kondansatör küçük seçilir
+        ve devrede kalacak şekilde (film tipi) tasarlanır.</p>`
+    },
+    {
+      tip: "final",
+      konu: 17,
+      soru: `<p>3 fazlı, rotor diş sayısı \\( N_r=50 \\) olan hibrit bir adım motoru için
+        (a) tam adım açısını, (b) bir tam tur için gereken darbe sayısını, (c) sürücü 2000 darbe/s
+        verdiğinde devir sayısını bulun. (d) Bu motorun yerine neden BLDC seçilebilir?</p>`,
+      cozum: `<p><b>(a)</b> \\( \\theta_s=\\dfrac{360^\\circ}{m N_r}=\\dfrac{360}{3\\cdot50}=2.4^\\circ \\).</p>
+        <p><b>(b)</b> Bir tur \\( =360/2.4=150 \\) darbe.</p>
+        <p><b>(c)</b> \\( n=\\dfrac{2000\\ \\text{darbe/s}}{150\\ \\text{darbe/tur}}=13.33\\ \\text{tur/s}=800\\ \\text{d/dk} \\).</p>
+        <p><b>(d)</b> Adım motoru açık çevrimde konumlanır ama momenti hızla hızla düşer ve yük
+        artarsa <b>adım kaçırır</b> — üstelik hatayı fark edemez. Ayrıca duruşta bile tam akım çeker,
+        verimi düşüktür. BLDC ise geri beslemeli komütasyon kullanır: yüksek devirde momentini korur,
+        verimi yüksektir ve yük değişimine uyum sağlar. Bedeli, konum sensörü ve daha karmaşık sürücüdür.</p>`
+    },
+
+    {
+      tip: "vize",
+      konu: 4,
+      soru: `<p>50 kVA, 2400/240 V, 50 Hz bir transformatöre iki deney yapılıyor.
+        <b>Açık devre</b> (AD, alçak gerilim tarafından): 240 V, 5.0 A, 320 W.
+        <b>Kısa devre</b> (KD, yüksek gerilim tarafından): 92 V, 20.8 A, 810 W.
+        (a) Mıknatıslanma kolu \\( R_c \\) ve \\( X_m \\) (AG tarafına göre) nedir?
+        (b) Seri kol \\( R_{eq} \\) ve \\( X_{eq} \\) (YG tarafına göre) nedir?
+        (c) Her deneyde hangi kayıp ölçülür, neden?</p>`,
+      cozum: `<p><b>(a) Açık devre.</b> İkincil açık olduğundan akım yalnız mıknatıslanma kolundan geçer.
+        \\( R_c=\\dfrac{V^{2}}{P}=\\dfrac{240^{2}}{320}=180\\,\\Omega \\).
+        \\( |Z|=240/5=48\\,\\Omega \\Rightarrow I_c=240/180=1.33\\ \\text{A} \\),
+        \\( I_m=\\sqrt{5^{2}-1.33^{2}}=4.82\\ \\text{A} \\Rightarrow X_m=240/4.82=49.8\\,\\Omega \\) (AG tarafına göre).</p>
+        <p><b>(b) Kısa devre.</b> İkincil kısa devre, gerilim küçük olduğundan mıknatıslanma kolu ihmal edilir.
+        \\( R_{eq}=\\dfrac{P}{I^{2}}=\\dfrac{810}{20.8^{2}}=1.87\\,\\Omega \\),
+        \\( |Z_{eq}|=92/20.8=4.42\\,\\Omega \\Rightarrow X_{eq}=\\sqrt{4.42^{2}-1.87^{2}}=4.01\\,\\Omega \\) (YG tarafına göre).</p>
+        <p><b>(c)</b> AD deneyinde anma gerilimi uygulanır ama akım çok küçüktür, bu yüzden bakır kaybı
+        ihmal edilir: ölçülen 320 W ≈ <b>çekirdek (demir) kaybı</b>dır. KD deneyinde akım anma değerinde
+        ama gerilim çok küçüktür, akı dolayısıyla çekirdek kaybı ihmal edilir: ölçülen 810 W ≈
+        <b>bakır kaybı</b>dır. İki deneyin ayrı ayrı yapılmasının sebebi tam olarak bu ayrıştırmadır.</p>`
+    },
+    {
+      tip: "final",
+      konu: 8,
+      soru: `<p>Döner makinelerin ortak temelleri üzerine:
+        (a) 4 kutuplu, 50 Hz bir makinede senkron hız kaç d/dk'dır? 6 kutupluda?
+        (b) Mekanik açı ile elektriksel açı arasındaki bağıntı nedir; 4 kutuplu makinede rotor
+        mekanik olarak 90° dönerse elektriksel olarak kaç derece döner?
+        (c) Bir makinede indüklenen emk ve moment ifadelerinin ortak çarpanı nedir, bu neden önemlidir?</p>`,
+      cozum: `<p><b>(a)</b> \\( n_s=\\dfrac{120f}{P}=\\dfrac{120\\cdot50}{4}=1500\\ \\text{d/dk} \\);
+        6 kutupta \\( \\dfrac{120\\cdot50}{6}=1000\\ \\text{d/dk} \\). Kutup sayısı arttıkça senkron hız düşer.</p>
+        <p><b>(b)</b> \\( \\theta_e=\\dfrac{P}{2}\\theta_m \\). 4 kutupta \\( \\theta_e=2\\theta_m \\),
+        yani 90° mekanik dönme <b>180° elektriksel</b> demektir. Sargı, bir kutup çiftini geçtiğinde
+        emk bir tam çevrim yapar; bu yüzden mekanik ve elektriksel açı ancak 2 kutupta eşittir.</p>
+        <p><b>(c)</b> Her ikisinde de <b>akı \\( \\phi \\) ile makine sabiti \\( K \\)</b> ortak çarpandır:
+        \\( E_A=K\\phi\\omega \\) ve \\( T_{ind}=K\\phi I_A \\). Bunun sonucu şudur:
+        \\( P_{dönüştürülen}=E_AI_A=T_{ind}\\omega \\) — elektriksel güç ile mekanik güç
+        <b>özdeş</b> olur, yani dönüşüm kayıpsız modellenir; tüm kayıplar (bakır, demir, sürtünme)
+        bu çarpımın dışında, devrenin başka elemanlarında hesaba katılır. Aynı yapı DC, asenkron ve
+        senkron makinelerin hepsinde geçerlidir.</p>`
     }
   ]
 };

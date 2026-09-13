@@ -14,7 +14,7 @@ window.DERSLER["STAT2056"] = {
   ad: "Probability and Random Variables",
   donem: "3. Sınıf · 1. Dönem",
   renk: "#F472B6",
-  ozet: "Olasılık aksiyomları ve sayma; koşullu olasılık, toplam olasılık ve Bayes; bağımsızlık; ayrık ve sürekli rastgele değişkenler (PMF/PDF/CDF); önemli dağılımlar (Bernoulli, Binom, Geometrik, Poisson, Hipergeometrik, Üniform, Üstel, Gamma/Erlang, Rayleigh, Gauss); beklenen değer, varyans, momentler ve eşitsizlikler; rastgele değişken fonksiyonları; birleşik dağılımlar, kovaryans, korelasyon ve iki değişkenli Gauss; koşullu beklenti ve MMSE tahmin; toplamlar ve konvolüsyon; MGF ve karakteristik fonksiyon; Büyük Sayılar Yasası ve Merkezi Limit Teoremi; rastgele süreçler, WSS ve PSD.",
+  ozet: "Olasılık aksiyomları ve sayma; koşullu olasılık, toplam olasılık ve Bayes; bağımsızlık; ayrık ve sürekli rastgele değişkenler (PMF/PDF/CDF); önemli dağılımlar (Bernoulli, Binom, Geometrik, Poisson, Hipergeometrik, Üniform, Üstel, Gamma/Erlang, Rayleigh, Gauss); beklenen değer, varyans, momentler ve eşitsizlikler; rastgele değişken fonksiyonları; birleşik dağılımlar, kovaryans, korelasyon ve iki değişkenli Gauss; koşullu beklenti ve MMSE tahmin; toplamlar ve konvolüsyon; MGF ve karakteristik fonksiyon; Büyük Sayılar Yasası ve Merkezi Limit Teoremi; rastgele süreçler, WSS ve PSD; Poisson süreci, üstel arası zamanlar ve hafızasızlık.",
   konular: [
     {
       baslik: "1. Olasılık Aksiyomları ve Örnek Uzay",
@@ -457,6 +457,51 @@ window.DERSLER["STAT2056"] = {
         </ul>
         <p><b>Neden önemli:</b> SNR hesabı, eşleşmiş filtre, Wiener/Kalman filtreleri, spektrum analizörü okumaları — hepsi \\( R_X \\) ve \\( S_X \\) diliyle yazılır.
         Bu konu, olasılık dersinin haberleşme ve sinyal işleme derslerine açılan kapısıdır.</p>`
+    },
+
+    {
+      baslik: "18. Poisson Süreci ve Üstel Arası Zamanlar",
+      icerik: `
+        <p>Poisson dağılımını "sabit bir aralıkta kaç olay" sorusu için, üstel dağılımı "bir sonraki
+        olaya kadar ne kadar süre" sorusu için ayrı ayrı öğrendik. <b>Poisson süreci</b> bu ikisinin
+        aynı modelin iki yüzü olduğunu gösterir ve rastgele süreçler konusunun ilk somut örneğidir.</p>
+        <p>\\( \\{N(t),\\,t\\ge0\\} \\) sayma süreci şu üç koşulu sağlıyorsa \\( \\lambda \\) oranlı
+        Poisson sürecidir: (1) \\( N(0)=0 \\); (2) <b>bağımsız artışlar</b> — ayrık zaman aralıklarındaki
+        olay sayıları bağımsızdır; (3) <b>durağan artışlar</b> — uzunluğu \\( \\tau \\) olan herhangi bir
+        aralıktaki olay sayısı yalnız \\( \\tau \\)'ya bağlıdır. Bu üç varsayımın tek sonucu şudur:</p>
+        \\[ P\\{N(t+\\tau)-N(t)=k\\}=\\frac{(\\lambda\\tau)^{k}e^{-\\lambda\\tau}}{k!},\\qquad
+           E[N(t)]=\\operatorname{Var}(N(t))=\\lambda t \\]
+        <p><b>Arası zamanlar.</b> Ardışık olaylar arasındaki süre \\( T \\) için
+        \\( P\\{T&gt;t\\}=P\\{N(t)=0\\}=e^{-\\lambda t} \\), yani</p>
+        \\[ f_T(t)=\\lambda e^{-\\lambda t},\\quad t\\ge0,\\qquad E[T]=\\frac{1}{\\lambda} \\]
+        <p>Arası zamanlar <b>bağımsız ve üstel</b> dağılımlıdır. \\( n \\) olayın gerçekleşme süresi
+        bu üstellerin toplamıdır ve <b>Erlang (Gamma)</b> dağılımı verir:
+        \\( f_{S_n}(t)=\\dfrac{\\lambda^{n}t^{n-1}e^{-\\lambda t}}{(n-1)!} \\).</p>
+        <p><b>Hafızasızlık.</b> Üstel dağılımın belirleyici özelliği:</p>
+        \\[ P\\{T&gt;s+t\\mid T&gt;s\\}=P\\{T&gt;t\\} \\]
+        <p>"10 dakikadır çağrı gelmedi, artık gelmesi yakındır" cümlesi <b>yanlıştır</b>: beklemiş
+        olmak kalan bekleme süresinin dağılımını değiştirmez. Üstel, sürekli dağılımlar arasında bu
+        özelliği taşıyan tek dağılımdır (ayrıkta karşılığı geometriktir). Fiziksel anlamı, olayların
+        birbirini "hatırlamadan", sabit oranla ortaya çıkmasıdır — yaşlanan/yıpranan sistemler için
+        bu yüzden Weibull gibi modeller kullanılır.</p>
+        <p><b>Ayrıştırma ve birleştirme.</b> İki önemli kapanış özelliği vardır:</p>
+        <ul>
+          <li><b>Birleştirme:</b> \\( \\lambda_1 \\) ve \\( \\lambda_2 \\) oranlı bağımsız iki Poisson
+          süreci üst üste binerse sonuç \\( \\lambda_1+\\lambda_2 \\) oranlı Poisson sürecidir.</li>
+          <li><b>Ayrıştırma:</b> her olay bağımsız olarak \\( p \\) olasılıkla A türüne atanırsa,
+          A olayları \\( \\lambda p \\) oranlı Poisson sürecidir ve B sürecinden <b>bağımsızdır</b>.
+          (Sezgiye aykırıdır ama doğrudur.)</li>
+        </ul>
+        <p>Ayrıca güzel bir koşullandırma sonucu: \\( (0,t) \\) aralığında tam \\( n \\) olay olduğu
+        bilindiğinde, bu olayların konumları \\( (0,t) \\) üzerinde <b>bağımsız düzgün dağılımlı</b>
+        noktaların sıralanmış hâli gibi davranır.</p>
+        <p><b>Sık yapılan hata:</b> \\( \\lambda \\)'yı aralık uzunluğuyla ölçeklemeyi unutmak.
+        \\( \\lambda \\) birim zamandaki orandır; 5 dakikalık pencere için Poisson parametresi
+        \\( \\lambda\\cdot5 \\)'tir. Bir diğeri, arası zaman ile toplam süreyi karıştırmak:
+        tek olay üstel, \\( n \\) olay Erlang'dır.</p>
+        <p><b>EE'de nerede:</b> çağrı merkezi ve paket ağı trafiği (M/M/1 kuyruğunun temeli),
+        foton sayımı ve atış gürültüsü (shot noise), radyoaktif bozunma, yarı iletken üretiminde
+        kusur sayısı, sistem güvenilirliğinde arıza oranı \\( \\lambda \\) ve MTBF \\( =1/\\lambda \\).</p>`
     }
   ],
   formuller: [
@@ -501,7 +546,14 @@ window.DERSLER["STAT2056"] = {
     { ad: "MGF Toplam Kuralı", formul: `\\( M_{X+Y}(t)=M_X(t)M_Y(t) \\)`, aciklama: "Bağımsız toplam; Gauss MGF: e^{μt+σ²t²/2}." },
     { ad: "Karakteristik Fonksiyon", formul: `\\( \\Phi_X(\\omega)=E[e^{j\\omega X}] \\)`, aciklama: "PDF'nin Fourier'i; her dağılım için var." },
     { ad: "Wiener–Khinchin", formul: `\\( S_X(f)=\\mathcal F\\{R_X(\\tau)\\},\\quad P=R_X(0)=\\int S_X\\,df \\)`, aciklama: "PSD ↔ otokorelasyon; LTI çıkış S_Y=|H|²S_X." },
-    { ad: "Beyaz Gürültü", formul: `\\( S=\\dfrac{N_0}{2},\\; R_X(\\tau)=\\dfrac{N_0}{2}\\delta(\\tau),\\; N_0=kT \\)`, aciklama: "Bant B'den geçen güç N_0B; 290 K'de −174 dBm/Hz." }
+    { ad: "Beyaz Gürültü", formul: `\\( S=\\dfrac{N_0}{2},\\; R_X(\\tau)=\\dfrac{N_0}{2}\\delta(\\tau),\\; N_0=kT \\)`, aciklama: "Bant B'den geçen güç N_0B; 290 K'de −174 dBm/Hz." },
+
+    { ad: "Poisson Süreci Olay Sayısı", formul: "\\( P\\{N(\\tau)=k\\}=\\dfrac{(\\lambda\\tau)^{k}e^{-\\lambda\\tau}}{k!} \\)", aciklama: "λ birim zamandaki oran; pencere uzunluğuyla ölçeklenir." },
+    { ad: "Poisson Süreci Ortalama ve Varyans", formul: "\\( E[N(t)]=\\operatorname{Var}(N(t))=\\lambda t \\)", aciklama: "Ortalama ile varyansın eşit olması Poisson'un imzasıdır." },
+    { ad: "Üstel Arası Zaman", formul: "\\( f_T(t)=\\lambda e^{-\\lambda t},\\qquad E[T]=\\dfrac{1}{\\lambda} \\)", aciklama: "Ardışık olaylar arası süre; bağımsız ve özdeş dağılımlı." },
+    { ad: "Hafızasızlık", formul: "\\( P\\{T>s+t\\mid T>s\\}=P\\{T>t\\} \\)", aciklama: "Beklemiş olmak kalan bekleme dağılımını değiştirmez." },
+    { ad: "n. Olayın Zamanı (Erlang)", formul: "\\( f_{S_n}(t)=\\dfrac{\\lambda^{n}t^{n-1}e^{-\\lambda t}}{(n-1)!} \\)", aciklama: "n bağımsız üstelin toplamı; MTBF hesaplarında kullanılır." },
+    { ad: "Birleştirme ve Ayrıştırma", formul: "\\( \\lambda_{top}=\\lambda_1+\\lambda_2,\\qquad \\lambda_A=p\\lambda \\)", aciklama: "Poisson süreçleri toplanır; bağımsız seyreltme yine Poisson verir." }
   ],
   galeri: [],
   dokumanlar: [],
@@ -519,6 +571,7 @@ window.DERSLER["STAT2056"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 8,
       soru: `<p>Hilesiz bir zar atılıyor. \\( X \\) gelen sayı ise \\( E[X] \\) ve \\( \\operatorname{Var}(X) \\) nedir? Zar iki kez atılıp toplam alınırsa toplamın ortalaması ve varyansı ne olur?</p>`,
       cozum: `
         \\[ E[X]=\\frac{1+2+3+4+5+6}{6}=3.5, \\qquad E[X^2]=\\frac{91}{6}, \\qquad \\operatorname{Var}(X)=\\frac{91}{6}-3.5^2=\\frac{35}{12}\\approx 2.92 \\]
@@ -526,6 +579,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>52'lik desteden yerine koymadan 5 kart çekiliyor. (a) Tam olarak 2 as, (b) en az 1 as gelme olasılığı nedir? (c) Bu hangi dağılımdır?</p>`,
       cozum: `
         <p>(a) 4 astan 2, 48 diğerden 3: \\( \\dfrac{\\binom42\\binom{48}3}{\\binom{52}5}=\\dfrac{6\\cdot17296}{2598960}\\approx0.040 \\).</p>
@@ -534,6 +588,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>Bir hastalık nüfusun %1'inde görülüyor. Test hastaları %99 doğru saptıyor ama sağlamlarda %5 yanlış pozitif veriyor. Testi pozitif çıkan birinin gerçekten hasta olma olasılığı nedir? Sonuç neden bu kadar düşük?</p>`,
       cozum: `
         <p>\\( P(H)=0.01 \\), \\( P(+\\mid H)=0.99 \\), \\( P(+\\mid \\overline{H})=0.05 \\). Toplam olasılık:</p>
@@ -544,6 +599,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 3,
       soru: `<p>Üç bileşenin bağımsız çalışma olasılıkları 0.9, 0.8, 0.7. (a) Seri bağlı sistem (hepsi çalışmalı), (b) paralel bağlı sistem (biri yeter) çalışma olasılığı nedir? (c) Sistem çalışmıyorsa 3. bileşenin bozuk olma olasılığı (seri durumda)?</p>`,
       cozum: `
         <p>(a) \\( 0.9\\cdot0.8\\cdot0.7=0.504 \\).</p>
@@ -553,6 +609,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>Bir bileşen bağımsız olarak 0.1 olasılıkla arızalanıyor. 5 bileşenden (a) tam 1'inin arızalanma, (b) en az 1'inin arızalanma olasılığı nedir? (c) Arıza sayısının ortalaması ve varyansı?</p>`,
       cozum: `
         <p>\\( X\\sim \\text{Binom}(5,0.1) \\).</p>
@@ -561,6 +618,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>Bir çağrı merkezine dakikada ortalama \\( \\lambda=3 \\) çağrı geliyor (Poisson). (a) Bir dakikada tam 5 çağrı, (b) 2 dakikada hiç çağrı gelmeme olasılığı nedir? (c) İki çağrı arası sürenin dağılımı ve ortalaması?</p>`,
       cozum: `
         <p>(a) \\( P(X=5)=\\dfrac{3^5 e^{-3}}{5!}=\\dfrac{243\\,(0.0498)}{120}\\approx 0.101 \\).</p>
@@ -569,6 +627,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>\\( f_X(x)=cx^2 \\), \\( 0\\le x\\le1 \\) (diğer yerde 0). (a) \\( c \\)'yi bulun, (b) CDF'yi yazın, (c) \\( E[X] \\) ve \\( \\operatorname{Var}(X) \\), (d) \\( P(X&gt;0.5) \\) ve medyan.</p>`,
       cozum: `
         <p>(a) \\( \\int_0^1 cx^2 dx=\\dfrac{c}{3}=1\\Rightarrow c=3 \\).</p>
@@ -578,6 +637,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 7,
       soru: `<p>Bir cihazın ömrü \\( \\lambda=1/1000 \\) parametreli üstel dağılımlıdır (saat). (a) 1500 saatten fazla dayanma olasılığı, (b) 500 saat çalışmışken 1000 saat daha dayanma olasılığı nedir? (c) Aynı cihazdan 3 tanesi sırayla (biri bozulunca diğeri) kullanılırsa toplam ömrün dağılımı ve ortalaması?</p>`,
       cozum: `
         <p>(a) \\( P(X&gt;1500)=e^{-1.5}\\approx 0.223 \\).</p>
@@ -586,6 +646,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 7,
       soru: `<p>Bir sinyal gerilimi \\( X\\sim N(\\mu=100,\\;\\sigma=15) \\). (a) \\( P(X&gt;130) \\), (b) \\( P(85&lt;X&lt;115) \\), (c) hangi eşik değerini yalnızca %1 aşar? (\\( \\Phi(1)=0.8413,\\;\\Phi(2)=0.9772,\\;\\Phi(2.33)=0.99 \\))</p>`,
       cozum: `
         <p>(a) \\( Z=\\dfrac{130-100}{15}=2 \\) ⟹ \\( P=1-\\Phi(2)=0.0228 \\).</p>
@@ -594,6 +655,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 9,
       soru: `<p>\\( X\\sim N(0,1) \\) ve \\( Y=X^2 \\). (a) \\( E[Y] \\) ve \\( \\operatorname{Var}(Y) \\)'yi LOTUS ile bulun (\\( E[X^4]=3 \\)). (b) \\( f_Y(y) \\)'yi türetin. (c) \\( Y=2X+3 \\) için \\( f_Y \\)'yi yazın.</p>`,
       cozum: `
         <p>(a) \\( E[Y]=E[X^2]=1 \\); \\( \\operatorname{Var}(Y)=E[X^4]-1=2 \\).</p>
@@ -604,6 +666,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 10,
       soru: `<p>\\( f_{X,Y}(x,y)=c \\), \\( 0&lt;x&lt;y&lt;1 \\) üçgen bölgesinde (dışında 0). (a) c, (b) marjinaller \\( f_X,f_Y \\), (c) X ve Y bağımsız mı, (d) \\( f_{Y\\mid X}(y\\mid x) \\) ve \\( E[Y\\mid X=x] \\), (e) \\( P(X+Y&lt;1) \\).</p>`,
       cozum: `
         <p>(a) Üçgenin alanı 1/2 ⟹ \\( c=2 \\).</p>
@@ -614,6 +677,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>\\( \\operatorname{Var}(X)=4 \\), \\( \\operatorname{Var}(Y)=9 \\), \\( \\operatorname{Cov}(X,Y)=3 \\). (a) korelasyon katsayısı, (b) \\( \\operatorname{Var}(X+Y) \\) ve \\( \\operatorname{Var}(X-Y) \\), (c) \\( \\operatorname{Cov}(2X+1,\\,3Y-2) \\)?</p>`,
       cozum: `
         <p>(a) \\( \\rho=\\dfrac{3}{2\\cdot3}=0.5 \\).</p>
@@ -622,6 +686,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>Bir sensör \\( X=Y+N \\) ölçüyor; \\( Y \\) (gerçek değer) ve \\( N \\) (gürültü) bağımsız, sıfır ortalamalı, \\( \\sigma_Y^2=4 \\), \\( \\sigma_N^2=1 \\). (a) \\( \\operatorname{Cov}(X,Y) \\) ve \\( \\rho_{XY} \\), (b) doğrusal MMSE tahminci \\( \\hat Y=aX \\) ve en küçük hata, (c) \\( X=3 \\) ölçüldüğünde tahmin nedir? Ham ölçümü kullanmaya göre hata ne kadar azaldı?</p>`,
       cozum: `
         <p>(a) \\( \\operatorname{Cov}(X,Y)=\\operatorname{Cov}(Y+N,Y)=\\sigma_Y^2=4 \\); \\( \\sigma_X^2=5 \\); \\( \\rho=\\dfrac{4}{\\sqrt5\\cdot2}=0.894 \\).</p>
@@ -630,6 +695,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>\\( X \\) ve \\( Y \\) bağımsız, \\( U(0,1) \\). \\( Z=X+Y \\)'nin PDF'sini konvolüsyonla bulun; \\( E[Z] \\) ve \\( \\operatorname{Var}(Z) \\)'yi yazın. \\( P(Z&gt;1.5) \\) nedir?</p>`,
       cozum: `
         <p>\\( f_Z(z)=\\int f_X(x)f_Y(z-x)dx \\); integrand yalnızca \\( 0&lt;x&lt;1 \\) ve \\( 0&lt;z-x&lt;1 \\) iken 1:</p>
@@ -639,6 +705,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>\\( X\\sim\\text{Poisson}(\\lambda) \\) için MGF'yi türetin; ondan \\( E[X] \\) ve \\( \\operatorname{Var}(X) \\)'i bulun. Bağımsız \\( X_1\\sim\\text{Poisson}(2) \\), \\( X_2\\sim\\text{Poisson}(3) \\) toplamının dağılımını MGF ile belirleyin.</p>`,
       cozum: `
         \\[ M(t)=\\sum_{k=0}^\\infty e^{tk}\\frac{\\lambda^ke^{-\\lambda}}{k!}=e^{-\\lambda}\\sum_k\\frac{(\\lambda e^t)^k}{k!}=e^{-\\lambda}e^{\\lambda e^t}=e^{\\lambda(e^t-1)} \\]
@@ -647,6 +714,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 15,
       soru: `<p>Ortalaması 5, varyansı 4 olan bağımsız 100 ölçümün örnek ortalaması \\( \\overline{X} \\). (a) \\( P(\\overline{X}&gt;5.2) \\) yaklaşık kaçtır? (\\( \\Phi(1)=0.8413 \\)) (b) %95 güvenle \\( |\\overline X-5|&lt;0.2 \\) olması için kaç ölçüm gerekir? (c) Chebyshev aynı olasılığa hangi sınırı verir?</p>`,
       cozum: `
         <p>(a) MLT: \\( \\overline{X}\\approx N(5,\\;4/100) \\), standart hata 0.2; \\( Z=1\\Rightarrow P=1-\\Phi(1)=0.1587 \\).</p>
@@ -656,6 +724,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 7,
       soru: `<p>\\( X\\sim U(2,8) \\). \\( E[X] \\), \\( \\operatorname{Var}(X) \\) ve \\( P(3\\le X\\le 5) \\) nedir? Bu değişken 1 V adımlı bir kuantalayıcıya girse kuantalama hatasının varyansı ne olur?</p>`,
       cozum: `
         <p>\\( E[X]=\\dfrac{2+8}{2}=5 \\), \\( \\operatorname{Var}(X)=\\dfrac{(8-2)^2}{12}=3 \\). Yoğunluk \\( 1/6 \\): \\( P(3\\le X\\le5)=\\dfrac{2}{6}=\\dfrac13 \\).</p>
@@ -663,6 +732,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 8,
       soru: `<p>Ortalaması \\( \\mu \\), sapması \\( \\sigma \\) olan herhangi bir dağılımda, değerin ortalamadan \\( 2\\sigma \\)'dan fazla sapma olasılığına Chebyshev üst sınırı nedir? Gauss için gerçek değer? Yalnızca \\( X\\ge0 \\) ve \\( E[X]=\\mu \\) bilinseydi \\( P(X\\ge3\\mu) \\) için ne söylenebilirdi?</p>`,
       cozum: `
         \\[ P(|X-\\mu|\\ge 2\\sigma)\\le\\frac{1}{4}=0.25 \\]
@@ -671,6 +741,7 @@ window.DERSLER["STAT2056"] = {
     },
     {
       tip: "final",
+      konu: 16,
       soru: `<p>WSS bir sürecin otokorelasyonu \\( R_X(\\tau)=4e^{-2|\\tau|}+9 \\). (a) Ortalama güç, DC gücü ve ortalama \\( \\mu_X \\), (b) AC (dalgalanma) gücü, (c) PSD \\( S_X(f) \\), (d) süreç kesimi 1 Hz olan ideal LPF'den geçerse DC bileşene ne olur?</p>`,
       cozum: `
         <p>(a) \\( P=R_X(0)=13 \\). \\( \\tau\\to\\infty \\): \\( R_X\\to9=\\mu_X^2 \\) ⟹ \\( \\mu_X=\\pm3 \\), DC gücü 9.</p>
@@ -678,6 +749,77 @@ window.DERSLER["STAT2056"] = {
         <p>(c) \\( \\mathcal F\\{4e^{-2|\\tau|}\\}=\\dfrac{4\\cdot4}{4+(2\\pi f)^2}=\\dfrac{16}{4+4\\pi^2f^2} \\); sabit 9 → \\( 9\\delta(f) \\):
         \\( S_X(f)=\\dfrac{16}{4+4\\pi^2f^2}+9\\delta(f) \\).</p>
         <p>(d) DC (\\( f=0 \\)) geçirme bandında → \\( 9\\delta(f) \\) aynen geçer; sürekli kısmın yalnızca \\( |f|&lt;1 \\) parçası kalır, AC gücü azalır.</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 17,
+      soru: `<p>Bir sunucuya istekler \\( \\lambda=4 \\) istek/dakika oranlı Poisson süreciyle geliyor.
+        (a) 30 saniyede hiç istek gelmeme olasılığı? (b) Ardışık iki istek arasındaki ortalama süre?
+        (c) Son istekten bu yana 2 dakika geçti; bir sonraki isteğin 15 saniye içinde gelme olasılığı?
+        (d) İsteklerin %25'i yazma işlemi ise, yazma istekleri hangi süreci oluşturur?</p>`,
+      cozum: `<p><b>(a)</b> \\( \\tau=0.5 \\) dk \\( \\Rightarrow \\lambda\\tau=2 \\).
+        \\( P\\{N=0\\}=e^{-2}=0.135 \\).</p>
+        <p><b>(b)</b> \\( E[T]=1/\\lambda=0.25 \\) dk \\( =15 \\) saniye.</p>
+        <p><b>(c)</b> Hafızasızlık gereği geçen 2 dakika <b>hiçbir şey değiştirmez</b>:
+        \\( P\\{T\\le0.25\\}=1-e^{-4\\cdot0.25}=1-e^{-1}=0.632 \\).
+        Sık yapılan hata, "2 dakika bekledik, artık gelmesi daha olası" diye koşullu olasılığı
+        büyütmeye çalışmaktır.</p>
+        <p><b>(d)</b> Bağımsız seyreltme: yazma istekleri \\( \\lambda_A=0.25\\cdot4=1 \\) istek/dakika
+        oranlı bir Poisson sürecidir ve okuma sürecinden (3 istek/dk) <b>bağımsızdır</b>.</p>`
+    },
+    {
+      tip: "final",
+      konu: 17,
+      soru: `<p>Bir cihazın arıza oranı \\( \\lambda=1/2000 \\) saat\\(^{-1}\\) sabit.
+        (a) MTBF nedir? (b) 1000 saat arızasız çalışma olasılığı? (c) Cihaz zaten 3000 saat çalışmışsa
+        1000 saat daha dayanma olasılığı? (d) Yedekli olarak 3 cihazın <b>sırayla</b> devreye girdiği
+        bir sistemde toplam ömrün dağılımı ve ortalaması nedir?</p>`,
+      cozum: `<p><b>(a)</b> \\( \\text{MTBF}=1/\\lambda=2000 \\) saat.</p>
+        <p><b>(b)</b> \\( R(1000)=e^{-1000/2000}=e^{-0.5}=0.607 \\).</p>
+        <p><b>(c)</b> Hafızasızlık: \\( P\\{T>4000\\mid T>3000\\}=P\\{T>1000\\}=0.607 \\).
+        Sabit arıza oranı varsayımı, cihazın <b>yıpranmadığını</b> söyler. Gerçek donanımda küvet
+        eğrisinin yalnız düz orta bölümü için geçerlidir; yıpranma bölgesi Weibull ile modellenir.</p>
+        <p><b>(d)</b> Üç bağımsız üstelin toplamı \\( n=3 \\), \\( \\lambda=1/2000 \\) parametreli
+        <b>Erlang</b> dağılımıdır: \\( f(t)=\\dfrac{\\lambda^{3}t^{2}e^{-\\lambda t}}{2} \\).
+        Ortalama \\( n/\\lambda=3\\cdot2000=6000 \\) saat, varyans \\( n/\\lambda^{2} \\).</p>`
+    },
+
+    {
+      tip: "vize",
+      konu: 0,
+      soru: `<p>Bir zar iki kez atılıyor. \\( A \\): "ilk atış çift", \\( B \\): "toplam 7".
+        (a) Örnek uzayın eleman sayısı ve \\( P(A) \\), \\( P(B) \\) nedir?
+        (b) \\( P(A\\cup B) \\) nedir? (c) \\( A \\) ile \\( B \\) bağımsız mıdır, ayrık mıdır?
+        (d) Aksiyomlardan \\( P(A^{c})=1-P(A) \\) olduğunu gösterin.</p>`,
+      cozum: `<p><b>(a)</b> \\( |S|=36 \\). \\( A \\): ilk atış 2,4,6 → \\( 3\\cdot6=18 \\) sonuç,
+        \\( P(A)=1/2 \\). \\( B \\): (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) → 6 sonuç, \\( P(B)=1/6 \\).</p>
+        <p><b>(b)</b> \\( A\\cap B \\): ilk atış çift <b>ve</b> toplam 7 → (2,5),(4,3),(6,1) → 3 sonuç,
+        \\( P(A\\cap B)=3/36=1/12 \\).
+        \\( P(A\\cup B)=\\tfrac12+\\tfrac16-\\tfrac1{12}=\\tfrac{6+2-1}{12}=\\tfrac{7}{12} \\).</p>
+        <p><b>(c)</b> \\( P(A)P(B)=\\tfrac12\\cdot\\tfrac16=\\tfrac1{12}=P(A\\cap B) \\): <b>bağımsızdırlar</b>.
+        Ayrık <b>değildirler</b>, çünkü \\( A\\cap B\\ne\\varnothing \\). Dikkat: bağımsızlık ile ayrıklık
+        birbirinin zıddı gibidir — olasılığı sıfırdan farklı iki ayrık olay asla bağımsız olamaz.</p>
+        <p><b>(d)</b> \\( A\\cup A^{c}=S \\) ve \\( A\\cap A^{c}=\\varnothing \\).
+        Üçüncü aksiyom (ayrık olaylar için toplanabilirlik):
+        \\( P(S)=P(A)+P(A^{c}) \\). İkinci aksiyom \\( P(S)=1 \\) der.
+        Buradan \\( P(A^{c})=1-P(A) \\). \\( \\square \\)</p>`
+    },
+    {
+      tip: "vize",
+      konu: 4,
+      soru: `<p>Ayrık bir rastgele değişkenin PMF'si \\( p_X(k)=c/2^{k} \\), \\( k=1,2,3,\\dots \\)
+        (a) \\( c \\)'yi bulun. (b) CDF \\( F_X(x) \\)'i yazın ve \\( F_X(2.5) \\)'i bulun.
+        (c) \\( P(X\\ \\text{çift}) \\) nedir? (d) PMF ile PDF arasındaki temel farkı bir cümleyle yazın.</p>`,
+      cozum: `<p><b>(a)</b> \\( \\sum_{k=1}^{\\infty}c/2^{k}=c\\cdot\\dfrac{1/2}{1-1/2}=c=1 \\).
+        Yani \\( c=1 \\) ve \\( p_X(k)=2^{-k} \\) (parametresi 1/2 olan geometrik dağılım).</p>
+        <p><b>(b)</b> \\( F_X(x)=\\sum_{k\\le x}2^{-k}=1-2^{-\\lfloor x\\rfloor} \\) (\\( x\\ge1 \\) için).
+        \\( F_X(2.5)=1-2^{-2}=0.75 \\). CDF ayrık değişkende <b>basamak fonksiyonudur</b>: her
+        \\( k \\)'de \\( p_X(k) \\) kadar sıçrar, aralarda sabittir ve sağdan süreklidir.</p>
+        <p><b>(c)</b> \\( P(\\text{çift})=\\sum_{m=1}^{\\infty}2^{-2m}=\\dfrac{1/4}{1-1/4}=\\dfrac{1}{3} \\).</p>
+        <p><b>(d)</b> PMF bir <b>olasılığın kendisidir</b> (\\( p_X(k)=P(X=k) \\), değeri ≤ 1); PDF ise
+        olasılık <b>yoğunluğudur</b> (\\( f_X(x) \\) 1'den büyük olabilir), olasılık ancak
+        integrali alınınca çıkar ve sürekli değişkende \\( P(X=x)=0 \\)'dır.</p>`
     }
   ]
 };

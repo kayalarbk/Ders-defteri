@@ -14,7 +14,7 @@ window.DERSLER["EE3012"] = {
   ad: "Electronics II",
   donem: "3. Sınıf · 1. Dönem",
   renk: "#F0A868",
-  ozet: "BJT/MOSFET yüksek frekans modelleri ve Miller etkisi; frekans yanıtı (alçak/yüksek, zaman sabitleri yöntemi); çok katlı, cascode ve fark kuvvetlendiriciler; akım aynaları ve aktif yükler; geri besleme topolojileri, kararlılık, faz payı ve kompanzasyon; osilatörler; güç kuvvetlendiricileri; op-amp kusurları.",
+  ozet: "BJT/MOSFET yüksek frekans modelleri ve Miller etkisi; frekans yanıtı (alçak/yüksek, zaman sabitleri yöntemi); çok katlı, cascode ve fark kuvvetlendiriciler; akım aynaları ve aktif yükler; geri besleme topolojileri, kararlılık, faz payı ve kompanzasyon; osilatörler; güç kuvvetlendiricileri; op-amp iç yapısı ve gerçek kusurları (ofset, polarma akımı, GBW, yönelme hızı); aktif filtreler (Sallen–Key, Butterworth/Chebyshev/Bessel); gerilim referansları ve doğrusal regülatörler.",
   konular: [
     {
       baslik: "1. Yüksek Frekans Modelleri (Hibrit-π)",
@@ -282,6 +282,111 @@ window.DERSLER["EE3012"] = {
                 \\[ T_J=T_A+P_D\\left(\\theta_{JC}+\\theta_{CS}+\\theta_{SA}\\right) \\]
                 <p>B sınıfında maksimum güç kaybının tam çıkışta değil, çıkış genliği besleme geriliminin
                 \\( 2/\\pi \\) katındayken oluştuğunu göstermek klasik bir sınav sorusudur.</p>`
+    },
+
+    {
+      baslik: "13. Op-Amp İç Yapısı ve Gerçek Kusurları",
+      icerik: `
+        <p>Op-amp derslerde çoğunlukla "ideal" kabul edilir: sonsuz kazanç, sonsuz giriş direnci,
+        sıfır çıkış direnci, sonsuz bant genişliği. Gerçek bir op-amp ise buraya kadar öğrenilen
+        blokların üst üste dizilmesinden ibarettir ve her bloğun kusuru dışarıya yansır. 741 gibi
+        klasik bir op-amp üç kattan oluşur: <b>fark kuvvetlendiricisi girişi</b> (aktif yüklü,
+        yüksek CMRR), <b>yüksek kazançlı ara kat</b> (Miller kompanzasyon kapasitörü burada) ve
+        <b>AB sınıfı çıkış katı</b> (düşük çıkış direnci, düşük çapraz bozulma).</p>
+        <p>Gerçek kusurlar dört başlıkta toplanır:</p>
+        <ul>
+          <li><b>Giriş ofset gerilimi \\( V_{OS} \\):</b> giriş çifti tam simetrik üretilemez.
+          Girişler kısa devre edilse bile çıkışta \\( V_{OS} \\) kapalı çevrim kazancıyla çarpılmış
+          bir DC hata görünür. Tipik değerler BJT girişte 1–5 mV, kırpıcı-dengeli op-amplarda birkaç µV.</li>
+          <li><b>Polarma akımları \\( I_{B+},\\,I_{B-} \\) ve ofset akımı \\( I_{OS} \\):</b>
+          giriş transistörlerinin beyz/geyt akımı dış dirençler üzerinde gerilim düşürür. Çözüm,
+          iki girişin gördüğü DC direnci eşitlemektir; o zaman yalnız \\( I_{OS}=|I_{B+}-I_{B-}| \\) hata verir.</li>
+          <li><b>Sonlu kazanç ve bant genişliği:</b> açık çevrim kazancı tek baskın kutupludur,
+          bu yüzden <b>kazanç–bant genişliği çarpımı</b> sabittir:
+          \\( \\text{GBW}=A_0f_b=|A_{CL}|\\,f_{3\\text{dB}} \\). 1 MHz GBW'li bir op-amptan 100 kazanç
+          isterseniz elinizde yalnızca 10 kHz bant kalır.</li>
+          <li><b>Yönelme hızı (slew rate):</b> kompanzasyon kapasitörünü şarj eden akım sınırlıdır:
+          \\( SR=I/C_C \\). Bu bir <b>büyük sinyal</b> sınırıdır ve küçük sinyal bandından bağımsızdır.
+          Genlik \\( V_p \\), frekans \\( f \\) olan sinüsün bozulmadan çıkabilmesi için
+          \\( SR \\ge 2\\pi fV_p \\) olmalıdır; bu koşulun bozulduğu frekansa <b>tam güç bant genişliği</b> denir.</li>
+        </ul>
+        <p><b>Neden böyle?</b> Miller kompanzasyonu kararlılık için şarttır (konu 10), ama aynı
+        kapasitör hem bandı hem yönelme hızını düşürür. Op-amp tasarımı bu üçlü arasındaki takastır.</p>
+        <p><b>Sık yapılan hata:</b> "op-amp 1 MHz, ben 100 kHz'de çalışıyorum, sorun yok" demek.
+        Kapalı çevrim kazancı 20 ise bant 50 kHz'e iner; sinyal genliği büyükse ayrıca yönelme hızı
+        sınırına takılırsınız. İki kontrol de ayrı ayrı yapılmalıdır.</p>
+        <p><b>EE'de nerede:</b> enstrümantasyon amplifikatörleri, sensör arayüzleri, ADC sürücüleri —
+        hepsinde \\( V_{OS} \\) ve \\( I_B \\) doğruluk bütçesinin, GBW ve SR ise hız bütçesinin kalemleridir.</p>`
+    },
+    {
+      baslik: "14. Aktif Filtreler (Sallen–Key ve Butterworth)",
+      icerik: `
+        <p>Pasif RLC filtreler düşük frekansta büyük ve kayıplı bobin gerektirir, ayrıca yük
+        bağlanınca karakteristikleri kayar. <b>Aktif filtre</b> bobini atar: op-amp + R + C ile
+        istenen kutupları üretir, çıkış direnci düşük olduğu için katlar birbirini yüklemez.</p>
+        <p>Temel yapı taşı <b>Sallen–Key</b> ikinci derece kattır. Alçak geçiren hâli için
+        transfer fonksiyonu genel ikinci derece biçimdedir:</p>
+        \\[ H(s)=\\frac{K\\,\\omega_0^{2}}{s^{2}+\\dfrac{\\omega_0}{Q}s+\\omega_0^{2}},
+           \\qquad \\omega_0=\\frac{1}{\\sqrt{R_1R_2C_1C_2}} \\]
+        <p>Eşit elemanlı (\\( R_1=R_2=R,\\;C_1=C_2=C \\)) tasarımda \\( \\omega_0=1/RC \\) olur ve
+        <b>kalite faktörü yalnız kazançla</b> ayarlanır:</p>
+        \\[ Q=\\frac{1}{3-K}, \\qquad K=1+\\frac{R_b}{R_a} \\]
+        <p>Burada kritik bir sınır vardır: \\( K\\ge3 \\) olursa \\( Q \\) negatife döner ve devre
+        <b>osilatöre</b> dönüşür. Aynı denklem, osilatörler konusundaki Wien köprüsünün
+        \\( K=3 \\) koşuluyla birebir aynıdır — filtre ile osilatör arasındaki sınır budur.</p>
+        <p><b>Yaklaşım seçimi.</b> Kaçıncı dereceden ve hangi \\( Q \\) değerleriyle çalışılacağını
+        seçilen yaklaşım belirler:</p>
+        <ul>
+          <li><b>Butterworth:</b> geçirme bandında maksimum düz genlik;
+          \\( |H(j\\omega)|^{2}=1/\\bigl(1+(\\omega/\\omega_c)^{2n}\\bigr) \\). Kutupları birim
+          çember üzerinde eşit açılıdır. En çok kullanılan varsayılan.</li>
+          <li><b>Chebyshev:</b> geçirme bandında kabul edilen dalgalanma karşılığında daha dik geçiş;
+          aynı diklik daha düşük dereceyle elde edilir, ama faz ve grup gecikmesi bozulur.</li>
+          <li><b>Bessel:</b> genlik keskinliğinden vazgeçip <b>doğrusal faz</b> (sabit grup gecikmesi)
+          verir; darbe biçimini bozmaması gereken yerlerde kullanılır.</li>
+        </ul>
+        <p>\\( n \\)'inci derece filtre, \\( n/2 \\) adet ikinci derece Sallen–Key katının (tek
+        dereceyse artı bir RC katının) <b>ardışık bağlanmasıyla</b> kurulur; her kata tablodan
+        gelen kendi \\( Q \\) değeri verilir. Bant dışı bastırma derece başına 20 dB/dekattır.</p>
+        <p><b>Sık yapılan hata:</b> katları \\( Q \\) sırasına dikkat etmeden dizmek. Yüksek \\( Q \\)'lu
+        kat başa konursa kendi rezonansında iç düğüm kırpar; genelde düşük \\( Q \\) kat başa,
+        yüksek \\( Q \\) kat sona konur.</p>
+        <p><b>EE'de nerede:</b> ADC önündeki örtüşme önleyici filtre, DAC sonrası yeniden yapılandırma
+        filtresi, ses ve biyomedikal sinyal ön yükselteçleri.</p>`
+    },
+    {
+      baslik: "15. Gerilim Referansları ve Doğrusal Regülatörler",
+      icerik: `
+        <p>Kuvvetlendiricinin kazancı ne kadar iyi olursa olsun, besleme gerilimi sıcaklıkla veya
+        yükle kayıyorsa polarlama noktası kayar ve bütün tasarım bozulur. Bu yüzden analog
+        sistemlerin altında daima bir <b>referans</b> ve bir <b>regülatör</b> vardır.</p>
+        <p><b>Zener referansı</b> en basitidir ama sıcaklık katsayısı gerilime bağlıdır: yaklaşık 5–6 V
+        altında negatif (zener kırılması), üstünde pozitif (çığ kırılması). Entegre devrelerde
+        kullanılan çözüm <b>bandgap referansı</b>dır: bir jonksiyon geriliminin negatif sıcaklık
+        katsayısı (\\( \\partial V_{BE}/\\partial T\\approx-2\\,\\text{mV/}^\\circ\\text{C} \\)) ile
+        iki transistörün \\( V_{BE} \\) farkının pozitif katsayısı toplanır:</p>
+        \\[ \\Delta V_{BE}=V_T\\ln(n),\\qquad
+           V_{REF}=V_{BE}+M\\,\\Delta V_{BE}\\approx 1.25\\ \\text{V} \\]
+        <p>Çıkan değer silisyumun 0 K'e ekstrapole edilmiş bant aralığı gerilimidir — adı buradan
+        gelir. \\( M \\) katsayısı iki eğimi tam olarak götürecek şekilde seçilir.</p>
+        <p><b>Doğrusal regülatör</b> bu referansı bir hata kuvvetlendiricisi ve bir geçiş elemanıyla
+        çıkışa taşır; yapı, negatif geri beslemenin ders kitabı örneğidir:</p>
+        \\[ V_{OUT}=V_{REF}\\left(1+\\frac{R_1}{R_2}\\right),\\qquad
+           \\eta=\\frac{V_{OUT}I_{OUT}}{V_{IN}I_{IN}}\\approx\\frac{V_{OUT}}{V_{IN}} \\]
+        <p>Verim doğrudan gerilim oranıdır: 12 V'tan 5 V üretirken en iyi ihtimalle %42, kalanı ısı.
+        Harcanan güç \\( P_D=(V_{IN}-V_{OUT})I_{OUT} \\) ve jonksiyon sıcaklığı
+        \\( T_J=T_A+P_D\\,\\theta_{JA} \\) ile soğutucu seçilir.</p>
+        <p><b>LDO (düşük düşümlü)</b> regülatörlerde geçiş elemanı PMOS/PNP'dir; birkaç yüz mV
+        düşümle çalışır ama geri besleme çevrimine yükten gelen bir kutup ekler — bu yüzden
+        veri sayfası belirli bir ESR aralığında çıkış kapasitörü ister. Yanlış kapasitör
+        (çok düşük ESR'li seramik) faz payını yok edip regülatörü osilatöre çevirir; bu,
+        kompanzasyon konusunun doğrudan pratik karşılığıdır.</p>
+        <p><b>Başarım ölçütleri:</b> hat regülasyonu (\\( \\partial V_{OUT}/\\partial V_{IN} \\)),
+        yük regülasyonu (\\( \\partial V_{OUT}/\\partial I_{OUT} \\)) ve <b>PSRR</b> — beslemedeki
+        dalgalanmanın çıkışta ne kadar bastırıldığı. PSRR frekansla düşer, bu yüzden hassas
+        analog katlar ayrıca RC süzme ister.</p>
+        <p><b>Sık yapılan hata:</b> verimi anahtarlamalı regülatörle karıştırmak. Doğrusal regülatör
+        gerilim <b>düşürür</b> ve farkı ısıya çevirir; akımı dönüştürmez.</p>`
     }
   ],
   formuller: [
@@ -317,7 +422,17 @@ window.DERSLER["EE3012"] = {
     { ad: "Colpitts Frekansı", formul: `\\( f_0=\\dfrac{1}{2\\pi\\sqrt{L\\,C_1C_2/(C_1+C_2)}} \\)`, aciklama: "Barkhausen: g_mR ≥ C₂/C₁." },
     { ad: "Faz Kaydırmalı Kazanç", formul: `\\( f_0=\\dfrac{1}{2\\pi RC\\sqrt6},\\quad |A|\\ge29 \\)`, aciklama: "Üç RC katı 180°; her kat 60°." },
     { ad: "Widlar Akım Kaynağı", formul: `\\( I_o R_E=V_T\\ln\\dfrac{I_{ref}}{I_o} \\)`, aciklama: "Büyük dirençsiz mikroamper akımlar." },
-    { ad: "Gerilim Kazancı (dB)", formul: `\\( A_{dB}=20\\log_{10}|A_v| \\)`, aciklama: "Katlar dB'de toplanır; güç için 10log." }
+    { ad: "Gerilim Kazancı (dB)", formul: `\\( A_{dB}=20\\log_{10}|A_v| \\)`, aciklama: "Katlar dB'de toplanır; güç için 10log." },
+
+    { ad: "Kazanç–Bant Genişliği Çarpımı", formul: "\\( \\text{GBW}=A_0f_b=|A_{CL}|\\,f_{3\\text{dB}} \\)", aciklama: "Tek baskın kutuplu op-amp: kazanç arttıkça bant aynı oranda daralır." },
+    { ad: "Yönelme Hızı ve Tam Güç Bandı", formul: "\\( SR=\\dfrac{I}{C_C}\\ \\ge\\ 2\\pi f V_p \\)", aciklama: "Büyük sinyal sınırı; küçük sinyal bandından ayrı kontrol edilir." },
+    { ad: "Op-Amp Çıkış Ofseti", formul: "\\( V_{O,\\text{ofs}}=V_{OS}\\left(1+\\dfrac{R_2}{R_1}\\right)+I_{OS}R_2 \\)", aciklama: "Girişler eşit DC dirençle dengelenirse yalnız ofset akımı kalır." },
+    { ad: "Sallen–Key Köşe Frekansı", formul: "\\( \\omega_0=\\dfrac{1}{\\sqrt{R_1R_2C_1C_2}} \\)", aciklama: "Eşit elemanlı tasarımda \\( \\omega_0=1/RC \\)." },
+    { ad: "Sallen–Key Kalite Faktörü", formul: "\\( Q=\\dfrac{1}{3-K},\\quad K=1+\\dfrac{R_b}{R_a} \\)", aciklama: "\\( K\\to3 \\) olduğunda filtre osilasyona geçer." },
+    { ad: "Butterworth Genlik Yanıtı", formul: "\\( |H(j\\omega)|^{2}=\\dfrac{1}{1+(\\omega/\\omega_c)^{2n}} \\)", aciklama: "Geçirme bandında maksimum düz; derece başına 20 dB/dekat." },
+    { ad: "Bandgap Referansı", formul: "\\( V_{REF}=V_{BE}+M\\,V_T\\ln(n)\\approx1.25\\ \\text{V} \\)", aciklama: "Negatif ve pozitif sıcaklık katsayıları toplanarak sıfırlanır." },
+    { ad: "Doğrusal Regülatör Çıkışı ve Verimi", formul: "\\( V_{OUT}=V_{REF}\\!\\left(1+\\dfrac{R_1}{R_2}\\right),\\ \\ \\eta\\approx\\dfrac{V_{OUT}}{V_{IN}} \\)", aciklama: "Fark gerilimi ısıya gider: \\( P_D=(V_{IN}-V_{OUT})I_{OUT} \\)." },
+    { ad: "Jonksiyon Sıcaklığı", formul: "\\( T_J=T_A+P_D\\,\\theta_{JA} \\)", aciklama: "Regülatör ve güç katı için soğutucu seçiminin temel denklemi." }
   ],
   galeri: [],
   dokumanlar: [],
@@ -335,6 +450,7 @@ window.DERSLER["EE3012"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 0,
       soru: `<p>Bir BJT'de \\( I_C=1\\,\\text{mA} \\), \\( C_\\pi=10\\,\\text{pF} \\),
              \\( C_\\mu=1\\,\\text{pF} \\) ve \\( V_T=25\\,\\text{mV} \\)'tur.
              (a) \\( g_m \\)'i, (b) \\( f_T \\)'yi bulun.</p>`,
@@ -347,6 +463,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>Ortak-emiter katında \\( C_\\mu=2\\,\\text{pF} \\), orta bant kazancı \\( A_v=-120 \\)
              ve kaynak direnci \\( R_{sig}=5\\,\\text{k}\\Omega \\)'dur. \\( C_\\pi=12\\,\\text{pF} \\) ise
              Miller yaklaşımıyla üst kesim frekansını tahmin edin.</p>`,
@@ -362,6 +479,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "vize",
+      konu: 8,
       soru: `<p>Açık çevrim kazancı \\( A=10^4 \\) olan bir kuvvetlendiriciye \\( \\beta=0.01 \\)
              ile negatif geri besleme uygulanıyor. Açık çevrim üst kesim frekansı 100 Hz'dir.
              (a) Kapalı çevrim kazancını, (b) yeni bant genişliğini, (c) \\( A \\) %50 azalırsa
@@ -379,6 +497,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 5,
       soru: `<p>Bir fark kuvvetlendiricisinde \\( g_m=2\\,\\text{mA/V} \\), \\( R_C=10\\,\\text{k}\\Omega \\)
              ve kuyruk akım kaynağının çıkış direnci \\( R_{SS}=500\\,\\text{k}\\Omega \\)'dur.
              \\( A_d \\), \\( A_{cm} \\) ve CMRR'yi (dB) bulun.</p>`,
@@ -392,6 +511,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>B sınıfı push-pull bir çıkış katında besleme \\( V_{CC}=15\\,\\text{V} \\), yük
              \\( R_L=8\\,\\Omega \\) ve çıkış tepe genliği \\( \\hat{V}_o=12\\,\\text{V} \\)'tur.
              (a) Yük gücünü, (b) beslemeden çekilen gücü, (c) verimi bulun.</p>`,
@@ -407,6 +527,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 10,
       soru: `<p>Bir Wien köprüsü osilatöründe \\( R=16\\,\\text{k}\\Omega \\) ve \\( C=10\\,\\text{nF} \\)'dır.
              Salınım frekansını ve kuvvetlendiriciden istenen kazancı bulun.</p>`,
       cozum: `
@@ -420,6 +541,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 4,
       soru: `<p>Üç katlı bir kuvvetlendiricinin kat kazançları \\( A_1=10 \\), \\( A_2=20 \\), \\( A_3=5 \\).
              Toplam kazanç kaçtır (mutlak ve dB)?</p>`,
       cozum: `
@@ -428,6 +550,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>Ortak-emiter katında kuplaj kapasitörü \\( C_{C1}=1\\,\\mu\\text{F} \\) (gördüğü direnç \\( R_{sig}+R_{in}=15\\,\\text{k}\\Omega \\)), emiter baypas \\( C_E=10\\,\\mu\\text{F} \\) (gördüğü direnç \\( R_E\\parallel(r_e+R_{sig}'/\\beta)\\approx 50\\,\\Omega \\)) ve çıkış kuplajı \\( C_{C2}=1\\,\\mu\\text{F} \\) (\\( R_C+R_L=15\\,\\text{k}\\Omega \\)). Kısa devre zaman sabitleri yöntemiyle alçak kesim frekansını bulun; hangi kapasitör baskındır?</p>`,
       cozum: `
         <p>Her kapasitörün kendi kutbu \\( f_p=1/(2\\pi RC) \\):</p>
@@ -437,6 +560,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "vize",
+      konu: 3,
       soru: `<p>Ortak-kaynak MOS katı: \\( g_m=4\\,\\text{mA/V} \\), \\( R_{sig}=20\\,\\text{k}\\Omega \\), \\( R_L'=5\\,\\text{k}\\Omega \\), \\( C_{gs}=2\\,\\text{pF} \\), \\( C_{gd}=0.5\\,\\text{pF} \\), \\( C_L=1\\,\\text{pF} \\). Açık devre zaman sabitleri yöntemiyle \\( f_H \\)'yi tahmin edin ve Miller yaklaşımıyla karşılaştırın.</p>`,
       cozum: `
         <p>\\( C_{gd} \\)'nin gördüğü direnç (Miller teoremi eşdeğeri): \\( R_{gd}=R_{sig}(1+g_mR_L')+R_L'=20(1+20)+5=425\\;\\text{k}\\Omega \\).</p>
@@ -447,6 +571,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>Basit BJT akım aynasında referans akımı \\( I_{ref}=1\\,\\text{mA} \\), \\( \\beta=100 \\), \\( V_A=100\\,\\text{V} \\). (a) Baz akımı hatasını içeren çıkış akımını, (b) çıkış direncini, (c) çıkış gerilimi 1 V'tan 11 V'a çıkarsa akımın yüzde değişimini bulun. Widlar ile aynı \\( R \\)'lerle 20 μA nasıl elde edilir?</p>`,
       cozum: `
         <p>(a) İki baz akımı referanstan çalınır: \\( I_o=\\dfrac{I_{ref}}{1+2/\\beta}=\\dfrac{1}{1.02}=0.98\\;\\text{mA} \\) (%2 hata; Wilson/emiter dejenerasyonlu aynalar düzeltir).</p>
@@ -457,6 +582,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 9,
       soru: `<p>Bir kuvvetlendiricinin açık çevrim kazancı \\( A(s)=\\dfrac{10^5}{(1+s/10^3)(1+s/10^6)(1+s/10^7)} \\) (rad/s). \\( \\beta=0.01 \\) ile geri besleme uygulanıyor. (a) Çevrim kazancının birim olduğu frekansı ve faz payını tahmin edin. (b) Kararlı mı? (c) Baskın kutup kompanzasyonuyla PM ≥ 45° için ilk kutbu nereye çekmek gerekir?</p>`,
       cozum: `
         <p>(a) \\( A\\beta \\) DC'de \\( 10^3 \\) (60 dB). İlk kutuptan sonra −20 dB/dek: \\( 10^3 \\) rad/s'de 60 dB → \\( 10^6 \\)'da 0 dB — ama orada ikinci kutup da var:
@@ -467,6 +593,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 10,
       soru: `<p>Bir Colpitts osilatöründe \\( L=10\\,\\mu\\text{H} \\), \\( C_1=100\\,\\text{pF} \\), \\( C_2=1\\,\\text{nF} \\). Salınım frekansını ve Barkhausen için gereken minimum \\( g_mR \\) (yük direnci R ile) koşulunu bulun. Üç katlı RC faz kaydırmalı osilatörde \\( R=10\\,\\text{k}\\Omega \\), \\( C=10\\,\\text{nF} \\) ise frekans ve gereken kazanç nedir?</p>`,
       cozum: `
         <p>Colpitts: seri eşdeğer \\( C_{eq}=\\dfrac{C_1C_2}{C_1+C_2}=\\dfrac{100\\cdot1000}{1100}=90.9\\;\\text{pF} \\):</p>
@@ -476,6 +603,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>A sınıfı emiter izleyici çıkış katı \\( V_{CC}=\\pm10\\,\\text{V} \\), sabit akım kaynağı \\( I=0.5\\,\\text{A} \\), yük \\( R_L=20\\,\\Omega \\). (a) Maksimum kırpılmasız çıkış tepe genliğini, (b) bu genlikte yük gücünü, besleme gücünü ve verimi, (c) sıfır çıkışta transistör güç kaybını bulun. B sınıfının aynı yükte maksimum verimiyle karşılaştırın.</p>`,
       cozum: `
         <p>(a) Negatif tepe akım kaynağıyla sınırlı: \\( \\hat V_o\\le IR_L=0.5\\cdot20=10\\,\\text{V} \\); pozitif tepe \\( V_{CC}-V_{CE,sat}\\approx10 \\). → \\( \\hat V_o\\approx\\mathbf{10\\;V} \\).</p>
@@ -486,6 +614,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 7,
       soru: `<p>MOS cascode katı: \\( g_{m1}=g_{m2}=2\\,\\text{mA/V} \\), \\( r_{o1}=r_{o2}=50\\,\\text{k}\\Omega \\). (a) Direnç yüklü (\\( R_D=5\\,\\text{k}\\Omega \\)) durumda kazancı ve \\( C_{gd1} \\)'in Miller yükünü tek kat CS ile karşılaştırın. (b) Çıkış direncini bulun. (c) Yük de özdeş bir cascode akım kaynağı olursa kazanç ne olur?</p>`,
       cozum: `
         <p>(a) Kazanç her ikisinde \\( -g_{m1}R_D=-10 \\). M1'in drenindeki kazanç: CS'de −10 → Miller \\( C_{gd}(1+10)=11C_{gd} \\); cascode'da \\( -g_{m1}/g_{m2}=-1 \\) →
@@ -496,6 +625,7 @@ window.DERSLER["EE3012"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>Bir op-amp'ın giriş ofset gerilimi \\( V_{OS}=2\\,\\text{mV} \\), giriş kutuplama akımı \\( I_B=100\\,\\text{nA} \\), slew rate \\( 1\\,\\text{V}/\\mu\\text{s} \\), GBW \\( 1\\,\\text{MHz} \\). Evirmeyen kuvvetlendirici \\( R_1=10\\,\\text{k}\\Omega \\), \\( R_f=90\\,\\text{k}\\Omega \\). (a) Çıkış DC hatasını, (b) kapalı çevrim bant genişliğini, (c) 5 V tepe sinüs için tam güç bant genişliğini bulun.</p>`,
       cozum: `
         <p>(a) Kazanç \\( 1+R_f/R_1=10 \\). Ofset: \\( 10\\cdot2\\,\\text{mV}=20\\,\\text{mV} \\). Kutuplama akımı \\( R_f\\parallel R_1=9\\,\\text{k}\\Omega \\) üzerinden \\( I_BR=0.9\\,\\text{mV} \\) giriş hatası → çıkışta 9 mV
@@ -503,6 +633,63 @@ window.DERSLER["EE3012"] = {
         <p>(b) \\( f_{-3dB}=\\text{GBW}/A_{cl}=1\\,\\text{MHz}/10=\\mathbf{100\\;kHz} \\).</p>
         <p>(c) \\( f_{max}=\\dfrac{SR}{2\\pi\\hat V_o}=\\dfrac{10^6}{2\\pi\\cdot5}\\approx\\mathbf{31.8\\;kHz} \\) — küçük sinyal bandı 100 kHz olsa da 5 V genlikte 32 kHz üstünde sinüs üçgene döner.
         Büyük sinyal sınırı (slew) ile küçük sinyal sınırı (GBW) ayrı ayrı kontrol edilmelidir.</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 12,
+      soru: `<p>Klasik bir op-amp'ın üç katını (giriş fark katı, yüksek kazançlı ara kat, AB sınıfı çıkış katı)
+        sayın ve her katın hangi kusuru dışarıya yansıttığını yazın.
+        (a) Kompanzasyon kapasitörü \\( C_C \\) hangi katta, neden oradadır?
+        (b) \\( C_C \\) büyütülürse faz payı, GBW ve yönelme hızı nasıl değişir?
+        (c) Bir tasarımcı "yönelme hızı yetersiz" diyerek \\( C_C \\)'yi küçültüyor; hangi riski alıyor?</p>`,
+      cozum: `<p><b>Katlar ve kusurları.</b> Giriş fark katı: \\( V_{OS} \\), \\( I_B \\)/\\( I_{OS} \\) ve
+        sonlu CMRR buradan gelir. Ara kat: açık çevrim kazancının büyük kısmını o üretir, baskın kutup
+        da oradadır. AB sınıfı çıkış katı: çıkış direncini düşürür, ama çapraz bozulma ve akım sınırı
+        getirir.</p>
+        <p><b>(a)</b> \\( C_C \\) ara katın giriş–çıkışı arasına konur. Sebebi Miller etkisidir: kapasitans
+        girişte \\( (1+|A_2|)C_C \\) kadar büyümüş görünür, yani küçük bir kapasitörle çok düşük bir
+        baskın kutup elde edilir — çipe büyük kapasitör sığdırmak gerekmez.</p>
+        <p><b>(b)</b> \\( C_C\\uparrow \\): baskın kutup daha aşağı iner, birim kazanç frekansı
+        \\( f_u\\approx g_{m1}/(2\\pi C_C) \\) <b>düşer</b> (GBW azalır), ikinci kutupla arada daha çok
+        dekat kaldığı için <b>faz payı artar</b> (kararlılık iyileşir). Yönelme hızı
+        \\( SR=I_{kuyruk}/C_C \\) olduğundan <b>düşer</b>.</p>
+        <p><b>(c)</b> \\( C_C \\) küçültülünce SR ve GBW artar ama baskın kutup yukarı kayar, ikinci
+        kutba yaklaşır ve <b>faz payı erir</b>. Faz payı 45°'nin altına inerse basamak yanıtında
+        aşım ve çınlama, 0°'a yaklaşırsa osilasyon görülür. Doğru çözüm \\( C_C \\)'yi küçültmek değil,
+        kuyruk akımını artırmak (veya slew artırıcı devre kullanmak) — çünkü \\( SR=I/C_C \\) payla da
+        büyütülebilir.</p>`
+    },
+    {
+      tip: "final",
+      konu: 13,
+      soru: `<p>Eşit elemanlı bir Sallen–Key alçak geçiren katta \\( R=10\\,\\text{k}\\Omega \\),
+        \\( C=1.59\\,\\text{nF} \\). (a) \\( f_0 \\) nedir? (b) İkinci derece Butterworth için gereken
+        \\( Q=0.707 \\) değerine ulaşmak için kazanç \\( K \\) ve \\( R_b/R_a \\) oranı ne olmalıdır?
+        (c) \\( R_b/R_a \\) yanlışlıkla 2 yapılırsa ne olur?</p>`,
+      cozum: `<p><b>(a)</b> \\( f_0=\\dfrac{1}{2\\pi RC}=\\dfrac{1}{2\\pi\\cdot10^{4}\\cdot1.59\\times10^{-9}}\\approx10\\ \\text{kHz} \\).</p>
+        <p><b>(b)</b> \\( Q=\\dfrac{1}{3-K}=0.707\\Rightarrow 3-K=1.414\\Rightarrow K=1.586 \\).
+        \\( K=1+R_b/R_a \\) olduğundan \\( R_b/R_a=0.586 \\) (ör. \\( R_b=5.86\\,\\text{k}\\Omega \\),
+        \\( R_a=10\\,\\text{k}\\Omega \\)).</p>
+        <p><b>(c)</b> \\( R_b/R_a=2\\Rightarrow K=3\\Rightarrow Q\\to\\infty \\). Kutuplar \\( j\\omega \\)
+        eksenine oturur; devre filtre olmaktan çıkıp 10 kHz'de <b>osilatör</b> olur. Wien köprüsü
+        osilatörünün koşulu tam olarak budur.</p>`
+    },
+    {
+      tip: "final",
+      konu: 14,
+      soru: `<p>Bir doğrusal regülatör \\( V_{IN}=12\\,\\text{V} \\)'tan \\( V_{OUT}=5\\,\\text{V} \\) üretiyor,
+        yük akımı \\( I_{OUT}=500\\,\\text{mA} \\). Isıl direnç \\( \\theta_{JA}=25\\,^\\circ\\text{C/W} \\),
+        ortam \\( 40\\,^\\circ\\text{C} \\), izin verilen jonksiyon sıcaklığı \\( 125\\,^\\circ\\text{C} \\).
+        (a) Harcanan güç ve verim? (b) Jonksiyon sıcaklığı? (c) Güvenli mi, değilse ne yapılır?</p>`,
+      cozum: `<p><b>(a)</b> \\( P_D=(12-5)\\cdot0.5=3.5\\ \\text{W} \\). Verim \\( \\eta\\approx5/12=\\%41.7 \\) —
+        gücün yarıdan fazlası ısı.</p>
+        <p><b>(b)</b> \\( T_J=40+3.5\\cdot25=127.5\\,^\\circ\\text{C} \\).</p>
+        <p><b>(c)</b> \\( 127.5>125 \\): sınırın üstünde, güvenli değil. Seçenekler:
+        (i) daha iyi soğutucu ile \\( \\theta_{JA} \\)'yı \\( 24\\,^\\circ\\text{C/W} \\) altına indirmek,
+        (ii) giriş gerilimini düşürmek (önce anahtarlamalı bir kademeyle 7 V'a inip sonra LDO ile 5 V
+        yapmak \\( P_D \\)'yi 1 W'a düşürür), (iii) doğrudan anahtarlamalı regülatör kullanmak.
+        <b>Ders:</b> doğrusal regülatörde ısı bütçesi gerilim farkı × akım ile belirlenir.</p>`
     }
   ]
 };

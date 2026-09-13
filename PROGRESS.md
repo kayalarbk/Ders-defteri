@@ -22,6 +22,88 @@ kurulabilen bir PWA'dır ve çevrimdışı çalışır.
 
 ## Tamamlanan İşler (en yeni üstte)
 
+### 2026-09-13 (2) — Müfredat boşlukları + "yormayan arayüz" revizyonu
+
+İki iş bir turda yapıldı: kalan müfredat boşlukları kapatıldı ve arayüz, saatlerce
+ders çalışan birinin gözünü yormayacak şekilde baştan ayarlandı.
+
+**İçerik — eklenen 9 konu (98 → 107)**
+- **EE3012**: Op-Amp İç Yapısı ve Gerçek Kusurları (ofset, polarma akımı, GBW, yönelme hızı);
+  Aktif Filtreler (Sallen–Key, Butterworth/Chebyshev/Bessel); Gerilim Referansları ve
+  Doğrusal Regülatörler (bandgap, LDO, ısı bütçesi). Dersin soru havuzunda op-amp kusurları
+  sorusu vardı ama konusu yoktu — o boşluk kapandı.
+- **EE3061**: İdeal ve Pratik Filtreler (ideal filtrenin neden nedensel olmadığı, Butterworth
+  derece seçimi, grup gecikmesi, çift doğrusal dönüşüm ve frekans bükülmesi).
+- **EE3014**: Tek Fazlı Asenkron Motorlar ve Özel Makineler (çift döner alan kuramı, kalkış
+  düzenekleri, üniversal/adım/BLDC/relüktans).
+- **EE3016**: Dalga Polarizasyonu (doğrusal/dairesel/eliptik, PLF, Faraday dönmesi);
+  İletim Hatları (telegrafçı denklemleri, \( Z_0 \), \( Z_{in} \), çeyrek dalga uyumlaştırma, Smith abağı).
+- **STAT2056**: Poisson Süreci ve Üstel Arası Zamanlar (hafızasızlık, Erlang, birleştirme/ayrıştırma).
+- **MATH2055**: Sonlu Durum Makineleri ve Diller (DFA/NFA, Kleene, pompalama lemması, Chomsky hiyerarşisi).
+
+**Sorulara konu etiketi (TODO #4 kapandı) — ve ortaya çıkan gerçek boşluk**
+Bütün sorulara `sorular[].konu` alanı eklendi (mevcut 109 soru tek tek okunup elle eşlendi).
+Etiketleme, önceki turda "her konunun sorusu var" sanılan durumun doğru olmadığını gösterdi:
+başlık metninden yapılan gevşek eşleşme yanıltıyormuş, **14 konunun hiç sorusu yokmuş**
+(EE3061'de 4, EE3014/EE3016/STAT2056/MATH2055'te 2'şer). Bu konular için 12 soru daha yazıldı.
+Yeni konuların soruları da dahil **soru 109 → 134**; artık *ölçülebilir biçimde* her konunun
+en az bir sorusu var (denetim betiği bunu her turda doğruluyor).
+
+**Formül kartları (237 → 276)** — yeni konuların kartları: GBW, slew/tam güç bandı, op-amp ofset,
+Sallen–Key \( \omega_0 \) ve \( Q \), Butterworth, bandgap, regülatör verimi, \( T_J \),
+çift döner alan, adım açısı, relüktans momenti, polarizasyon koşulu, eksenel oran, PLF,
+\( \gamma \), \( Z_0 \), \( Z_{in} \), çeyrek dalga, Smith dönüşümü, Poisson süreci, hafızasızlık,
+Erlang, DFA, Kleene yıldızı, pompalama lemması.
+
+**Arayüz — göz yorgunluğu hedeflenerek**
+- **Tema iki değil ÜÇ kademe**: `kagit` (gündüz, varsayılan) · `ilik` (akşam, mavi ışık kısık)
+  · `gece` (karanlık oda). Eski `light`/`dark` kayıtları açılışta `kagit`/`gece`ye göçürülüyor.
+- **Okuma ayarları paneli (Aa, topbar)**: tema, yazı boyutu (4 kademe), satır genişliği
+  (58/68/82ch) ve hareket azaltma. Hepsi `<html>` üzerinde `data-*`, CSS değişkenlerini sürüyor.
+  Sabit bir "doğru punto" yok — kullanıcı ortam ışığına ve yorgunluğuna göre gün içinde değiştiriyor.
+- **Defter karesi zemini kaldırıldı.** Sayfa boyunca tekrar eden ince çizgiler sürekli bir
+  gürültü kaynağıydı.
+- **Hareket kısıldı**: hover'da `translateY` zıplaması ve `filter: brightness` oynatması
+  her yerden çıkarıldı, yerine sessiz zemin/kenarlık değişimi kondu. Hedef vurgusu tek seferlik
+  yumuşak halkaya indirildi.
+- **Renk yalnız anlam taşıdığında**: her formül kartındaki "FORMÜL" rozeti, hero'nun büyük harf
+  vurgu satırı, mono-büyük harf bölüm çipleri ve marka noktasındaki halka kaldırıldı;
+  bölüm/konu kutuları `--border-yumusak` ile liste hâline getirildi.
+- **Kontrast ölçüldü, tahmin edilmedi.** Üç temanın 12 metin/zemin çifti WCAG'a göre hesaplandı;
+  5 çift eşiğin altındaydı (kağıtta `--muted`/zemin 4.41, `--accent`/`--accent-soft` 4.06,
+  `--uyari`/`--uyari-soft` 3.60; ılıkta uyarı 4.14). Tonları korunarak koyultuldu.
+  Şimdi **gövde metni her temada ≥ 9.3:1 (AAA), ikincil metin ve vurgular ≥ 4.5:1 (AA)**.
+
+**Ders sayfası artık açılışta donmuyor (TODO #1 kapandı)**
+MathJax bütün konuları ve formülleri, akordeonlar kapalıyken bile açılışta işliyordu.
+Artık: formül kartları `IntersectionObserver` ile ekrana yaklaştıkça, konu ve soru metinleri
+akordeon açıldığında ve **yalnız bir kez** (`data-math-hazir`) işleniyor.
+IntersectionObserver'ı olmayan tarayıcıda eski davranışa düşülüyor.
+
+**Konu ↔ soru bağı (etiketlerin karşılığı)**
+- Her konunun altında "N soru bu konudan → çöz" köprüsü; tıklayınca soru havuzu o konuya
+  süzülüp oraya kaydırılıyor.
+- Soru havuzuna konu açılır listesi eklendi. Konu süzgeci tip/durum süzgeciyle **VE**'leniyor
+  (ikisi birlikte uygulanıyor), ayrı ayrı değil.
+
+**Doğrulama**
+- `kontrol.js`: 107 konu / 276 formül / 134 sorunun LaTeX ayraç dengesi, kaçışsız `<`,
+  açık kalmış HTML etiketi, mükerrer soru, konu etiketi geçerliliği ve sorusuz konu taraması — temiz.
+- `dom-test.js` (jsdom): ana sayfa + iki ders sayfası gerçekten render edilip **63 denetim**
+  çalıştırıldı — tema göçürme, okuma ayarlarının kaydı/geri yüklenmesi, geçersiz ayarın
+  reddi, arama (yeni içerik + Türkçe normalizasyon), tembel MathJax (açılışta hiçbir şey
+  işlenmiyor, kart ekrana girince işleniyor ve gözlemden çıkıyor), konu↔soru köprü sayılarının
+  toplamının soru sayısına eşitliği, konu+tip süzgecinin birlikte daraltması, akordeon,
+  not kaydı, ilerleme, `?git=` derin bağlantısı. Konsol hatasız.
+- `kontrast.js`: 3 tema × 12 çift — hepsi eşik üstü.
+- `statik.js`: 29 olay işleyicisinin tamamı tanımlı, 31 CSS değişkeni tanımlı,
+  üç temanın 16 renk değişkeni eksiksiz eşleşiyor.
+- `sw.js` → `dd-v7`. Yeni dosya eklenmedi, PRECACHE listesi değişmedi.
+
+**Not:** Tarayıcı eklentisi bu oturumda bağlanamadığı için doğrulama gerçek Chrome yerine
+jsdom + hesaplanmış kontrast ile yapıldı. Yapısal ve mantıksal davranış doğrulandı; **temaların
+gerçek ekranda görsel kontrolü yapılmadı.**
+
 ### 2026-09-13 — İçerik denetimi: eksik tespiti ve kapatılması
 
 Altı ders dosyası tek tek okunup içerik eksikleri çıkarıldı (konu derinliği, sorusuz konular,
@@ -266,7 +348,10 @@ Ders-defteri/
 ├── index.html          # Ana sayfa: ders kartları ızgarası + hızlı erişim linkleri
 ├── course.html         # Ders detay şablonu (?ders=KOD ile beslenir), MathJax burada yüklenir
 ├── app.js              # Tüm uygulama mantığı (tek dosya, modülsüz)
-│                       #   · tema, LaTeX render, duzMetin() + Türkçe arama normalizasyonu
+│                       #   · okuma ayarları: 3 tema + punto/genişlik/hareket (data-* → CSS değişkeni)
+│                       #   · tembel LaTeX render (IntersectionObserver + data-math-hazir)
+│                       #   · konu ↔ soru köprüsü ve konu süzgeci (sorular[].konu)
+│                       #   · duzMetin() + Türkçe arama normalizasyonu
 │                       #   · IndexedDB (foto/doküman) + görsel küçültme
 │                       #   · ilerleme takibi (localStorage, debounce'lu)
 │                       #   · ana sayfa & ders sayfası render fonksiyonları
@@ -299,6 +384,12 @@ Ders-defteri/
 Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 `{ ad, donem, ozet, renk, konular[], formuller[], dokumanlar[], videolar[], linkler[], sorular[] }`.
 
+Soru şeması: `{ tip: "vize"|"final", konu: <konular[] indeksi>, soru, cozum }`.
+`konu` alanı zorunludur — konu→soru köprüsü ve konu süzgeci buna dayanır, ayrıca
+denetim betiği "sorusuz konu" taramasını bu alanla yapar. **Yeni konu daima dizinin
+SONUNA eklenir**: ilerleme, not ve soru etiketleri konu indeksine bağlı olduğu için
+araya ekleme mevcut kullanıcı kayıtlarını kaydırır.
+
 ---
 
 ## Teknik Kararlar
@@ -330,6 +421,13 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 | Çözüm soruyla birlikte değil, butonla açılıyor | Cevabı görerek "anladım" sanmak en yaygın çalışma hatası; önce deneme zorunlu hale getirildi | 2026-07-25 |
 | Soru başlıkları veriye elle girilmedi, `duzMetin()` ile soru metninden türetiliyor | 62 sorunun tamamına elle başlık girmek gerekmesin; veri şeması değişmedi, mevcut ders dosyaları olduğu gibi çalışıyor | 2026-07-25 |
 | Formül "bilinen" durumu ders bazlı localStorage dizisi (`dd-flash-KOD`) | İlerleme kayıtlarıyla aynı desen; yedekleme `dd-*` anahtarlarını zaten topladığı için ek iş gerekmedi | 2026-07-25 |
+| Tema iki değil üç kademe: kagit / ilik / gece | Gündüz–gece ikilisi akşam çalışmasını karşılamıyordu; "koyu tema kadar karanlık istemiyorum ama ekran parlıyor" aralığı için ılık (düşük mavi ışık) tema eklendi. Eski light/dark kayıtları göçürülüyor | 2026-09-13 |
+| Punto, satır genişliği ve hareket kullanıcı ayarı (`data-*` + CSS değişkeni) | Tek bir "doğru" punto yok: ekran uzaklığı, ışık ve yorgunluk gün içinde değişiyor. CSS değişkenine bağlanınca tek yerden bütün sayfayı sürüyor, JS'in ayrıca ölçü hesaplaması gerekmiyor | 2026-09-13 |
+| Hover'da `translateY`/`brightness` yerine sessiz zemin değişimi | Göz, imlecin dolaştığı her yerde hareket yakalıyordu; uzun oturumda en çok yoran şey bu mikro hareketlerdi. Geri bildirim korundu, hareket atıldı | 2026-09-13 |
+| Renkler tahmin edilmiyor, WCAG oranı hesaplanıyor (`kontrast.js`) | "Yumuşak" diye seçilen tonların beşi eşiğin altındaydı (en kötüsü 3.60:1) — gözle bakarak fark edilmiyor. Gövde AAA (≥7:1), ikincil ve vurgular AA (≥4.5:1) hedefi betikle sabitlendi | 2026-09-13 |
+| MathJax tembel: formüller IntersectionObserver, metinler akordeon açılışında, hepsi bir kez | Açılışta 276 formülün hepsini işlemek sayfayı saniyelerce donduruyordu. `data-math-hazir` işareti, akordeonun ikinci açılışında tekrar işlemeyi de engelliyor | 2026-09-13 |
+| Soru↔konu eşleşmesi başlıktan tahmin değil, veride `sorular[].konu` | Tahmin yanıltıcıydı: etiketleme yapılınca 14 konunun aslında hiç sorusu olmadığı ortaya çıktı. Etiket ayrıca konu→soru köprüsünü ve konu süzgecini mümkün kıldı | 2026-09-13 |
+| Konu süzgeci tip/durum süzgeciyle VE'leniyor, onun yerine geçmiyor | "Bu konunun final soruları" gerçek bir çalışma isteği; süzgeçler birbirini sıfırlasaydı iki tıkta da istenen liste elde edilemezdi | 2026-09-13 |
 | Arama indeksi ilk aramada kuruluyor (lazy) | 294 kayıt; açılış hızını etkilememesi için sayfa yüklenirken değil, ilk tuşta kuruluyor | 2026-07-25 |
 | `?git=hedef` ile derin bağlantı: önce akordeon açılıyor, sonra kaydırılıyor | Ters sırada, açılan panel ve MathJax yerleşimi sayfa yüksekliğini değiştirip kaydırmayı kaçırıyordu (test sırasında görüldü) | 2026-07-25 |
 
@@ -337,19 +435,26 @@ Her ders dosyası global `DERSLER` nesnesine kendi kodunu ekler; şema:
 
 ## TODO (öncelik sırasına göre)
 
-1. **Ders sayfası ilk açılışta ağır.** MathJax 15 konunun tamamını, akordeonlar kapalıyken
-   bile bir kerede render ediyor; yavaş cihazda sayfa birkaç saniye donuyor
-   (tarayıcı otomasyonunda da render zaman aşımı olarak görüldü).
-   Çözüm: akordeon açılınca o konuyu render etmek (lazy typeset).
+1. **Temaların gerçek cihazda görsel kontrolü.** Kağıt/Ilık/Gece hesapla doğrulandı
+   (kontrast + jsdom), ama gerçek ekranda — özellikle iPhone'da, gece modunda ve
+   düşük parlaklıkta — hiç bakılmadı.
 2. Ders sayfasında "çalışma süresi" istatistiği (pomodoro seansları ders bazında kaydedilsin).
 3. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek
    gerekiyor — tek bir `data/_index.js` listesinden dinamik yüklemeye geçilebilir
    (`sw.js` PRECACHE listesi de aynı derdi yaşıyor).
-4. Soru havuzuna konu etiketi alanı (`sorular[].konu`) eklenip "bu konunun soruları" filtresi
-   yapılabilir. Şu an başlık soru metninden türetiliyor; veriye etiket girilirse eşleşme kesinleşir.
-5. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
+4. Formül çalışma modunda gerçek aralıklı tekrar (tarih bazlı: 1 gün / 3 gün / 1 hafta).
    Şu an "biliyorum" kalıcı işaret; zamanla unutma modellenmiyor.
-6. Notlar şu an yalnızca konu bazlı — "bütün notlarım" görünümü ve notta arama eklenebilir.
+5. Notlar şu an yalnızca konu bazlı — "bütün notlarım" görünümü ve notta arama eklenebilir.
+6. `dokumanlar: []` hâlâ her derste boş; videolar ders bazında playlist, konuya bağlı değil
+   (`videolar[].konu` yok). Konu etiketi artık sorularda var — aynı desen videolara da uygulanabilir.
+7. Denetim betikleri (`kontrol.js`, `dom-test.js`, `kontrast.js`, `statik.js`) scratchpad'de
+   kaldı; repoya bir `test/` klasörü olarak alınırsa her değişiklikte çalıştırılabilir.
+
+### Kapatılan TODO'lar (2026-09-13, ikinci tur)
+- ~~Ders sayfası ilk açılışta ağır (MathJax hepsini birden render ediyor)~~ → tembel render:
+  formüller IntersectionObserver ile, konu/soru metinleri akordeon açılınca ve yalnız bir kez.
+- ~~Soru havuzuna konu etiketi (`sorular[].konu`) ve "bu konunun soruları" filtresi~~ →
+  134 sorunun tamamı etiketli; konu köprüsü + konu süzgeci (tip süzgeciyle VE'lenen) eklendi.
 
 ### Kapatılan TODO'lar (2026-09-13)
 - ~~Konu metinleri sığ (EE3061/EE3016/STAT ~550 kr)~~ → tüm dersler 1990–3650 kr bandında.
@@ -399,7 +504,7 @@ doğrulama hâlâ yapılmadı** (aşağıdaki PWA listesindeki açık madde ile 
 |---|---|---|
 | Yeni ders eklenince `sw.js` PRECACHE listesine elle eklenmezse ders çevrimdışı açılmıyor | `data/YENI.js` ekle, script tag'i ekle, uçak modunda ana sayfadan derse gir | **Açık** (TODO #3 ile çözülecek) |
 | GitHub Pages'te ders kartları görünmüyordu | Ana sayfayı Pages üzerinden aç, ızgara boştu | **Çözüldü** (2026-07-19, `DERS_SIRASI` fallback) |
-| Ders sayfası ilk açılışta 1-3 sn donuyor (MathJax tüm konuları birden render ediyor) | 15 konuluk bir dersi aç, hemen kaydırmayı dene | **Açık** (TODO #1) |
+| Ders sayfası ilk açılışta 1-3 sn donuyor (MathJax tüm konuları birden render ediyor) | 15 konuluk bir dersi aç, hemen kaydırmayı dene | **Çözüldü** (2026-09-13, tembel render) |
 | Gizli/özel sekmede IndexedDB açılmıyor, yükleme başarısız oluyor | Safari özel sekmede fotoğraf ekle | **Açık** — kullanıcıya açıklayıcı mesaj gösteriliyor, teknik çözümü yok |
 
 ---

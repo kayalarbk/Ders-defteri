@@ -7,36 +7,132 @@
    - Tema + MathJax
    ============================================================ */
 
-/* ---------- Tema ----------
-   Varsayılan AÇIK tema (kağıt); kullanıcı seçimi localStorage'da,
-   hiç seçim yapılmadıysa işletim sistemi tercihi kullanılır. */
-(function initTheme() {
-  const saved = localStorage.getItem("dd-theme");
-  const tema = saved || (window.matchMedia &&
-    matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  document.documentElement.setAttribute("data-theme", tema);
-})();
-function toggleTheme() {
+/* ============================================================
+   OKUMA AYARLARI — tema, punto, satır genişliği, hareket
+   ------------------------------------------------------------
+   Uygulama saatlerce açık kalıyor ve kullanıcının ihtiyacı gün
+   içinde değişiyor: gündüz kağıt, akşam ılık, gece karanlık.
+   Bu yüzden tema iki değil ÜÇ kademeli ve punto/satır genişliği
+   de kullanıcıya bırakıldı — sabit bir "doğru" boyut yok.
+   Hepsi <html> üzerinde data-* olarak duruyor, CSS tarafı okuyor.
+   ============================================================ */
+const TEMALAR = ["kagit", "ilik", "gece"];
+const TEMA_AD = { kagit: "Kağıt", ilik: "Ilık", gece: "Gece" };
+const TEMA_IKON = { kagit: "☀️", ilik: "🌤", gece: "🌙" };
+/* Tarayıcı arayüz rengini de temayla uyumlu tut (iOS durum çubuğu) */
+const TEMA_RENK = { kagit: "#F5F2EB", ilik: "#F0E6D6", gece: "#16191D" };
+
+const YAZI = ["kucuk", "orta", "buyuk", "cok"];
+const OLCU = ["dar", "normal", "genis"];
+
+function ayarOku(k, gecerli, varsayilan) {
+  const v = localStorage.getItem("dd-" + k);
+  return gecerli.includes(v) ? v : varsayilan;
+}
+
+(function initOkuma() {
   const el = document.documentElement;
-  const next = el.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  el.setAttribute("data-theme", next);
-  localStorage.setItem("dd-theme", next);
+
+  /* Eski iki temalı kayıtları göçür: light → kagit, dark → gece */
+  let t = localStorage.getItem("dd-theme");
+  if (t === "light") t = "kagit";
+  else if (t === "dark") t = "gece";
+  if (!TEMALAR.includes(t)) {
+    /* Hiç seçim yoksa işletim sistemi tercihi */
+    t = (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches)
+      ? "gece" : "kagit";
+  } else {
+    localStorage.setItem("dd-theme", t);   // göçürülmüş değeri sabitle
+  }
+  el.setAttribute("data-theme", t);
+
+  el.setAttribute("data-yazi", ayarOku("yazi", YAZI, "orta"));
+  el.setAttribute("data-olcu", ayarOku("olcu", OLCU, "normal"));
+
+  /* Hareket: kullanıcı ayarı yoksa işletim sistemi tercihine uy */
+  const h = localStorage.getItem("dd-hareket");
+  const azalt = h ? h === "az"
+    : (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  el.setAttribute("data-hareket", azalt ? "az" : "tam");
+})();
+
+function temaUygula(t) {
+  if (!TEMALAR.includes(t)) return;
+  document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem("dd-theme", t);
+  /* Sabit theme-color meta'ları media sorgusuna bağlıydı; kullanıcı
+     seçimi sistem tercihiyle çeliştiğinde yanlış renk veriyordu. */
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+  const m = document.createElement("meta");
+  m.name = "theme-color"; m.content = TEMA_RENK[t];
+  document.head.appendChild(m);
+  okumaPaneliTazele();
   setThemeBtnIcon();
 }
+function temaSirala() {   // klavye kısayolu: sırayla gez
+  const su = document.documentElement.getAttribute("data-theme");
+  temaUygula(TEMALAR[(TEMALAR.indexOf(su) + 1) % TEMALAR.length]);
+}
+/* Eski ad — HTML'deki onclick ve kısayol bunu çağırıyor */
+function toggleTheme() { temaSirala(); }
+
+function ayarUygula(ad, deger, gecerli) {
+  if (!gecerli.includes(deger)) return;
+  document.documentElement.setAttribute("data-" + ad, deger);
+  localStorage.setItem("dd-" + ad, deger);
+  okumaPaneliTazele();
+  /* Punto/genişlik değişince açık akordeonların yüksekliği bozuluyor */
+  document.querySelectorAll(".acc-item.open .acc-body, .topic-item.open .acc-body")
+    .forEach(b => olcAkordeon(b));
+}
+function yaziAyarla(v)    { ayarUygula("yazi", v, YAZI); }
+function olcuAyarla(v)    { ayarUygula("olcu", v, OLCU); }
+function hareketAyarla(v) { ayarUygula("hareket", v, ["tam", "az"]); }
+
 function setThemeBtnIcon() {
   const btn = document.getElementById("themeBtn");
   if (!btn) return;
-  const koyu = document.documentElement.getAttribute("data-theme") === "dark";
-  btn.textContent = koyu ? "☀️" : "🌙";
-  btn.title = koyu ? "Açık temaya geç" : "Koyu temaya geç";
+  const t = document.documentElement.getAttribute("data-theme");
+  btn.textContent = TEMA_IKON[t] || "☀️";
+  btn.title = `Tema: ${TEMA_AD[t]} — değiştirmek için tıkla (t)`;
   btn.setAttribute("aria-label", btn.title);
 }
 
-/* ---------- LaTeX ---------- */
+/* ---------- LaTeX ----------
+   MathJax pahalı: bir ders sayfasında 100+ formül var. Kapalı
+   akordeonların içindekiler ekranda görünmediği hâlde açılışta
+   işleniyor ve sayfa saniyelerce donuyordu (eski TODO #1).
+   Artık yalnız GÖRÜNÜR parçalar işlenir; akordeon açıldığında
+   içeriği bir kez işlenip işaretlenir. */
 function renderMath(el) {
-  if (window.MathJax && MathJax.typesetPromise) {
-    MathJax.typesetPromise(el ? [el] : undefined).catch(e => console.warn("MathJax:", e));
+  if (!window.MathJax || !MathJax.typesetPromise) return Promise.resolve();
+  return MathJax.typesetPromise(el ? [el] : undefined)
+    .catch(e => console.warn("MathJax:", e));
+}
+/* Bir kabı yalnız ilk kez işler */
+function renderMathBirKez(el) {
+  if (!el || el.dataset.mathHazir === "1") return Promise.resolve();
+  el.dataset.mathHazir = "1";
+  return renderMath(el);
+}
+/* Ekrana yaklaşan formül kartlarını işler (IntersectionObserver yoksa hepsi) */
+let _mathGozlemci = null;
+function mathGozlemciKur() {
+  const hedefler = document.querySelectorAll("[data-math-lazy]");
+  if (!hedefler.length) return;
+  if (!("IntersectionObserver" in window)) {
+    hedefler.forEach(renderMathBirKez);
+    return;
   }
+  _mathGozlemci?.disconnect();
+  _mathGozlemci = new IntersectionObserver((girisler, gozlemci) => {
+    for (const g of girisler) {
+      if (!g.isIntersecting) continue;
+      gozlemci.unobserve(g.target);
+      renderMathBirKez(g.target);
+    }
+  }, { rootMargin: "400px 0px" });   // ekrana girmeden önce hazır olsun
+  hedefler.forEach(el => _mathGozlemci.observe(el));
 }
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
@@ -563,7 +659,10 @@ function renderCourse() {
   bindFlashcards();
   updateCourseProgress(kod);
   updateSoruOzet(kod);
-  renderMath();
+  /* Sayfanın tamamı DEĞİL: formül kartları ekrana girdikçe işlenir,
+     konu ve soru metinleri açıldıklarında. Ders sayfası artık
+     açılışta donmuyor (eski TODO #1). */
+  mathGozlemciKur();
   loadUploads(kod);   // IndexedDB'den foto + doküman çek
 
   localStorage.setItem("dd-son-ders", kod);   // ana sayfadaki "kaldığın yer" için
@@ -749,6 +848,7 @@ function konularBlock(kod, d) {
       </div>
       <div class="acc-body"><div class="inner topic-content">
         ${k.icerik}
+        ${konuSoruLinki(kod, d, i)}
         ${notBlock(kod, i)}
       </div></div>
     </div>`).join("");
@@ -756,6 +856,29 @@ function konularBlock(kod, d) {
     <p class="section-hint">Konuya tıklayınca içerik açılır · soldaki ✓ ile çalıştığın konuyu işaretle ·
        her konunun altına kendi notunu yazabilirsin</p>
     ${items || emptyMsg("Henüz konu eklenmemiş.")}</section>`;
+}
+
+/* Konudan o konunun sorularına köprü.
+   Sorular artık `konu` alanıyla etiketli (veri dosyalarında);
+   önceden eşleşme soru metninden tahmin ediliyordu ve kopuktu.
+   Konuyu okuyup bitiren öğrencinin bir sonraki adımı soru çözmek —
+   o adımı aramaya bırakmamak gerekiyor. */
+function konuSorulari(d, i) {
+  return (d.sorular || []).map((s, j) => [s, j]).filter(([s]) => s.konu === i);
+}
+function konuSoruLinki(kod, d, i) {
+  const n = konuSorulari(d, i).length;
+  if (!n) return "";
+  return `<a class="konu-soru" href="#sec-sorular"
+    onclick="konuSorulariniGoster(${i});return false;">
+    <span class="ks-say">${n}</span> soru bu konudan → çöz</a>`;
+}
+/* Soru havuzunu bu konuya göre süzer ve oraya kaydırır */
+function konuSorulariniGoster(i) {
+  const sec = document.getElementById("qKonu");
+  if (sec) { sec.value = String(i); sec.dispatchEvent(new Event("change")); }
+  document.getElementById("sec-sorular")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /* ============================================================
@@ -821,10 +944,9 @@ function formullerBlock(kod, d) {
   const bilinen = getFlashBilinen(kod);
   const cards = f.map((x, i) => `
     <button class="flip ${bilinen.includes(i) ? "biliniyor" : ""}" id="formul-${i}"
-            type="button" aria-label="${esc(x.ad)} — çevir">
+            type="button" aria-label="${esc(x.ad)} — çevir" data-math-lazy>
       <div class="flip-inner">
         <div class="flip-face flip-front">
-          <span class="flip-tag">FORMÜL</span>
           <strong>${esc(x.ad)}</strong>
           <span class="flip-hint">çevirmek için dokun</span>
         </div>
@@ -916,7 +1038,6 @@ function paintFlash() {
     </div>
     <div class="flash-bar"><div class="flash-bar-fill" style="width:${pct}%"></div></div>
     <div class="flash-card">
-      <span class="flip-tag">FORMÜL</span>
       <strong class="flash-ad">${esc(x.ad)}</strong>
       <div class="flash-cevap" id="flashCevap" hidden>
         <div class="flip-formula">${x.formul}</div>
@@ -1057,7 +1178,8 @@ function sorularBlock(kod, d) {
     const dr = durum[i] || "";
     return `
     <div class="acc-item q-item ${dr ? "q-" + dr : ""}" id="soru-${i}"
-         data-tip="${x.tip || "vize"}" data-durum="${dr}">
+         data-tip="${x.tip || "vize"}" data-durum="${dr}"
+         data-konu="${typeof x.konu === "number" ? x.konu : ""}">
       <button class="acc-head" type="button">
         <span class="tag ${x.tip === "final" ? "final" : ""}">${x.tip || "vize"}</span>
         <span class="q-num">${i + 1}</span>
@@ -1093,8 +1215,50 @@ function sorularBlock(kod, d) {
         <button data-f="final">Final</button>
         <button data-f="takil" class="q-f-takil">↻ Takıldıklarım</button>
         <button data-f="yeni">Denemediklerim</button>
-      </div><div class="accordion">${items}</div>
+      </div>
+      ${konuSuzgeci(d)}
+      <div class="accordion">${items}</div>
     ` : emptyMsg("Henüz soru eklenmemiş.")}</section>`;
+}
+
+/* Konuya göre süzme — "sınavda şu konu çıkacak, onun sorularını çözeyim" */
+function konuSuzgeci(d) {
+  const secenek = (d.konular || []).map((k, i) => {
+    const n = konuSorulari(d, i).length;
+    return n ? `<option value="${i}">${esc(k.baslik)} (${n})</option>` : "";
+  }).join("");
+  if (!secenek) return "";
+  return `<div class="q-konu-satir">
+    <label class="q-konu-lbl" for="qKonu">Konuya göre:</label>
+    <select class="q-konu-secim" id="qKonu" onchange="konuSuzgecUygula(this.value)">
+      <option value="">Bütün konular</option>${secenek}
+    </select>
+    <span class="q-konu-ad" id="qKonuAd"></span>
+  </div>`;
+}
+/* Konu süzgeci tip/durum süzgeciyle BİRLİKTE çalışır (ikisi de uygulanır) */
+let _qKonu = "";
+function konuSuzgecUygula(v) {
+  _qKonu = v;
+  const ad = $("#qKonuAd");
+  if (ad) {
+    const n = v === "" ? 0 : document.querySelectorAll(`#sec-sorular .q-item[data-konu="${v}"]`).length;
+    ad.textContent = v === "" ? "" : `${n} soru süzüldü · temizlemek için “Bütün konular”`;
+  }
+  qSuzgecleriUygula();
+}
+function qSuzgecleriUygula() {
+  const aktif = document.querySelector(".q-filter button.active");
+  const f = aktif ? aktif.dataset.f : "all";
+  document.querySelectorAll("#sec-sorular .q-item").forEach(it => {
+    const tipTamam =
+      f === "all"   ? true :
+      f === "takil" ? it.dataset.durum === "takil" :
+      f === "yeni"  ? !it.dataset.durum :
+                      it.dataset.tip === f;
+    const konuTamam = _qKonu === "" || it.dataset.konu === _qKonu;
+    it.style.display = (tipTamam && konuTamam) ? "" : "none";
+  });
 }
 
 /* Soru durumu: { indeks: 'coz' | 'takil' } */
@@ -1287,11 +1451,9 @@ function bindAccordion() {
       const open = item.classList.toggle("open");
       body.style.maxHeight = open ? body.scrollHeight + "px" : null;
       if (open) {
-        renderMath(body);   // içerik açılınca LaTeX'i işle
-        // MathJax yüksekliği değiştirebilir → yeniden ölç
-        setTimeout(() => {
-          if (item.classList.contains("open")) body.style.maxHeight = body.scrollHeight + "px";
-        }, 500);
+        /* LaTeX yalnız ilk açılışta işlenir; sonraki açılışlar anında */
+        renderMathBirKez(body).then(() => olcAkordeon(body));
+        setTimeout(() => olcAkordeon(body), 500);
       }
     }));
 }
@@ -1300,15 +1462,7 @@ function bindQuestionFilter() {
   btns.forEach(b => b.addEventListener("click", () => {
     btns.forEach(x => x.classList.remove("active"));
     b.classList.add("active");
-    const f = b.dataset.f;
-    document.querySelectorAll("#sec-sorular .q-item").forEach(it => {
-      const gorunur =
-        f === "all"   ? true :
-        f === "takil" ? it.dataset.durum === "takil" :
-        f === "yeni"  ? !it.dataset.durum :
-                        it.dataset.tip === f;
-      it.style.display = gorunur ? "" : "none";
-    });
+    qSuzgecleriUygula();   // konu süzgeciyle birlikte uygulanır
   }));
 }
 
@@ -1656,6 +1810,7 @@ function mountBackup() {
 document.addEventListener("click", e => {
   if (!e.target.closest(".bk-holder")) $("#bkPanel")?.classList.remove("open");
   if (!e.target.closest(".pomo-holder")) $("#pomoPanel")?.classList.remove("open");
+  if (!e.target.closest(".oa-holder")) $("#oaPanel")?.classList.remove("open");
 });
 
 /* ============================================================
@@ -1687,7 +1842,8 @@ const KISAYOLLAR = [
   ["?",     "bu listeyi aç / kapat"],
   ["p",     "pomodoro panelini aç / kapat"],
   ["y",     "dersi yazdır veya PDF olarak kaydet"],
-  ["t",     "açık / koyu tema"],
+  ["t",     "tema: kağıt → ılık → gece"],
+  ["a",     "okuma ayarları (punto, genişlik, tema)"],
   ["Esc",   "açık pencereyi kapat"],
   ["Boşluk","formül çalışmasında cevabı göster"],
   ["← →",   "formül çalışmasında tekrar et / biliyorum"]
@@ -1710,6 +1866,83 @@ function kisayolHTML() {
 function ksKapat() { $("#ksOverlay")?.classList.remove("open"); }
 function ksToggle(){ $("#ksOverlay")?.classList.toggle("open"); }
 
+/* ============================================================
+   OKUMA AYARLARI PANELİ (Aa)
+   Tema seçimi tek düğmeyle sırayla geziliyordu; üç tema olunca
+   ve punto/genişlik eklenince görünür bir panel şart oldu.
+   ============================================================ */
+function okumaHTML() {
+  const sec = (fn, deger, etiket, ekSinif = "") =>
+    `<button type="button" class="${ekSinif}" data-oa="${deger}"
+       onclick="${fn}('${deger}')">${etiket}</button>`;
+  return `
+  <button id="oaBtn" class="theme-toggle" onclick="oaTogglePanel()"
+    title="Okuma ayarları — tema, punto, genişlik" aria-label="Okuma ayarları">
+    <span class="oa-aa">Aa</span></button>
+  <div id="oaPanel" class="oa-panel">
+    <div class="oa-grup">
+      <div class="oa-baslik">Tema</div>
+      <div class="oa-secim oa-tema" data-grup="theme">
+        ${TEMALAR.map(t =>
+          `<button type="button" data-oa="${t}" onclick="temaUygula('${t}')">
+             <span class="oa-ornek ${t}"></span>${TEMA_AD[t]}</button>`).join("")}
+      </div>
+    </div>
+    <div class="oa-grup">
+      <div class="oa-baslik">Yazı boyutu</div>
+      <div class="oa-secim" data-grup="yazi">
+        ${sec("yaziAyarla", "kucuk", "A<sup>-</sup>")}
+        ${sec("yaziAyarla", "orta", "A")}
+        ${sec("yaziAyarla", "buyuk", "A<sup>+</sup>")}
+        ${sec("yaziAyarla", "cok", "A<sup>++</sup>")}
+      </div>
+    </div>
+    <div class="oa-grup">
+      <div class="oa-baslik">Satır genişliği</div>
+      <div class="oa-secim" data-grup="olcu">
+        ${sec("olcuAyarla", "dar", "Dar")}
+        ${sec("olcuAyarla", "normal", "Normal")}
+        ${sec("olcuAyarla", "genis", "Geniş")}
+      </div>
+    </div>
+    <div class="oa-grup">
+      <div class="oa-baslik">Hareket</div>
+      <div class="oa-secim" data-grup="hareket">
+        ${sec("hareketAyarla", "tam", "Normal")}
+        ${sec("hareketAyarla", "az", "Azalt")}
+      </div>
+    </div>
+    <p class="oa-not">Ayarlar bu cihazda saklanır. Akşam çalışırken
+      <b>Ilık</b>, karanlık odada <b>Gece</b> temasını dene.</p>
+  </div>`;
+}
+function oaTogglePanel() {
+  const p = $("#oaPanel");
+  if (!p) return;
+  p.classList.toggle("open");
+  if (p.classList.contains("open")) okumaPaneliTazele();
+}
+/* Panelde hangi seçeneğin etkin olduğunu göster */
+function okumaPaneliTazele() {
+  const p = $("#oaPanel");
+  if (!p) return;
+  const el = document.documentElement;
+  p.querySelectorAll(".oa-secim").forEach(grup => {
+    const su = el.getAttribute("data-" + grup.dataset.grup);
+    grup.querySelectorAll("button").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.oa === su)));
+  });
+}
+function mountOkuma() {
+  const nav = document.querySelector(".nav-actions");
+  if (!nav) return;
+  const holder = document.createElement("div");
+  holder.className = "oa-holder";
+  holder.innerHTML = okumaHTML();
+  nav.prepend(holder);
+  okumaPaneliTazele();
+}
+
 function mountKisayol() {
   const nav = document.querySelector(".nav-actions");
   if (!nav) return;
@@ -1727,10 +1960,11 @@ function mountKisayol() {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     if (e.key === "?") { e.preventDefault(); ksToggle(); }
-    else if (e.key === "Escape") ksKapat();
+    else if (e.key === "Escape") { ksKapat(); $("#oaPanel")?.classList.remove("open"); }
     else if (!FLASH.acik) {
       if (e.key === "p" || e.key === "P") { e.preventDefault(); pomoTogglePanel(); }
-      else if (e.key === "t" || e.key === "T") { e.preventDefault(); toggleTheme(); }
+      else if (e.key === "t" || e.key === "T") { e.preventDefault(); temaSirala(); }
+      else if (e.key === "a" || e.key === "A") { e.preventDefault(); oaTogglePanel(); }
       else if (e.key === "y" || e.key === "Y") { e.preventDefault(); window.print(); }
     }
   });
@@ -1739,6 +1973,7 @@ function mountKisayol() {
 /* ---------- Başlat ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   setThemeBtnIcon();
+  mountOkuma();
   mountPomodoro();
   mountBackup();
   mountKisayol();

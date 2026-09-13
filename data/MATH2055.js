@@ -14,7 +14,7 @@ window.DERSLER["MATH2055"] = {
   ad: "Discrete Mathematics",
   donem: "Alttan Ders",
   renk: "#34D399",
-  ozet: "Önermeler ve yüklem mantığı, çıkarım kuralları ve ispat teknikleri; kümeler, fonksiyonlar, bağıntılar, bağıntı matrisleri ve kapanışlar; algoritma karmaşıklığı (Big-O); sayı teorisi ve modüler aritmetik; tümevarım ve özyineleme; sayma (permütasyon, kombinasyon, güvercin yuvası, içerme-dışarma); özyineleme bağıntıları ve üreteç fonksiyonları; ayrık olasılık; çizge teorisi (Euler/Hamilton, Dijkstra, boyama), ağaçlar; Boole cebiri, Karnaugh haritası ve mantık devreleri.",
+  ozet: "Önermeler ve yüklem mantığı, çıkarım kuralları ve ispat teknikleri; kümeler, fonksiyonlar, bağıntılar, bağıntı matrisleri ve kapanışlar; algoritma karmaşıklığı (Big-O); sayı teorisi ve modüler aritmetik; tümevarım ve özyineleme; sayma (permütasyon, kombinasyon, güvercin yuvası, içerme-dışarma); özyineleme bağıntıları ve üreteç fonksiyonları; ayrık olasılık; çizge teorisi (Euler/Hamilton, Dijkstra, boyama), ağaçlar; Boole cebiri, Karnaugh haritası ve mantık devreleri; sonlu durum makineleri, düzenli diller ve pompalama lemması.",
   konular: [
     {
       baslik: "1. Önermeler Mantığı ve Doğruluk Tabloları",
@@ -607,6 +607,54 @@ window.DERSLER["MATH2055"] = {
         terimi eklenerek giderilir.</p>
         <p><b>Neden önemli:</b> Bu konu, ders programındaki Sayısal Tasarım / Lojik Devreler dersinin doğrudan ön hazırlığıdır; işlemci ALU'sundan FPGA'ya kadar her sayısal sistem burada
         tanımlanan cebir ve minimizasyonla kurulur. Ayrıca önermeler mantığı (1. konu) ile küme cebri (5. konu) burada tek yapı olduğu netleşir: üçü de <b>Boole cebridir</b>.</p>`
+    },
+
+    {
+      baslik: "20. Sonlu Durum Makineleri ve Diller",
+      icerik: `
+        <p>Ayrık matematiğin son halkası, buraya kadar öğrenilen küme, bağıntı ve çizge araçlarını
+        <b>hesaplama modeline</b> dönüştürür. Soru şudur: sınırlı bellekli bir makine hangi
+        problemleri çözebilir, hangilerini çözemez?</p>
+        <p><b>Alfabe ve dil.</b> \\( \\Sigma \\) sonlu bir semboller kümesidir; \\( \\Sigma^{*} \\)
+        bu semboller üzerinde kurulabilecek tüm sonlu dizgilerin (boş dizgi \\( \\varepsilon \\) dahil)
+        kümesidir. Bir <b>dil</b>, \\( \\Sigma^{*} \\)'ın herhangi bir alt kümesidir. Diller küme
+        oldukları için birleşim/kesişim/tümleme işlemleri doğrudan geçerlidir; ayrıca
+        <b>birleştirme</b> \\( AB \\) ve <b>Kleene yıldızı</b> \\( A^{*}=\\bigcup_{n\\ge0}A^{n} \\) tanımlanır.</p>
+        <p><b>Sonlu durum makinesi (DFA).</b> Beşli ile tanımlanır:</p>
+        \\[ M=(S,\\Sigma,\\delta,s_0,F),\\qquad \\delta:S\\times\\Sigma\\to S \\]
+        <p>\\( S \\) sonlu durum kümesi, \\( \\delta \\) geçiş fonksiyonu, \\( s_0 \\) başlangıç durumu,
+        \\( F\\subseteq S \\) kabul durumları. Geçiş fonksiyonu aslında durumlar üzerinde etiketli bir
+        <b>yönlü çizgedir</b>; makinenin çalışması bu çizgede bir yürüyüştür. Dizgi okunduğunda
+        varılan durum \\( F \\)'deyse dizgi <b>kabul edilir</b>. Makinenin tanıdığı dil
+        \\( L(M)=\\{w\\in\\Sigma^{*}:\\hat\\delta(s_0,w)\\in F\\} \\).</p>
+        <p><b>Belirsiz makine (NFA)</b> aynı sembolle birden çok duruma gidebilir, \\( \\varepsilon \\)
+        geçişleri olabilir. Görünüşte daha güçlüdür ama değildir: <b>altküme kurulumu</b>
+        (subset construction) ile her NFA, durumları \\( \\mathcal P(S) \\) olan bir DFA'ya çevrilir.
+        Durum sayısı en kötü durumda \\( 2^{|S|} \\)'e çıkar, tanınan dil aynı kalır.</p>
+        <p><b>Kleene teoremi</b> üç farklı tanımın çakıştığını söyler: bir dil ancak ve ancak
+        bir DFA tarafından tanınıyorsa, bir NFA tarafından tanınıyorsa ve bir <b>düzenli ifadeyle</b>
+        yazılabiliyorsa <b>düzenlidir</b>. Bu, günlük hayattaki regex'lerin neden sonlu bellekle
+        çalıştığının teorik açıklamasıdır.</p>
+        <p><b>Sınır: pompalama (pumping) lemması.</b> Düzenli her \\( L \\) dili için öyle bir
+        \\( p \\) sayısı vardır ki, uzunluğu \\( \\ge p \\) olan her \\( w\\in L \\),
+        \\( w=xyz \\) biçiminde yazılabilir ve</p>
+        \\[ |xy|\\le p,\\qquad |y|\\ge1,\\qquad xy^{i}z\\in L\\quad \\forall i\\ge0 \\]
+        <p>Sezgisi güvercin yuvası ilkesidir: makinenin \\( p \\) durumu varsa, \\( p \\) sembolden
+        uzun bir dizgiyi okurken bir durumu <b>mutlaka iki kez</b> ziyaret eder; aradaki döngü
+        istenildiği kadar tekrarlanabilir. Bununla \\( L=\\{0^{n}1^{n}:n\\ge0\\} \\) dilinin düzenli
+        <b>olmadığı</b> ispatlanır: sonlu bellek "kaç tane 0 gördüm" bilgisini tutamaz. Bu,
+        dersteki ilk "bu problem bu modelle çözülemez" sonucudur.</p>
+        <p><b>Dilbilgisi hiyerarşisi.</b> Chomsky sınıflandırması modelleri güçlerine göre sıralar:
+        düzenli (sonlu makine) \\( \\subset \\) bağlamdan bağımsız (yığıtlı makine; parantez dengesi,
+        programlama dili sözdizimi) \\( \\subset \\) bağlama duyarlı \\( \\subset \\) özyinelemeli
+        sayılabilir (Turing makinesi). Her kapsama <b>gerçektir</b>: her seviyede bir üsttekinin
+        çözebildiği, alttakinin çözemediği bir dil vardır.</p>
+        <p><b>Sık yapılan hata:</b> pompalama lemmasını ters yönde kullanmak. Lemma yalnızca
+        düzenli olmadığını <b>ispatlamak</b> için kullanılır; koşulun sağlanması dilin düzenli
+        olduğunu göstermez (lemma gerek koşuldur, yeter koşul değil).</p>
+        <p><b>EE'de nerede:</b> sayısal tasarımda ardışıl devreler doğrudan sonlu durum makinesidir
+        (Moore/Mealy, durum diyagramı → durum tablosu → Karnaugh ile kodlama); haberleşme
+        protokolleri, sözcüksel çözümleyiciler (lexer), dizgi arama donanımı ve denetleyici tasarımı.</p>`
     }
   ],
   formuller: [
@@ -661,7 +709,13 @@ window.DERSLER["MATH2055"] = {
     { ad: "m-li Ağaç Sayımı", formul: `\\( n=mi+1,\\qquad l=(m-1)i+1 \\)`, aciklama: "Tam m-li ağaç; i iç düğüm, l yaprak." },
     { ad: "Ağaç Yükseklik Sınırı", formul: `\\( h\\ge\\lceil\\log_m l\\rceil \\)`, aciklama: "Karşılaştırmalı sıralama Ω(n log n) buradan." },
     { ad: "Uzlaşma (Consensus)", formul: `\\( xy+\\overline xz+yz=xy+\\overline xz \\)`, aciklama: "Boole sadeleştirme; hazard giderme terimi." },
-    { ad: "Tam Toplayıcı", formul: `\\( S=x\\oplus y\\oplus c,\\quad C=xy+c(x\\oplus y) \\)`, aciklama: "1-bit toplayıcı; zincirle n-bit." }
+    { ad: "Tam Toplayıcı", formul: `\\( S=x\\oplus y\\oplus c,\\quad C=xy+c(x\\oplus y) \\)`, aciklama: "1-bit toplayıcı; zincirle n-bit." },
+
+    { ad: "Sonlu Durum Makinesi", formul: "\\( M=(S,\\Sigma,\\delta,s_0,F),\\quad \\delta:S\\times\\Sigma\\to S \\)", aciklama: "Durumlar üzerinde etiketli yönlü çizge; çalışma bu çizgede yürüyüştür." },
+    { ad: "Tanınan Dil", formul: "\\( L(M)=\\{w\\in\\Sigma^{*}:\\hat\\delta(s_0,w)\\in F\\} \\)", aciklama: "Dizgi okununca varılan durum kabul kümesindeyse dizgi kabul edilir." },
+    { ad: "Kleene Yıldızı", formul: "\\( A^{*}=\\bigcup_{n\\ge0}A^{n},\\qquad A^{0}=\\{\\varepsilon\\} \\)", aciklama: "Düzenli ifadelerin üç işleminden biri (birleşim, birleştirme, yıldız)." },
+    { ad: "Altküme Kurulumu (NFA → DFA)", formul: "\\( |S_{DFA}|\\le 2^{|S_{NFA}|} \\)", aciklama: "Belirsizlik güç katmaz, yalnız durum sayısını üstel büyütebilir." },
+    { ad: "Pompalama Lemması", formul: "\\( w=xyz,\\ |xy|\\le p,\\ |y|\\ge1\\ \\Rightarrow\\ xy^{i}z\\in L \\)", aciklama: "Güvercin yuvasının dil kuramındaki karşılığı; düzenli OLMADIĞINI ispatlar." }
   ],
   galeri: [],
   dokumanlar: [],
@@ -681,6 +735,7 @@ window.DERSLER["MATH2055"] = {
   sorular: [
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>\\( \\neg(p\\to q) \\) ifadesinin \\( p\\wedge\\neg q \\) ile denk olduğunu hem denklik zinciriyle hem doğruluk tablosuyla gösterin. \\( (p\\to q)\\to r \\) ile \\( p\\to(q\\to r) \\) denk midir?</p>`,
       cozum: `
         <p>Zincir: \\( p\\to q\\equiv\\neg p\\vee q \\); değillenirse De Morgan ile \\( \\neg(\\neg p\\vee q)\\equiv p\\wedge\\neg q \\). ✓</p>
@@ -689,6 +744,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 1,
       soru: `<p>"Çalışırsan geçersin. Geçtin. Öyleyse çalıştın." argümanı geçerli midir? Geçerli değilse hangi yanılgıdır; geçerli bir sonuca dönüştürün.</p>`,
       cozum: `
         <p>\\( p\\to q,\\;q\\;\\vdash\\;p \\) — <b>tersi onaylama yanılgısı</b>, geçersiz: \\( p=F,q=T \\) atamasında öncüller T, sonuç F (çalışmadan da geçilebilir).</p>
@@ -696,6 +752,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 2,
       soru: `<p>\\( \\forall x\\,\\exists y\\,(x+y=0) \\) önermesinin değilini alın ve yorumlayın. Evren gerçel sayılar ise hangisi doğrudur? \\( \\exists y\\,\\forall x\\,(x+y=0) \\) doğru mudur?</p>`,
       cozum: `
         \\[ \\neg\\forall x\\,\\exists y\\,(x+y=0)\\equiv \\exists x\\,\\forall y\\,(x+y\\ne 0) \\]
@@ -704,6 +761,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 3,
       soru: `<p>\\( \\sqrt2 \\)'nin irrasyonel olduğunu çelişkiyle ispatlayın. İspatın hangi adımı "n² çiftse n çifttir" lemmasını kullanıyor ve o lemma en kolay hangi teknikle kanıtlanır?</p>`,
       cozum: `
         <p>\\( \\sqrt2=a/b \\), \\( \\gcd(a,b)=1 \\) varsay. \\( a^2=2b^2 \\) ⟹ \\( a^2 \\) çift ⟹ <b>(lemma)</b> a çift, \\( a=2c \\). \\( 4c^2=2b^2\\Rightarrow b^2=2c^2 \\) ⟹ b çift.
@@ -712,6 +770,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 4,
       soru: `<p>\\( A=\\{1,2,3\\} \\), \\( B=\\{2,3,4\\} \\), \\( U=\\{1,\\dots,6\\} \\). \\( A\\triangle B \\), \\( \\overline{A\\cup B} \\), \\( \\mathcal P(A\\cap B) \\) ve \\( |A\\times B| \\)'yi bulun. \\( \\overline{A\\cup B}=\\overline A\\cap\\overline B \\) özdeşliğini üyelik tablosuyla doğrulayın.</p>`,
       cozum: `
         <p>\\( A\\triangle B=\\{1,4\\} \\); \\( A\\cup B=\\{1,2,3,4\\} \\) → tümleyen \\( \\{5,6\\} \\); \\( A\\cap B=\\{2,3\\} \\) → \\( \\mathcal P=\\{\\emptyset,\\{2\\},\\{3\\},\\{2,3\\}\\} \\) (\\( 2^2=4 \\)); \\( |A\\times B|=9 \\).</p>
@@ -719,6 +778,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 5,
       soru: `<p>\\( f:\\mathbb{R}\\to\\mathbb{R},\\; f(x)=3x-2 \\) fonksiyonunun bijektif olduğunu gösterip tersini bulun. \\( g(x)=x^2 \\) için \\( \\mathbb R\\to\\mathbb R \\) ve \\( \\mathbb R_{\\ge0}\\to\\mathbb R_{\\ge0} \\) durumlarını sınıflandırın.</p>`,
       cozum: `
         <p><b>Birebir:</b> \\( 3a-2=3b-2\\Rightarrow a=b \\). ✓ <b>Örten:</b> her y için \\( x=\\dfrac{y+2}{3} \\). ✓ Tersi \\( f^{-1}(y)=\\dfrac{y+2}{3} \\).</p>
@@ -726,6 +786,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 6,
       soru: `<p>\\( A=\\{1,2,3,4\\} \\) üzerinde \\( R=\\{(1,1),(1,2),(2,1),(2,2),(3,4),(4,3)\\} \\). Yansıyan, simetrik, ters-simetrik, geçişken midir? Denklik bağıntısı olması için en az hangi çiftler eklenmeli; sınıflar ne olur?</p>`,
       cozum: `
         <p>Yansıyan <b>değil</b>: (3,3),(4,4) yok. Simetrik ✓ (her çiftin tersi var). Ters-simetrik <b>değil</b> ((1,2),(2,1), 1≠2). Geçişken <b>değil</b>: (3,4),(4,3) var ama (3,3) yok.</p>
@@ -733,6 +794,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 8,
       soru: `<p>Üç kapalı döngü: <code>for i=1..n: for j=1..i: for k=1..n: x=x+1</code>. Toplam işlem sayısını kapalı biçimde bulup Θ-sınıfını verin. \\( 3n^2+5n+7=O(n^2) \\) için tanık C ve k bulun.</p>`,
       cozum: `
         <p>\\( \\sum_{i=1}^n\\sum_{j=1}^i n=n\\sum_{i=1}^ni=n\\cdot\\dfrac{n(n+1)}{2}=\\dfrac{n^3+n^2}{2}=\\Theta(n^3) \\).</p>
@@ -740,6 +802,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 11,
       soru: `<p>10 kişilik bir gruptan 3 kişilik bir komite kaç farklı şekilde seçilebilir? Komitede bir başkan da belirlenecekse? Belirli iki kişi (A ve B) birlikte olamıyorsa kaç komite kurulur?</p>`,
       cozum: `
         \\[ \\binom{10}{3}=\\frac{10\\cdot9\\cdot8}{6}=120 \\]
@@ -748,6 +811,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 9,
       soru: `<p>Öklid algoritmasıyla \\( \\gcd(252,198) \\) değerini bulun; Bézout katsayılarını (\\( 18=252s+198t \\)) geriye sararak çıkarın. Buradan \\( 14x\\equiv1\\pmod{11} \\)'in çözümünü bulun.</p>`,
       cozum: `
         \\[ 252=1\\cdot198+54,\\quad 198=3\\cdot54+36,\\quad 54=1\\cdot36+18,\\quad 36=2\\cdot18 \\;\\Rightarrow\\;\\gcd=18 \\]
@@ -756,6 +820,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "vize",
+      konu: 11,
       soru: `<p>Herhangi 6 tam sayı arasında farkı 5'e bölünen iki sayı olduğunu ispatlayın. \\( \\{1,2,\\dots,20\\} \\)'den en az kaç sayı seçilmeli ki içlerinden biri diğerini bölsün?</p>`,
       cozum: `
         <p>Kutular: mod 5 kalanları (5 kutu), 6 nesne → güvercin yuvasıyla iki sayı aynı kalanda ⟹ farkları 5'e bölünür. ∎</p>
@@ -764,6 +829,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 10,
       soru: `<p>Her \\( n\\ge1 \\) için \\( 1+2+\\dots+n=\\dfrac{n(n+1)}{2} \\) olduğunu tümevarımla ispatlayın. Ardından \\( n\\ge4 \\) için \\( 2^n&lt;n! \\) olduğunu gösterin — taban adımı neden 4'ten başlar?</p>`,
       cozum: `
         <p><b>Taban:</b> \\( n=1 \\): 1 = \\( \\frac{1\\cdot2}{2} \\). ✓ <b>Adım:</b> \\( n=k \\) için doğru varsay:
@@ -773,6 +839,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 9,
       soru: `<p>\\( 3^{302}\\bmod 7 \\) değerini Fermat'ın küçük teoremiyle bulun. Ardından \\( x\\equiv2\\pmod3 \\), \\( x\\equiv3\\pmod5 \\) sistemini Çin Kalan Teoremi ile çözün.</p>`,
       cozum: `
         <p>\\( 3^{6}\\equiv1\\pmod 7 \\); \\( 302=6\\cdot50+2 \\Rightarrow 3^{302}\\equiv3^2=9\\equiv\\mathbf{2}\\pmod 7 \\).</p>
@@ -781,6 +848,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 12,
       soru: `<p>1 ile 100 arasında 2, 3 veya 5'e bölünen kaç tam sayı vardır? Hiçbirine bölünmeyen kaç tane vardır ve bunların içinde asal olmayanlar hangileridir?</p>`,
       cozum: `
         <p>\\( |A|=50,\\;|B|=33,\\;|C|=20 \\); kesişimler 6,10,15,30'un katları: 16, 10, 6, 3.</p>
@@ -790,6 +858,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 11,
       soru: `<p>"MISSISSIPPI" kelimesinin harfleri kaç farklı şekilde dizilebilir? Dört S'nin hepsi yan yana olan dizilişler kaç tanedir? \\( x_1+x_2+x_3=10 \\), \\( x_i\\ge0 \\) tam sayı çözümü kaçtır; \\( x_1\\ge2 \\) ise?</p>`,
       cozum: `
         \\[ \\frac{11!}{4!\\,4!\\,2!\\,1!}=\\mathbf{34650} \\]
@@ -798,6 +867,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>\\( a_n=a_{n-1}+2a_{n-2} \\), \\( a_0=2 \\), \\( a_1=1 \\) bağıntısını çözün. Ardından \\( b_n=2b_{n-1}+3 \\), \\( b_0=1 \\) homojen olmayan bağıntısını çözün.</p>`,
       cozum: `
         <p>\\( r^2-r-2=(r-2)(r+1)=0\\Rightarrow r=2,-1 \\). \\( a_n=A2^n+B(-1)^n \\); \\( A+B=2,\\;2A-B=1\\Rightarrow A=B=1 \\): \\( a_n=2^n+(-1)^n \\).</p>
@@ -806,6 +876,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 13,
       soru: `<p>Merge sort \\( T(n)=2T(n/2)+n \\), ikili arama \\( T(n)=T(n/2)+1 \\) ve \\( T(n)=4T(n/2)+n \\) bağıntılarını Ana Teorem ile sınıflandırın.</p>`,
       cozum: `
         <ul>
@@ -816,6 +887,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 14,
       soru: `<p>Üreteç fonksiyonu kullanarak: 3 kutuya 10 özdeş top, her kutuda en az 2 en fazla 4 top olacak şekilde kaç dağıtım vardır? Aynı yöntemle \\( a_n=3a_{n-1} \\), \\( a_0=2 \\) bağıntısını çözün.</p>`,
       cozum: `
         <p>Her kutu \\( x^2+x^3+x^4=x^2(1+x+x^2) \\); çarpım \\( x^6(1+x+x^2)^3 \\), \\( x^{10} \\) katsayısı = \\( (1+x+x^2)^3 \\)'te \\( x^4 \\).
@@ -824,6 +896,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 15,
       soru: `<p>n şapka n kişiye rastgele dağıtılıyor. Kendi şapkasını alan kişi sayısının beklenen değerini gösterge değişkenlerle bulun. Hiç kimsenin almama olasılığı n büyükken yaklaşık kaçtır?</p>`,
       cozum: `
         <p>\\( I_i \\) = i. kişi kendininkini aldı; \\( E[I_i]=P=1/n \\). Doğrusallık: \\( E[X]=\\sum_iE[I_i]=n\\cdot\\frac1n=\\mathbf{1} \\) — n'den bağımsız (değişkenler bağımlı olsa da).</p>
@@ -831,6 +904,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 16,
       soru: `<p>Bir çizgede düğüm dereceleri 3, 3, 2, 2, 2 ise kenar sayısı kaçtır? Bu çizgenin Euler devresi var mıdır, Euler yolu? Dereceleri 3,3,3,3,2 olan basit çizge olabilir mi?</p>`,
       cozum: `
         \\[ \\sum\\deg(v)=12=2|E| \\Rightarrow |E|=6 \\]
@@ -839,6 +913,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 16,
       soru: `<p>Düğümler a,b,c,d,e; ağırlıklı kenarlar: ab=4, ac=2, bc=5, bd=10, cd=3, ce=8, de=1. Dijkstra ile a'dan e'ye en kısa yolu bulun. Kruskal ile minimum kapsayan ağacın toplam ağırlığı nedir?</p>`,
       cozum: `
         <p><b>Dijkstra:</b> a=0. Kesinleş a → c=2, b=4. Kesinleş c → d=min(∞,2+3)=5, e=2+8=10, b=min(4,2+5)=4. Kesinleş b → d=min(5,14)=5. Kesinleş d → e=min(10,5+1)=6.
@@ -847,6 +922,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 17,
       soru: `<p>Tam 3'lü bir ağaçta 100 yaprak varsa kaç iç düğüm ve toplam kaç düğüm vardır? Yüksekliği 4 olan ikili ağaçta en fazla kaç yaprak olur? 1000 elemanlı dengeli BST'de arama en kötü kaç karşılaştırma?</p>`,
       cozum: `
         <p>\\( l=(m-1)i+1\\Rightarrow100=2i+1\\Rightarrow i=49.5 \\) — tam sayı değil, <b>böyle bir tam 3'lü ağaç yoktur</b>. (Tam 3'lü ağaçta yaprak sayısı tektir.)
@@ -855,6 +931,7 @@ window.DERSLER["MATH2055"] = {
     },
     {
       tip: "final",
+      konu: 18,
       soru: `<p>\\( f(x,y,z)=\\sum m(0,1,2,4,6) \\) fonksiyonunu Karnaugh haritasıyla sadeleştirin. Sonucu yalnızca NAND kapılarıyla nasıl gerçeklersiniz? \\( xy+x'y+xy' \\) ifadesini cebirsel olarak sadeleştirin.</p>`,
       cozum: `
         <p>Harita (satır x; sütun yz = 00,01,11,10): x=0 → 1,1,0,1; x=1 → 1,0,0,1. Sol ve sağ sütun (sarmalı) tüm satırlar → \\( \\overline z \\);
@@ -862,6 +939,94 @@ window.DERSLER["MATH2055"] = {
         <p>NAND: \\( f=\\overline{\\overline{\\overline z}\\cdot\\overline{\\overline x\\,\\overline y}}=\\overline{z\\cdot(x+y)} \\) → \\( \\overline x,\\overline y \\) NAND(x,x), NAND(y,y); \\( \\overline{\\overline x\\,\\overline y} \\) tek NAND;
         \\( \\overline z \\) NAND(z,z); son çıkış NAND(\\( \\overline z \\)... ) — De Morgan ile her SOP iki seviye NAND'a çevrilir.</p>
         <p>Cebir: \\( xy+\\overline xy+x\\overline y=y(x+\\overline x)+x\\overline y=y+x\\overline y=(y+x)(y+\\overline y)=\\mathbf{x+y} \\).</p>`
+    },
+
+    {
+      tip: "final",
+      konu: 19,
+      soru: `<p>\\( \\Sigma=\\{0,1\\} \\) üzerinde, "1'lerin sayısı çift olan dizgiler" dilini tanıyan bir DFA
+        tasarlayın. (a) Kaç durum yeter, geçiş tablosunu yazın. (b) \\( 1011 \\) dizgisi kabul edilir mi?
+        (c) Aynı dil için düzenli ifade yazın.</p>`,
+      cozum: `<p><b>(a)</b> İki durum yeter: \\( s_0 \\) = "şimdiye kadar çift sayıda 1" (başlangıç ve kabul),
+        \\( s_1 \\) = "tek sayıda 1". 0 sembolü sayacı değiştirmez, 1 sembolü durumu değiştirir.</p>
+        <table>
+          <tr><th>durum</th><th>0</th><th>1</th></tr>
+          <tr><td>→ *\\( s_0 \\)</td><td>\\( s_0 \\)</td><td>\\( s_1 \\)</td></tr>
+          <tr><td>\\( s_1 \\)</td><td>\\( s_1 \\)</td><td>\\( s_0 \\)</td></tr>
+        </table>
+        <p>\\( F=\\{s_0\\} \\). Boş dizgi de kabul edilir (sıfır tane 1, çifttir).</p>
+        <p><b>(b)</b> \\( 1011 \\): \\( s_0\\xrightarrow{1}s_1\\xrightarrow{0}s_1\\xrightarrow{1}s_0\\xrightarrow{1}s_1 \\).
+        Son durum \\( s_1\\notin F \\): <b>kabul edilmez</b> (üç tane 1 var, tek sayı).</p>
+        <p><b>(c)</b> \\( (0^{*}10^{*}1)^{*}0^{*} \\) — sıfırlar serbest, 1'ler ikişerli gruplar hâlinde.</p>`
+    },
+    {
+      tip: "final",
+      konu: 19,
+      soru: `<p>\\( L=\\{0^{n}1^{n}:n\\ge0\\} \\) dilinin düzenli olmadığını pompalama lemmasıyla ispatlayın.
+        Sonucu, ardışıl devre tasarımı açısından yorumlayın.</p>`,
+      cozum: `<p><b>İspat (çelişki ile).</b> \\( L \\) düzenli olsun; lemmanın verdiği sabit \\( p \\) olsun.
+        \\( w=0^{p}1^{p}\\in L \\) seçelim, \\( |w|=2p\\ge p \\).</p>
+        <p>Lemma gereği \\( w=xyz \\), \\( |xy|\\le p \\) ve \\( |y|\\ge1 \\). \\( |xy|\\le p \\) olduğundan
+        \\( x \\) ve \\( y \\) tamamen ilk \\( p \\) sembolün, yani <b>yalnız 0'ların</b> içindedir:
+        \\( y=0^{k} \\) ile \\( k\\ge1 \\).</p>
+        <p>\\( i=2 \\) alalım: \\( xy^{2}z=0^{p+k}1^{p} \\). Burada \\( k\\ge1 \\) olduğundan 0 sayısı
+        1 sayısından fazladır, dolayısıyla \\( xy^{2}z\\notin L \\). Bu, lemmanın
+        \\( xy^{i}z\\in L \\ \\forall i \\) koşuluyla çelişir. Öyleyse \\( L \\) düzenli değildir. \\( \\square \\)</p>
+        <p><b>Yorum.</b> Sonlu durum makinesinin belleği yalnızca durum sayısı kadardır; "kaç tane 0
+        gördüm" bilgisi sınırsız büyüyebildiği için sabit sayıda durumla tutulamaz. Ardışıl devre
+        tasarımında karşılığı şudur: \\( n \\) bitlik bir sayaçla ancak \\( 2^{n} \\)'e kadar sayılabilir;
+        sınırsız derinlikte parantez/çerçeve eşleştirmesi için yığıt (bellek) gerekir — bu da
+        bağlamdan bağımsız diller seviyesine çıkmak demektir.</p>`
+    },
+
+    {
+      tip: "vize",
+      konu: 0,
+      soru: `<p>(a) \\( (p\\vee q)\\wedge\\neg(p\\wedge q) \\) ifadesinin doğruluk tablosunu kurun; bu hangi
+        bağlaçtır? (b) \\( p\\to q \\) için karşıt tersini (contrapositive), tersini (converse) ve
+        değilini yazın; hangisi \\( p\\to q \\) ile denktir? (c) "Yağmur yağarsa maç iptal olur" önermesi
+        doğruyken maç iptal olduysa yağmur yağdığı sonucuna varılabilir mi?</p>`,
+      cozum: `<p><b>(a)</b></p>
+        <table>
+          <tr><th>p</th><th>q</th><th>p∨q</th><th>p∧q</th><th>¬(p∧q)</th><th>sonuç</th></tr>
+          <tr><td>D</td><td>D</td><td>D</td><td>D</td><td>Y</td><td>Y</td></tr>
+          <tr><td>D</td><td>Y</td><td>D</td><td>Y</td><td>D</td><td>D</td></tr>
+          <tr><td>Y</td><td>D</td><td>D</td><td>Y</td><td>D</td><td>D</td></tr>
+          <tr><td>Y</td><td>Y</td><td>Y</td><td>Y</td><td>D</td><td>Y</td></tr>
+        </table>
+        <p>Yalnız biri doğruyken doğru: bu <b>dışlayan veya</b> (XOR, \\( p\\oplus q \\)).</p>
+        <p><b>(b)</b> Karşıt ters \\( \\neg q\\to\\neg p \\) — \\( p\\to q \\) ile <b>denktir</b>.
+        Ters \\( q\\to p \\) ve değil \\( p\\wedge\\neg q \\) denk <b>değildir</b>.
+        (Değilin \\( p\\to\\neg q \\) olmadığına dikkat: \\( \\neg(p\\to q)\\equiv p\\wedge\\neg q \\).)</p>
+        <p><b>(c)</b> Hayır. Bu, tersi doğru sanma hatasıdır (<b>sonucu doğrulama</b> yanılgısı):
+        \\( p\\to q \\) ve \\( q \\) verildiğinde \\( p \\) çıkarılamaz — maç başka sebeple de iptal
+        olmuş olabilir. Geçerli çıkarım \\( q \\) yanlışsa yapılır: \\( p\\to q \\), \\( \\neg q \\Rightarrow \\neg p \\) (modus tollens).</p>`
+    },
+    {
+      tip: "final",
+      konu: 7,
+      soru: `<p>\\( A=\\{1,2,3\\} \\) üzerinde \\( R=\\{(1,2),(2,3)\\} \\) bağıntısı veriliyor.
+        (a) \\( M_R \\) bağıntı matrisini yazın. (b) \\( M_{R^{2}} \\)'yi Boole çarpımıyla bulun ve
+        \\( R^{2} \\)'yi listeleyin. (c) Geçişli kapanış \\( R^{+} \\)'yı bulun.
+        (d) Warshall algoritması bunu hangi karmaşıklıkla yapar, saf yöntem neden daha pahalıdır?</p>`,
+      cozum: `<p><b>(a)</b> Satır = başlangıç, sütun = varış:</p>
+        <table>
+          <tr><th></th><th>1</th><th>2</th><th>3</th></tr>
+          <tr><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+          <tr><td>2</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>3</td><td>0</td><td>0</td><td>0</td></tr>
+        </table>
+        <p><b>(b)</b> Boole çarpımında \\( \\cdot \\) yerine ∧, \\( + \\) yerine ∨ kullanılır.
+        \\( M_R\\odot M_R \\): 1. satır, 3. sütun \\( =(0\\wedge0)\\vee(1\\wedge1)\\vee(0\\wedge0)=1 \\),
+        diğer tüm girdiler 0. Yani \\( R^{2}=\\{(1,3)\\} \\) — "iki adımda ulaşılan" çiftler.</p>
+        <p><b>(c)</b> \\( R^{+}=R\\cup R^{2}\\cup R^{3}=\\{(1,2),(2,3),(1,3)\\} \\)
+        (\\( R^{3}=\\varnothing \\)). \\( |A|=n \\) için \\( R^{n} \\)'e kadar bakmak yeterlidir:
+        daha uzun yol varsa mutlaka bir düğümü tekrar ziyaret eder, o döngü atılabilir.</p>
+        <p><b>(d)</b> Warshall \\( O(n^{3}) \\)'tür: üç iç içe döngü, ara düğüm \\( k \\) üzerinden
+        \\( m_{ij}\\leftarrow m_{ij}\\vee(m_{ik}\\wedge m_{kj}) \\). Saf yöntem
+        \\( R,R^{2},\\dots,R^{n} \\) matrislerini tek tek çarpıp birleştirir: \\( n-1 \\) adet
+        \\( O(n^{3}) \\) matris çarpımı, toplam \\( O(n^{4}) \\). Warshall'ın kazancı, ara düğümleri
+        <b>artımlı</b> olarak açmasıdır.</p>`
     }
   ]
 };

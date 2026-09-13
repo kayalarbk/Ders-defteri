@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="dark">
+<html lang="tr" data-theme="kagit">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,8 +7,8 @@
 
   <!-- ---------- PWA ---------- -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#191D23" media="(prefers-color-scheme: dark)">
+  <!-- Tema kullanıcı seçimine bağlı; app.js açılışta doğru rengi yazar. -->
+  <meta name="theme-color" content="#F5F2EB">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -41,7 +41,7 @@
       <a class="brand" href="index.html"><span class="dot"></span> Ders Defteri</a>
       <div class="nav-actions">
         <a class="back-link" href="index.html">← tüm dersler</a>
-        <button id="themeBtn" class="theme-toggle" onclick="toggleTheme()" aria-label="Tema değiştir">☀️</button>
+        <button id="themeBtn" class="theme-toggle" onclick="temaSirala()" aria-label="Tema değiştir">☀️</button>
       </div>
     </div>
   </header>
