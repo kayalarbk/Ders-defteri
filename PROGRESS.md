@@ -80,6 +80,22 @@ Artık: formül kartları `IntersectionObserver` ile ekrana yaklaştıkça, konu
 akordeon açıldığında ve **yalnız bir kez** (`data-math-hazir`) işleniyor.
 IntersectionObserver'ı olmayan tarayıcıda eski davranışa düşülüyor.
 
+> **Düzeltme (aynı gün, tarayıcı kontrolünde yakalandı).** Yukarıdaki ilk sürüm işe yaramıyordu:
+> app.js'teki toplu `renderMath()` çağrısı kaldırılmıştı ama **MathJax v3 yüklenince
+> `startup.typeset` varsayılanı `true` olduğu için `document.body`'nin tamamını kendisi
+> işliyor.** Gerçek tarayıcıda EE3016 sayfasında 655 MathJax kabı sayıldı, 607'si kapalı
+> akordeonların içindeydi — yani hiçbir şey değişmemişti. jsdom testi bunu yakalayamadı,
+> çünkü orada MathJax hiç yüklenmiyor. İki değişiklikle kapatıldı:
+> - `course.html` → MathJax yapılandırmasına `startup: { typeset: false, pageReady() {...} }`.
+> - `app.js` → MathJax betiği `async` yüklendiği için kullanıcı motor gelmeden akordeon
+>   açabiliyor. Önceki kod kabı "işlendi" diye işaretleyip geçiyordu, yani formüller
+>   ham LaTeX olarak kalıyordu. Artık motor yoksa kap `_mathKuyruk`'a alınıyor ve
+>   `pageReady` → `window.mathMotoruHazir()` ile işleniyor.
+>
+> Doğrulandı (gerçek Chrome): açılışta **0** MathJax kabı; bir konu açılınca yalnız o konu
+> (28 kap, 0 hata); formül bölümüne kaydırınca 57 karttan görünür olan **20**'si işlendi;
+> ikinci açılışta yeniden işlenmiyor.
+
 **Konu ↔ soru bağı (etiketlerin karşılığı)**
 - Her konunun altında "N soru bu konudan → çöz" köprüsü; tıklayınca soru havuzu o konuya
   süzülüp oraya kaydırılıyor.
@@ -100,9 +116,24 @@ IntersectionObserver'ı olmayan tarayıcıda eski davranışa düşülüyor.
   üç temanın 16 renk değişkeni eksiksiz eşleşiyor.
 - `sw.js` → `dd-v7`. Yeni dosya eklenmedi, PRECACHE listesi değişmedi.
 
-**Not:** Tarayıcı eklentisi bu oturumda bağlanamadığı için doğrulama gerçek Chrome yerine
-jsdom + hesaplanmış kontrast ile yapıldı. Yapısal ve mantıksal davranış doğrulandı; **temaların
-gerçek ekranda görsel kontrolü yapılmadı.**
+**Gerçek tarayıcı kontrolü (aynı gün, ikinci turda yapıldı)**
+Chrome'da yerel sunucu üzerinden ana sayfa, EE3016 ve MATH2055 gezildi. Kağıt ve Ilık
+temaları, okuma ayarları paneli (üç tema önizlemesi + etkin seçenek işareti), konu→soru
+köprüsü (konu 19 → 2 soru, süzgeç ve etiket doğru), formül kartlarının tembel işlenmesi
+ve yeni konu metinlerinin LaTeX'i ekranda doğrulandı. `data-mjx-error` sayısı 0.
+
+Kontrol sırasında öğrenilen iki şey:
+- **Yukarıdaki MathJax hatası ancak burada görüldü** — jsdom'da MathJax yüklenmediği için
+  test yeşil kalıyordu. Ders: MathJax davranışı jsdom'la doğrulanamaz, tarayıcı şart.
+- **Service worker eski `app.js`'i sunuyordu.** Yeni kod sanki çalışmıyormuş gibi görünüp
+  yarım saat kaybettirdi. Doğrulamaya başlamadan önce
+  `navigator.serviceWorker.getRegistrations()` ile kayıt silinmeli ve `caches.keys()`
+  temizlenmeli; `CACHE_VERSION` artırmak yalnız kullanıcı tarafını çözüyor, geliştirme
+  sırasındaki sekmeyi değil.
+
+**Ölçüm artefaktı (hata değil):** arka plandaki sekme boyama yapmadığı için tema geçişi
+donmuş bir ara karede kalıyor ve IntersectionObserver tetiklenmiyor; ekran görüntüsü
+alınıp bir kare boyandığında ikisi de doğru çalışıyor. Ölçümler buna göre yapılmalı.
 
 ### 2026-09-13 — İçerik denetimi: eksik tespiti ve kapatılması
 
@@ -426,6 +457,8 @@ araya ekleme mevcut kullanıcı kayıtlarını kaydırır.
 | Hover'da `translateY`/`brightness` yerine sessiz zemin değişimi | Göz, imlecin dolaştığı her yerde hareket yakalıyordu; uzun oturumda en çok yoran şey bu mikro hareketlerdi. Geri bildirim korundu, hareket atıldı | 2026-09-13 |
 | Renkler tahmin edilmiyor, WCAG oranı hesaplanıyor (`kontrast.js`) | "Yumuşak" diye seçilen tonların beşi eşiğin altındaydı (en kötüsü 3.60:1) — gözle bakarak fark edilmiyor. Gövde AAA (≥7:1), ikincil ve vurgular AA (≥4.5:1) hedefi betikle sabitlendi | 2026-09-13 |
 | MathJax tembel: formüller IntersectionObserver, metinler akordeon açılışında, hepsi bir kez | Açılışta 276 formülün hepsini işlemek sayfayı saniyelerce donduruyordu. `data-math-hazir` işareti, akordeonun ikinci açılışında tekrar işlemeyi de engelliyor | 2026-09-13 |
+| MathJax yapılandırmasında `startup.typeset: false` şart | Varsayılan `true`; uygulama kodundan toplu çağrıyı kaldırmak yetmiyor, MathJax yüklenince belgenin tamamını kendisi işliyor. Tembel render'ın çalışması bu bayrağa bağlı | 2026-09-13 |
+| Motor gelmeden açılan kap "işlendi" sayılmaz, kuyruğa alınır | MathJax `async` yükleniyor; kullanıcı ondan önce akordeon açarsa kap işaretlenip atlanıyor ve formüller kalıcı olarak ham LaTeX kalıyordu | 2026-09-13 |
 | Soru↔konu eşleşmesi başlıktan tahmin değil, veride `sorular[].konu` | Tahmin yanıltıcıydı: etiketleme yapılınca 14 konunun aslında hiç sorusu olmadığı ortaya çıktı. Etiket ayrıca konu→soru köprüsünü ve konu süzgecini mümkün kıldı | 2026-09-13 |
 | Konu süzgeci tip/durum süzgeciyle VE'leniyor, onun yerine geçmiyor | "Bu konunun final soruları" gerçek bir çalışma isteği; süzgeçler birbirini sıfırlasaydı iki tıkta da istenen liste elde edilemezdi | 2026-09-13 |
 | Arama indeksi ilk aramada kuruluyor (lazy) | 294 kayıt; açılış hızını etkilememesi için sayfa yüklenirken değil, ilk tuşta kuruluyor | 2026-07-25 |
@@ -435,9 +468,9 @@ araya ekleme mevcut kullanıcı kayıtlarını kaydırır.
 
 ## TODO (öncelik sırasına göre)
 
-1. **Temaların gerçek cihazda görsel kontrolü.** Kağıt/Ilık/Gece hesapla doğrulandı
-   (kontrast + jsdom), ama gerçek ekranda — özellikle iPhone'da, gece modunda ve
-   düşük parlaklıkta — hiç bakılmadı.
+1. **Temaların gerçek iPhone'da kontrolü.** Kağıt ve Ilık masaüstü Chrome'da görüldü;
+   Gece teması yalnız ilk açılışta (sistem tercihiyle) göründü, ayrıca **hiçbiri gerçek
+   iPhone'da, düşük parlaklıkta ve standalone PWA modunda denenmedi.**
 2. Ders sayfasında "çalışma süresi" istatistiği (pomodoro seansları ders bazında kaydedilsin).
 3. Yeni ders eklerken `index.html` + `course.html` içindeki script listesini elle güncellemek
    gerekiyor — tek bir `data/_index.js` listesinden dinamik yüklemeye geçilebilir

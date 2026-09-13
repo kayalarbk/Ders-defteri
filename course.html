@@ -29,7 +29,23 @@
         inlineMath:  [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']]
       },
-      svg: { fontCache: 'global' }
+      svg: { fontCache: 'global' },
+      startup: {
+        /* MathJax v3 yüklenince VARSAYILAN OLARAK bütün document.body'yi
+           işler. Bir ders sayfasında bu 600+ formül demek ve sayfa
+           saniyelerce donuyor — üstelik formüllerin çoğu kapalı
+           akordeonların içinde, yani görünmüyor bile.
+           Açılıştaki toplu işleme kapatıldı; işleme app.js'te tembel
+           yapılıyor (formüller ekrana girdikçe, metinler akordeon
+           açıldığında, her kap yalnız bir kez). */
+        typeset: false,
+        pageReady() {
+          return MathJax.startup.defaultPageReady().then(() => {
+            /* Motor hazır olmadan açılan akordeon/kart kuyruğa alınmıştı */
+            if (window.mathMotoruHazir) window.mathMotoruHazir();
+          });
+        }
+      }
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>

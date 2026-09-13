@@ -104,17 +104,39 @@ function setThemeBtnIcon() {
    işleniyor ve sayfa saniyelerce donuyordu (eski TODO #1).
    Artık yalnız GÖRÜNÜR parçalar işlenir; akordeon açıldığında
    içeriği bir kez işlenip işaretlenir. */
+/* MathJax betiği `async` yükleniyor: kullanıcı, motor gelmeden önce bir
+   akordeon açabilir. O kabı "işlendi" diye işaretleyip geçersek formüller
+   ham LaTeX olarak kalır — bu yüzden bekleyenler kuyruğa alınır ve motor
+   hazır olunca (course.html'deki pageReady) işlenir. */
+const _mathKuyruk = new Set();
+const mathMotoruVar = () => !!(window.MathJax && MathJax.typesetPromise);
+
 function renderMath(el) {
-  if (!window.MathJax || !MathJax.typesetPromise) return Promise.resolve();
+  if (!mathMotoruVar()) {
+    if (el) _mathKuyruk.add(el);
+    return Promise.resolve();
+  }
   return MathJax.typesetPromise(el ? [el] : undefined)
     .catch(e => console.warn("MathJax:", e));
 }
 /* Bir kabı yalnız ilk kez işler */
 function renderMathBirKez(el) {
   if (!el || el.dataset.mathHazir === "1") return Promise.resolve();
+  if (!mathMotoruVar()) { _mathKuyruk.add(el); return Promise.resolve(); }
   el.dataset.mathHazir = "1";
   return renderMath(el);
 }
+/* course.html, MathJax hazır olunca bunu çağırır */
+window.mathMotoruHazir = function () {
+  const bekleyen = [..._mathKuyruk];
+  _mathKuyruk.clear();
+  bekleyen.forEach(el => {
+    renderMathBirKez(el).then(() => {
+      /* Kuyrukta bekleyen bir akordeonsa yüksekliği yeniden ölçülmeli */
+      if (el.classList.contains("acc-body")) olcAkordeon(el);
+    });
+  });
+};
 /* Ekrana yaklaşan formül kartlarını işler (IntersectionObserver yoksa hepsi) */
 let _mathGozlemci = null;
 function mathGozlemciKur() {
